@@ -1,8 +1,7 @@
 import express from "express";
-import { env } from "./env";
+import { router as authRouter } from "./routes/auth";
+import "./types/express-session"
 
-const app = express();
+export const app = express();
 
-app.get("/", (req, res) => res.send("<h1>heyaa</h1>"));
-
-app.listen(env.PORT, () => console.log("server is up"));
+app.use("/api/auth", authRouter);

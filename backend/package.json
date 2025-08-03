@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
     "drizzle-push": "npx drizzle-kit push",
     "generate": "npx drizzle-kit generate",
