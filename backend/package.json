@@ -10,20 +10,23 @@
     "drizzle-push": "npx drizzle-kit push",
     "generate": "npx drizzle-kit generate",
     "migrate": "npx drizzle-kit migrate",
-    "drizzle-studio": "npx drizzle"
+    "drizzle-studio": "npx drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.1",
     "drizzle-orm": "^0.44.3",
     "envalid": "^8.1.0",
     "express": "^5.1.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
