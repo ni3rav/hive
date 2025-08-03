@@ -5,6 +5,7 @@ import { usersTable } from "../db/schema";
 import { registerSchema } from "../utils/validations/auth";
 import { createSession } from "../utils/sessions";
 import { env } from "../env";
+import { eq } from "drizzle-orm";
 
 export async function registerController(req: Request, res: Response) {
   const result = registerSchema.safeParse(req.body);
@@ -15,6 +16,18 @@ export async function registerController(req: Request, res: Response) {
     });
   }
   const { name, email, password } = result.data;
+
+  const existingUser = await db.query.usersTable.findFirst({
+    where: eq(usersTable.email, email),
+  });
+
+  if (existingUser) {
+    return res.status(409).json({
+      message: "Email already registered",
+      suggestion: "Try logging in or use password recovery",
+    });
+  }
+
   const hashedPassword = await hashPassword(password);
 
   const [user] = await db

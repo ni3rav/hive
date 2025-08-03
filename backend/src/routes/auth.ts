@@ -6,4 +6,4 @@ export const router = Router();
 router.get("/", (req: Request, res: Response) =>
   res.send("<p>auth routes</p>")
 );
-router.get("/register", registerController);
+router.post("/register", registerController);
