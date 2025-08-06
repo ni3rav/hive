@@ -38,6 +38,7 @@ export async function registerController(req: Request, res: Response) {
     .returning();
 
   const { sessionId, expiresAt } = await createSession(user.id);
+  
   res.cookie("session_id", sessionId, {
     httpOnly: true,
     sameSite: "lax",
@@ -65,6 +66,8 @@ export async function loginController(req: Request, res: Response) {
     .where(eq(usersTable.email, email))
     .then((res) => res[0]);
 
+  console.log("db query complete");
+
   if (!user) {
     res.status(404).json({ message: "User not found" });
     return;
@@ -74,4 +77,16 @@ export async function loginController(req: Request, res: Response) {
     res.status(401).json({ message: "Password did not match" });
     return;
   }
+  console.log("credentials checked");
+
+  const { sessionId, expiresAt } = await createSession(user.id);
+
+  res.cookie("session_id", sessionId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: env.isProduction,
+    expires: expiresAt,
+  });
+
+  res.status(200).json({ message: "Logged In" });
 }
