@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { hashPassword, verifyPassword } from "../utils/password";
 import { db } from "../db";
-import { usersTable } from "../db/schema";
+import { sessionsTable, usersTable } from "../db/schema";
 import { loginSchema, registerSchema } from "../utils/validations/auth";
 import { createSession } from "../utils/sessions";
 import { env } from "../env";
@@ -38,7 +38,7 @@ export async function registerController(req: Request, res: Response) {
     .returning();
 
   const { sessionId, expiresAt } = await createSession(user.id);
-  
+
   res.cookie("session_id", sessionId, {
     httpOnly: true,
     sameSite: "lax",
@@ -66,8 +66,6 @@ export async function loginController(req: Request, res: Response) {
     .where(eq(usersTable.email, email))
     .then((res) => res[0]);
 
-  console.log("db query complete");
-
   if (!user) {
     res.status(404).json({ message: "User not found" });
     return;
@@ -77,7 +75,6 @@ export async function loginController(req: Request, res: Response) {
     res.status(401).json({ message: "Password did not match" });
     return;
   }
-  console.log("credentials checked");
 
   const { sessionId, expiresAt } = await createSession(user.id);
 
@@ -89,4 +86,41 @@ export async function loginController(req: Request, res: Response) {
   });
 
   res.status(200).json({ message: "Logged In" });
+}
+
+export async function meController(req: Request, res: Response) {
+  const sessionId = req.cookies["session_id"];
+
+  if (!sessionId) {
+    res.status(401).json({ message: "No sessionId found please login" });
+    return;
+  }
+
+  const session = await db.query.sessionsTable.findFirst({
+    where: eq(sessionsTable.id, sessionId),
+  });
+
+  if (!session) {
+    res.status(401).json({ message: "Session not found or expired." });
+    return;
+  }
+
+  if (new Date() > new Date(session.expiresAt)) {
+    res.status(401).json({ message: "Session expired" });
+  }
+
+  const user = await db.query.usersTable.findFirst({
+    where: eq(usersTable.id, session.userId),
+  });
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  res.status(200).json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  });
 }
