@@ -106,6 +106,9 @@ export async function meController(req: Request, res: Response) {
   }
 
   if (new Date() > new Date(session.expiresAt)) {
+    // !lazy deleltion on check
+    // TODO: Add a cronjob to purge out all inactive sessions at a regular interval
+    await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
     res.status(401).json({ message: "Session expired" });
   }
 

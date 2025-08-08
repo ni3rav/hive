@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
-export function App() {
+export function Home() {
   return (
     <div className="h-screen w-screen grid place-items-center">
-      <Button>Heyaa</Button>
+      <Button onClick={() => toast.success("meow")}>Heyaa</Button>
     </div>
   );
 }
