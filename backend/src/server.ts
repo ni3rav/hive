@@ -3,8 +3,11 @@ import { router as authRouter } from "./routes/auth";
 import cookieParser from "cookie-parser";
 import { env } from "./env";
 import morgan from "morgan";
+import cors from "cors";
 
 export const app = express();
+
+app.use(cors({ origin: env.FRONTEND_URL }));
 
 app.use(cookieParser());
 app.use(express.json());
