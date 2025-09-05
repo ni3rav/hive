@@ -7,12 +7,12 @@ import cors from "cors";
 
 export const app = express();
 
-app.use(cors({ origin: env.FRONTEND_URL }));
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 
 app.use(cookieParser());
 app.use(express.json());
 
-if (env.isProd) {
+if (!env.isProd) {
   app.use(morgan("dev"));
 }
 
