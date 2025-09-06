@@ -1,10 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import SideBar from "@/components/Sidebar";
 
 export function Home() {
   return (
-    <div className="h-screen w-screen grid place-items-center">
-      <Button onClick={() => toast.success("meow")}>Heyaa</Button>
-    </div>
+    <SideBar/>
   );
 }
