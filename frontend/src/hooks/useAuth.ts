@@ -1,5 +1,13 @@
-import { apiLogin, apiRegister } from "@/api/auth";
-import { useMutation } from "@tanstack/react-query";
+import { apiGetMe, apiLogin, apiRegister } from "@/api/auth";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+export function useAuth() {
+  return useQuery({
+    queryKey: ["user"], // A unique key for this query
+    queryFn: apiGetMe,  // The API function to call
+    retry: false,       // Don't retry if it fails (e.g., user is not logged in)
+  });
+}
 
 export function useLogin() {
   return useMutation({

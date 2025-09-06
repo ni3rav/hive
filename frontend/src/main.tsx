@@ -7,11 +7,21 @@ import { Toaster } from "sonner";
 import RegisterPage from "./pages/Register";
 import LoginPage from "./pages/Login";
 import { Home } from "./pages/Home";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Home />,
+   {
+    element: <ProtectedRoute />, // 👈 2. Use ProtectedRoute as the parent
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/home",
+        element: <Home />,
+      },
+    ],
   },
   {
     path: "/login",
@@ -20,10 +30,6 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
-  },
-  {
-    path: "/home",
-    element: <Home />,
   },
 ]);
 
