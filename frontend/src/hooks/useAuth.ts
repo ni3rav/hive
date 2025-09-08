@@ -1,4 +1,4 @@
-import { apiGetMe, apiLogin, apiRegister } from "@/api/auth";
+import { apiGetMe, apiLogin, apiRegister, apiLogout } from "@/api/auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 export function useAuth() {
@@ -20,5 +20,11 @@ export function useRegister() {
   return useMutation({
     mutationFn: apiRegister, 
     // Connects this mutation to the apiRegister function(changes made during Registration)
+  });
+}
+
+export function useLogout() {
+  return useMutation({
+    mutationFn: apiLogout,
   });
 }

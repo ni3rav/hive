@@ -9,6 +9,7 @@ import LoginPage from "./pages/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout"; // Renamed for clarity
 import { DashboardPage } from "./pages/Dashboard"; // The actual page content
+import { ProfilePage } from "./pages/ProfilePage";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/dashboard/profile",
+    element:  <ProfilePage />, // Placeholder for Profile page
   },
 ]);
 

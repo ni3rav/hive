@@ -28,3 +28,7 @@ export function apiRegister(data: RegisterData) {
 export function apiGetMe(): Promise<User> {
   return apiGet("/api/auth/me");
 }
+
+export function apiLogout() {
+  return apiPost("/api/auth/logout");
+}

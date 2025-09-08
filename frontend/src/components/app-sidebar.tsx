@@ -26,8 +26,8 @@ const data = {
       icon: SquareTerminal,
     },
     {
-      title: "Models",
-      url: "/dashboard/models", // Updated URL
+      title: "Profile",
+      url: "/dashboard/profile", // Updated URL
       icon: Bot,
     },
     {
