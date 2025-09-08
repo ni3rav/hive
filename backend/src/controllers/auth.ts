@@ -88,6 +88,22 @@ export async function loginController(req: Request, res: Response) {
   res.status(200).json({ message: "Logged In" });
 }
 
+export async function logoutController(req: Request, res: Response) {
+  const sessionId = req.cookies["session_id"];
+
+  if (!sessionId) {
+    res.status(400).json({ message: "No sessionId found" });
+    return;
+  }
+
+  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+
+  res.clearCookie("session_id");
+
+  res.status(200).json({ message: "Logged out successfully" });
+  return;
+}
+
 export async function meController(req: Request, res: Response) {
   const sessionId = req.cookies["session_id"];
 
