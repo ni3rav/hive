@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Bot, BookOpen, SquareTerminal, Settings2, Code } from "lucide-react";
+import {
+  Bot,
+  BookOpen,
+  SquareTerminal,
+  Settings2,
+  Hexagon,
+} from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -48,7 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex h-10 items-center gap-2 rounded-lg px-3 text-lg font-medium">
-          <Code className="h-6 w-6" />
+            <Hexagon className="size-8 text-primary fill-background flex items-center justify-center"/>
           <span>Hive</span>
         </div>
       </SidebarHeader>
