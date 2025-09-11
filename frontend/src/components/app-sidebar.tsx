@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { BookOpen, SquareTerminal, Settings2, Code, User } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -13,6 +12,13 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BookOpen,
+  SquareTerminal,
+  Settings2,
+  Hexagon,
+  User,
+} from "lucide-react";
 
 const navData = {
   navMain: [
@@ -47,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* --- LOGO FIX --- */}
       <SidebarHeader>
         <a href="/dashboard" className="flex h-14 items-center justify-center group-data-[state=expanded]:justify-start group-data-[state=expanded]:px-3">
-          <Code className="h-6 w-6 transition-all group-data-[state=collapsed]:h-7 group-data-[state=collapsed]:w-7" />
+            <Hexagon className="size-8 text-primary fill-background flex items-center justify-center"/>
           <span className="ml-2 text-lg font-semibold group-data-[state=collapsed]:hidden">
             Hive
           </span>
