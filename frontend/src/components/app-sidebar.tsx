@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { User, BookOpen, SquareTerminal, Settings2, Code } from "lucide-react";
+import { BookOpen, SquareTerminal, Settings2, Code, User } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -42,7 +42,7 @@ const navData = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user, isLoading } = useAuth();
 
-  return (
+ return (
     <Sidebar collapsible="icon" {...props}>
       {/* --- LOGO FIX --- */}
       <SidebarHeader>
