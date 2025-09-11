@@ -2,39 +2,22 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query-client.ts";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
 import RegisterPage from "./pages/Register";
 import LoginPage from "./pages/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { DashboardLayout } from "./components/DashboardLayout"; // Renamed for clarity
-import { DashboardPage } from "./pages/Dashboard"; // The actual page content
+import { DashboardLayout } from "./components/DashboardLayout";
+import { DashboardPage } from "./pages/Dashboard";
 import { ProfilePage } from "./pages/ProfilePage";
+import { LandingPage } from "./pages/LandingPage"; // Import the new landing page
 
 const router = createBrowserRouter([
+  // --- Public Routes ---
   {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: "/dashboard",
-        element: <DashboardLayout />, // The layout with the sidebar
-        children: [
-          {
-            index: true, // This makes it the default child for /dashboard
-            element: <DashboardPage />,
-          },
-          // Add other nested dashboard routes here in the future
-          // { path: "models", element: <ModelsPage /> },
-        ],
-      },
-    ],
+    path: "/", // Root path is now the public landing page
+    element: <LandingPage />,
   },
-  // Redirect root path to the dashboard
-  {
-    path: "/",
-    element: <Navigate to="/dashboard" replace />,
-  },
-  // Public routes
   {
     path: "/login",
     element: <LoginPage />,
@@ -43,9 +26,26 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+
+  // --- Protected Routes ---
   {
-    path: "/dashboard/profile",
-    element:  <ProfilePage />, // Placeholder for Profile page
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: "/dashboard",
+        element: <DashboardLayout />, // This layout has the sidebar
+        children: [
+          {
+            index: true, // This renders at /dashboard
+            element: <DashboardPage />,
+          },
+          {
+            path: "profile", // This renders at /dashboard/profile
+            element: <ProfilePage />,
+          },
+        ],
+      },
+    ],
   },
 ]);
 
