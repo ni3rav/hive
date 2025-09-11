@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, BookOpen, SquareTerminal, Settings2, Code } from "lucide-react";
+import { User, BookOpen, SquareTerminal, Settings2, Code } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -11,52 +11,57 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Updated and simplified data for navigation
-const data = {
-  user: {
-    name: "Hive User",
-    email: "",
-    avatar: "",
-  },
+const navData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard", // Updated URL
+      url: "/dashboard", 
       icon: SquareTerminal,
     },
     {
       title: "Profile",
-      url: "/dashboard/profile", // Updated URL
-      icon: Bot,
+      url: "/dashboard/profile", 
+      icon: User,
     },
     {
       title: "Documentation",
-      url: "/dashboard/docs", // Updated URL
+      url: "/dashboard/docs", 
       icon: BookOpen,
     },
     {
       title: "Settings",
-      url: "/dashboard/settings", // Updated URL
+      url: "/dashboard/settings",
       icon: Settings2,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: user, isLoading } = useAuth();
+
   return (
     <Sidebar collapsible="icon" {...props}>
+      {/* --- LOGO FIX --- */}
       <SidebarHeader>
-        <div className="flex h-10 items-center gap-2 rounded-lg px-3 text-lg font-medium">
-          <Code className="h-6 w-6" />
-          <span>Hive</span>
-        </div>
+        <a href="/dashboard" className="flex h-14 items-center justify-center group-data-[state=expanded]:justify-start group-data-[state=expanded]:px-3">
+          <Code className="h-6 w-6 transition-all group-data-[state=collapsed]:h-7 group-data-[state=collapsed]:w-7" />
+          <span className="ml-2 text-lg font-semibold group-data-[state=collapsed]:hidden">
+            Hive
+          </span>
+        </a>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navData.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {isLoading ? (
+          <Skeleton className="h-14 w-full" />
+        ) : user ? (
+          <NavUser user={user} />
+        ) : null}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
