@@ -11,7 +11,7 @@ export default function RegisterPage() {
     register({ name, email, password }, {
       onSuccess: () => {
         toast.success("Registration successful!.");
-        navigate("/");
+        navigate("/dashboard");
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
