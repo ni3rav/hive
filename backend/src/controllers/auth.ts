@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
 import { hashPassword, verifyPassword } from "../utils/password";
 import { db } from "../db";
-import { sessionsTable, usersTable } from "../db/schema";
+import {
+  sessionsTable,
+  usersTable,
+  verificationLinksTable,
+} from "../db/schema";
 import { loginSchema, registerSchema } from "../utils/validations/auth";
 import { createSession } from "../utils/sessions";
 import { env } from "../env";
 import { eq } from "drizzle-orm";
+import { randomBytes } from "crypto";
 
 export async function registerController(req: Request, res: Response) {
   const validatedBody = registerSchema.safeParse(req.body);
@@ -37,16 +42,10 @@ export async function registerController(req: Request, res: Response) {
     .values({ name, email, password: hashedPassword })
     .returning();
 
-  const { sessionId, expiresAt } = await createSession(user.id);
+  const verificationLinkToken = randomBytes(32).toString("hex");
+  const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
 
-  res.cookie("session_id", sessionId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: env.isProduction,
-    expires: expiresAt,
-  });
-
-  res.status(201).json({ userId: user.id });
+  res.status(201).json({ userId: user.id, verificationLinkToken, verificationLinkExpiresAt });
 }
 
 export async function loginController(req: Request, res: Response) {
