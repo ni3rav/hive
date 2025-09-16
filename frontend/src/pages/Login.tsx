@@ -11,7 +11,7 @@ export default function LoginPage() {
     login({ email, password }, {
       onSuccess: () => {
         toast.success("Login successful! Welcome back.");
-        navigate("/");
+        navigate("/dashboard");
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (error: any) => {
