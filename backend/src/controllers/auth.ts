@@ -6,10 +6,14 @@ import {
   usersTable,
   verificationLinksTable,
 } from "../db/schema";
-import { loginSchema, registerSchema } from "../utils/validations/auth";
+import {
+  loginSchema,
+  registerSchema,
+  verifyEmailSchema,
+} from "../utils/validations/auth";
 import { createSession } from "../utils/sessions";
 import { env } from "../env";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { randomBytes } from "crypto";
 
 export async function registerController(req: Request, res: Response) {
@@ -49,6 +53,13 @@ export async function registerController(req: Request, res: Response) {
   // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
   const verificationLinkToken = randomBytes(32).toString("hex");
   const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
+
+  //* storing verification link in db
+  await db.insert(verificationLinksTable).values({
+    userId: user.id,
+    token: verificationLinkToken,
+    expiresAt: verificationLinkExpiresAt,
+  });
 
   //* currently sending at response, in future we can send it via email now we will consume this link in /verify endpoint so this endpoint would just return success message
   res.status(201).json({
@@ -94,14 +105,20 @@ export async function loginController(req: Request, res: Response) {
     // TODO: replace it with the common verification link generator function later, but here it should not directly trigger email sending rather wait for user to hit /resend-verification endpoint if they want to (let's keep it for later)
     const verificationLinkToken = randomBytes(32).toString("hex");
     const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
-    res
-      .status(403)
-      .json({
-        message: "email not verified",
-        userId: user.id,
-        verificationLinkToken,
-        verificationLinkExpiresAt,
-      });
+
+    //* storing verification link in db
+    await db.insert(verificationLinksTable).values({
+      userId: user.id,
+      token: verificationLinkToken,
+      expiresAt: verificationLinkExpiresAt,
+    });
+    
+    res.status(403).json({
+      message: "email not verified",
+      userId: user.id,
+      verificationLinkToken,
+      verificationLinkExpiresAt,
+    });
     return;
   }
 
@@ -172,4 +189,53 @@ export async function meController(req: Request, res: Response) {
     name: user.name,
     email: user.email,
   });
+}
+
+export async function verifyController(req: Request, res: Response) {
+  //* validating request body
+  const validatedBody = verifyEmailSchema.safeParse(req.body);
+
+  if (!validatedBody.success) {
+    res.status(400).json({
+      message: "Invalid Payload",
+    });
+    return;
+  }
+  const { userId, token } = validatedBody.data;
+
+  //* fetching verification link from db
+  const verificationLink = await db.query.verificationLinksTable.findFirst({
+    where: and(
+      eq(verificationLinksTable.userId, userId),
+      eq(verificationLinksTable.token, token)
+    ),
+  });
+
+  if (!verificationLink) {
+    res.status(400).json({ message: " no verification link found" });
+    return;
+  }
+
+  if (new Date() > new Date(verificationLink.expiresAt)) {
+    // !lazy deleltion on check
+    await db
+      .delete(verificationLinksTable)
+      .where(eq(verificationLinksTable.id, verificationLink.id));
+    res.status(400).json({ message: "Verification link expired" });
+    return;
+  }
+
+  //* updating user to set emailVerified to true
+  await db
+    .update(usersTable)
+    .set({ emailVerified: true })
+    .where(eq(usersTable.id, userId));
+
+  //* deleting all verification links for this user
+  await db
+    .delete(verificationLinksTable)
+    .where(eq(verificationLinksTable.userId, userId));
+
+  res.status(200).json({ message: "Email verified successfully" });
+  return;
 }

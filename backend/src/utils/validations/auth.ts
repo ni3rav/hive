@@ -11,7 +11,7 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Enter your 8 character password please"),
 });
 
-export const verificationLinlSchema = z.object({
+export const verifyEmailSchema = z.object({
   userId: z.string().min(1, "userId is required"),
   token: z.string().min(1, "token is required"),
 });
