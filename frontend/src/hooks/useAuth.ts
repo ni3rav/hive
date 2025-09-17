@@ -1,4 +1,4 @@
-import { apiGetMe, apiLogin, apiRegister, apiLogout } from "@/api/auth";
+import { apiGetMe, apiLogin, apiRegister, apiLogout, apiEditProfile } from "@/api/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useAuth() {
@@ -36,6 +36,16 @@ export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: apiLogout,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+}
+
+export function useEditProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: apiEditProfile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },

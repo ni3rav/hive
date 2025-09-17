@@ -33,7 +33,7 @@ const navData = {
       icon: User,
     },
     {
-      title: "Documentation",
+      title: "Editor",
       url: "/dashboard/docs", 
       icon: BookOpen,
     },

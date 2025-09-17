@@ -1,4 +1,4 @@
-import {apiPost , apiGet} from '@/lib/api-client';
+import {apiPost , apiGet, apiPatch} from '@/lib/api-client';
 
 type LoginData = {
   email: string;
@@ -18,6 +18,11 @@ export type User = {
   email: string;
 };
 
+type EditProfileData = {
+  name?: string;
+  email?: string;
+};
+
 export function apiLogin(data: LoginData) {
   return apiPost("/api/auth/login", data);
 }
@@ -32,4 +37,8 @@ export function apiGetMe(): Promise<User> {
 
 export function apiLogout() {
   return apiPost("/api/auth/logout");
+}
+
+export function apiEditProfile(data: EditProfileData) {
+  return apiPatch("/api/user/edit", data);
 }
