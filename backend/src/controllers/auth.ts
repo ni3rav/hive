@@ -67,6 +67,7 @@ export async function registerController(req: Request, res: Response) {
     verificationLinkToken,
     verificationLinkExpiresAt,
   });
+  return;
 }
 
 export async function loginController(req: Request, res: Response) {
@@ -133,6 +134,7 @@ export async function loginController(req: Request, res: Response) {
   });
 
   res.status(200).json({ message: "Logged In" });
+  return;
 }
 
 export async function logoutController(req: Request, res: Response) {
@@ -212,7 +214,7 @@ export async function verifyController(req: Request, res: Response) {
   });
 
   if (!verificationLink) {
-    res.status(400).json({ message: " no verification link found" });
+    res.status(404).json({ message: " no verification link found" });
     return;
   }
 
@@ -236,6 +238,16 @@ export async function verifyController(req: Request, res: Response) {
     .delete(verificationLinksTable)
     .where(eq(verificationLinksTable.userId, userId));
 
-  res.status(200).json({ message: "Email verified successfully" });
+  //* creating session and setting cookies in the end
+  const { sessionId, expiresAt } = await createSession(userId);
+
+  res.cookie("session_id", sessionId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: env.isProduction,
+    expires: expiresAt,
+  });
+
+  res.status(200).json({ message: "email verified and logged in" });
   return;
 }
