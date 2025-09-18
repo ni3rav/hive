@@ -1,27 +1,5 @@
 import {apiPost , apiGet, apiPatch} from '@/lib/api-client';
-
-type LoginData = {
-  email: string;
-  password: string;
-};
-
-type RegisterData = {
-  name: string;
-  email: string;
-  password: string;
-};
-
-export type User = {
-  avatar: string;
-  id: string;
-  name: string;
-  email: string;
-};
-
-type EditProfileData = {
-  name?: string;
-  email?: string;
-};
+import type { EditProfileData, LoginData, RegisterData, User, VerifyEmailData } from '@/types/auth';
 
 export function apiLogin(data: LoginData) {
   return apiPost("/api/auth/login", data);
@@ -41,4 +19,8 @@ export function apiLogout() {
 
 export function apiEditProfile(data: EditProfileData) {
   return apiPatch("/api/user/edit", data);
+}
+
+export function apiVerifyEmail(data: VerifyEmailData) {
+  return apiPost("/api/auth/verify", data);
 }
