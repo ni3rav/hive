@@ -2,13 +2,21 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LoginForm } from "@/components/login.tsx";
 import { useLogin } from "@/hooks/useAuth";
+import { loginSchema } from "@/lib/validations/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { mutate: login } = useLogin();
 
   const handleLogin = (email: string, password: string) => {
-    login({ email, password }, {
+    // add zod validations here
+    const validatedData = loginSchema.safeParse({ email, password });
+    if (!validatedData.success) {
+      toast.error("please enter a valid email and password");
+      return;
+    }
+    const { validatedEmail, validatedPassword } = validatedData.data;
+    login({ email: validatedEmail, password: validatedPassword }, {
       onSuccess: () => {
         toast.success("Login successful! Welcome back.");
         navigate("/dashboard");
