@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import './styles/_variables.scss';
+@import './styles/_keyframe-animations.scss';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -191,4 +193,122 @@
   --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
   --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+}
+
+/* Prevent horizontal scrolling on editor */
+.ProseMirror {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  outline: none;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+/* Ensure editor content is responsive */
+.tiptap {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Fix any code blocks or pre elements that might cause overflow */
+.ProseMirror pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.ProseMirror code {
+  word-break: break-all;
+}
+
+/* Ensure the root elements take full height */
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Prevent any unexpected scrolling */
+* {
+  box-sizing: border-box;
+}
+/* Add this to your index.css */
+.tiptap-editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.tiptap-content-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  overflow: auto;
+}
+
+.tiptap-content {
+  width: 100%;
+  max-width: 900px; /* Adjust this value to control editor width */
+  background: #1a1a1a;
+  color: white;
+  min-height: 100%;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tiptap-content {
+    max-width: 100%;
+  }
+  
+  .tiptap-content-wrapper {
+    padding: 0.5rem;
+  }
+}
+
+.tiptap-content .ProseMirror {
+  outline: none;
+  color: white;
+}
+
+.tiptap-content h1, 
+.tiptap-content h2, 
+.tiptap-content h3 {
+  color: white;
+}
+
+.tiptap-content blockquote {
+  border-left: 4px solid #666;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #ccc;
+}
+
+.tiptap-content pre {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.tiptap-content code {
+  background: #2a2a2a;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  color: #fff;
+}
+
+.tiptap-content em {
+  color: #fbbf24;
+}
+
+.tiptap-content strong {
+  color: white;
+  font-weight: bold;
+}
+
+.tiptap-content a {
+  color: #3b82f6;
+  text-decoration: underline;
 }

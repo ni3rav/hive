@@ -11,6 +11,7 @@ import { DashboardLayout } from "./components/DashboardLayout";
 import { DashboardPage } from "./pages/Dashboard";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LandingPage } from "./pages/LandingPage"; // Import the new landing page
+import SimpleEditor from "./pages/Editor";
 
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
           {
             path: "profile", // This renders at /dashboard/profile
             element: <ProfilePage />,
+          },
+          {
+            path: "editor",
+            element: <SimpleEditor />,
           },
         ],
       },
