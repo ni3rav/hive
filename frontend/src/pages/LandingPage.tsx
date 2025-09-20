@@ -57,9 +57,10 @@ const features = [
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const currentYear = new Date().getFullYear(); // Dynamic year calculation
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="landing-page-container min-h-screen bg-neutral-900"> {/* Changed from bg-neutral-950 to bg-neutral-900 for charcoal black */}
       {/* Header */}
       <header className="flex items-center justify-between p-6">
         <div className="flex items-center gap-2">
@@ -167,7 +168,7 @@ export function LandingPage() {
         <footer className="mt-24 pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              © 2024 Hive. All rights reserved.
+              © {currentYear} Hive. All rights reserved. 
             </div>
             <div className="flex gap-6 text-sm">
               <a

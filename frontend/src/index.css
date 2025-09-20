@@ -223,7 +223,7 @@
 /* Ensure the root elements take full height */
 html, body, #root {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Prevent any unexpected scrolling */
@@ -311,4 +311,31 @@ html, body, #root {
 .tiptap-content a {
   color: #3b82f6;
   text-decoration: underline;
+}
+
+/* Dark, transparent scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(40, 40, 40, 0.4);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(40, 40, 40, 0.4) transparent;
+}
+
+/* Special rule for landing page */
+.landing-page-container {
+  overflow: auto;
+  height: auto;
 }
