@@ -24,7 +24,7 @@ export function Verify() {
   const { mutate: verifyEmail, isError, isSuccess, isPending } = useVerifyEmail({ token, userId });
 
   useEffect(() => {
-    const validatedData = verifyEmailSchema.safeParse({ token, userId });
+    const validatedData = verifyEmailSchema.safeParse({ validatedToken: token, validatedUserId: userId });
     
     if (!validatedData.success) {
 
