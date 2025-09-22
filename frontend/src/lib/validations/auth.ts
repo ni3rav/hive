@@ -10,3 +10,8 @@ export const registerSchema = z.object({
   validatedEmail: z.email(),
   validatedPassword: z.string().min(8),
 });
+
+export const verifyEmailSchema = z.object({
+  validatedUserId: z.string().min(1),
+  validatedToken: z.string().min(1),
+});
