@@ -10,17 +10,22 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { DashboardPage } from "./pages/Dashboard";
 import { ProfilePage } from "./pages/ProfilePage";
-import { LandingPage } from "./pages/LandingPage"; // Import the new landing page
+import { LandingPage } from "./pages/LandingPage";
+import { Verify } from "./pages/Verify";
 
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
-    path: "/", // Root path is now the public landing page
+    path: "/", 
     element: <LandingPage />,
   },
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/verify", 
+    element: <Verify />,
   },
   {
     path: "/register",
