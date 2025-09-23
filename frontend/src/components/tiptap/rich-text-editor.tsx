@@ -17,6 +17,7 @@ import { FloatingToolbar } from "@/components/tiptap/extensions/floating-toolbar
 import { EditorToolbar } from "./toolbars/editor-toolbar";
 import Placeholder from "@tiptap/extension-placeholder";
 import { createPersistenceHandlers } from "./persistence";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const extensions = [
   StarterKit.configure({
@@ -82,9 +83,9 @@ export function RichTextEditorDemo({ className }: { className?: string }) {
   if (!editor) return null;
 
   return (
-    <div
+    <ScrollArea
       className={cn(
-        "relative max-h-[calc(100dvh-6rem)]  w-full overflow-hidden overflow-y-scroll border bg-card pb-[60px] sm:pb-0",
+        "relative max-h-[calc(100dvh-6rem)] w-full border bg-card pb-[60px] sm:pb-0 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-thumb]]:bg-primary/50",
         className
       )}
     >
@@ -92,8 +93,8 @@ export function RichTextEditorDemo({ className }: { className?: string }) {
       <FloatingToolbar editor={editor} />
       <EditorContent
         editor={editor}
-        className=" min-h-[600px] w-full min-w-full cursor-text sm:p-6"
+        className="min-h-[600px] w-full min-w-full cursor-text"
       />
-    </div>
+    </ScrollArea>
   );
 }
