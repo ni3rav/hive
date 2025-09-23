@@ -12,6 +12,7 @@ import { DashboardPage } from "./pages/Dashboard";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LandingPage } from "./pages/LandingPage";
 import { Verify } from "./pages/Verify";
+import Editor from "./pages/Editor";
 
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
           {
             path: "profile", // This renders at /dashboard/profile
             element: <ProfilePage />,
+          },
+          {
+            path: "editor", // This renders at /dashboard/editor
+            element: <Editor />,
           },
         ],
       },
