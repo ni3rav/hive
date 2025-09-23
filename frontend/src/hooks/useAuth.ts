@@ -54,7 +54,10 @@ export function useLogout() {
 export function useVerifyEmail(data: VerifyEmailData) {
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: () => apiVerifyEmail(data),
+    mutationFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // delibrately delaying the verification process for 2 seconds
+      return apiVerifyEmail(data);
+    },
     onSuccess: () => {
       toast.success("Email verified successfully");
       navigate("/dashboard");
