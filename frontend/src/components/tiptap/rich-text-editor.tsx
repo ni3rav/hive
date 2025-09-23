@@ -16,6 +16,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { FloatingToolbar } from "@/components/tiptap/extensions/floating-toolbar";
 import { EditorToolbar } from "./toolbars/editor-toolbar";
 import Placeholder from "@tiptap/extension-placeholder";
+import { createPersistenceHandlers } from "./persistence";
 
 const extensions = [
   StarterKit.configure({
@@ -75,13 +76,7 @@ export function RichTextEditorDemo({ className }: { className?: string }) {
         class: "max-w-full focus:outline-none",
       },
     },
-    onUpdate: ({ editor }) => {
-      // do what you want to do with output
-      // Update stats
-      // saving as text/json/hmtml
-      // const text = editor.getHTML();
-      console.log(editor.getText());
-    },
+    ...createPersistenceHandlers(),
   });
 
   if (!editor) return null;
