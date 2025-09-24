@@ -10,7 +10,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { DashboardPage } from "./pages/Dashboard";
 import { ProfilePage } from "./pages/ProfilePage";
-import { LandingPage } from "./pages/LandingPage";
+import LandingPage from "./pages/LandingPage";
 import { Verify } from "./pages/Verify";
 import Editor from "./pages/Editor";
 
