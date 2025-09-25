@@ -1,6 +1,6 @@
 import { db } from "../db";
 import { authorTable } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function getAuthorsByUserId(userId: string) {
   try {
@@ -16,7 +16,7 @@ export async function getAuthorsByUserId(userId: string) {
 export async function getAuthorById(authorId: string, userId: string) {
   try {
     const result = await db.query.authorTable.findFirst({
-      where: eq(authorTable.id, authorId) && eq(authorTable.userId, userId),
+      where: and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)),
     });
     return [null, result] as const;
   } catch (error) {
@@ -62,7 +62,7 @@ export async function updateAuthor(
     const result = await db
       .update(authorTable)
       .set(data)
-      .where(eq(authorTable.id, authorId) && eq(authorTable.userId, userId));
+      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
     return [null, result] as const;
   } catch (error) {
     return [error, null] as const;
@@ -73,7 +73,7 @@ export async function deleteAuthor(authorId: string, userId: string) {
   try {
     const result = await db
       .delete(authorTable)
-      .where(eq(authorTable.id, authorId) && eq(authorTable.userId, userId));
+      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
     return [null, result] as const;
   } catch (error) {
     return [error, null] as const;
