@@ -4,6 +4,7 @@ import {
   timestamp,
   uuid,
   boolean,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -32,4 +33,16 @@ export const verificationLinksTable = pgTable("verification_links", {
   token: varchar("token").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   expiresAt: timestamp("expires_at").notNull().defaultNow(),
+});
+
+export const authorTable = pgTable("authors", {
+  id: uuid().defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull().unique(),
+  about: varchar("about").default(""),
+  socialLinks: jsonb("social_links").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
