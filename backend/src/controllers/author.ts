@@ -26,7 +26,7 @@ export async function authorByUserIdController(req: Request, res: Response) {
     res.status(404).json({ message: "no author found for this user" });
     return;
   }
-
+  // TODO: add DTO here to filter out some stuff
   res.status(200).json(author);
 }
 
@@ -55,4 +55,6 @@ export async function authorByIdController(req: Request, res: Response) {
     res.status(404).json({ message: "no author found for this id" });
     return;
   }
+  // TODO: add DTO here to filter out some stuff
+  res.status(200).json(author);
 }
