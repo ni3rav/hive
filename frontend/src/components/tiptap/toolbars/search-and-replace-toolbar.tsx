@@ -67,17 +67,13 @@ export function SearchAndReplaceToolbar() {
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<PopoverTrigger disabled={!editor} asChild>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => {
-								setOpen(!open);
-							}}
-							className={cn("h-8 w-max px-3 font-normal")}
-						>
-							<Repeat className="mr-2 h-4 w-4" />
-							<p>Search & Replace</p>
-						</Button>
+							<Button
+					variant="ghost"
+					size="icon" // Use the "icon" size for a perfect square
+					onClick={() => { setOpen(!open); }}
+					>
+					<Repeat className="h-4 w-4" /> {/* No margin needed */}
+					</Button>
 					</PopoverTrigger>
 				</TooltipTrigger>
 				<TooltipContent>

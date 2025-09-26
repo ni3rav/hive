@@ -1,5 +1,5 @@
-import { RichTextEditorDemo } from "@/components/tiptap/rich-text-editor";
+import { PostEditorPage } from "@/components/tiptap/posteditorpage";
 
 export default function Editor() {
-  return <RichTextEditorDemo />;
+  return <PostEditorPage />;
 }

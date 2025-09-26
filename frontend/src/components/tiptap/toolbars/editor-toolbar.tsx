@@ -20,7 +20,6 @@ import { AlignmentTooolbar } from "./alignment";
 import { ColorHighlightToolbar } from "./color-and-highlight";
 import { SearchAndReplaceToolbar } from "./search-and-replace-toolbar";
 import { CodeBlockToolbar } from "./code-block";
-import { SaveOptionsToolbar } from "./save-options";
 
 export const EditorToolbar = ({ editor }: { editor: Editor }) => {
   return (
@@ -69,7 +68,6 @@ export const EditorToolbar = ({ editor }: { editor: Editor }) => {
                 {/* Utility Group */}
                 <SearchAndReplaceToolbar />
                 <Separator orientation="vertical" className="mx-1 h-7" />
-                <SaveOptionsToolbar />
               </div>
             </div>
             <ScrollBar className="hidden" orientation="horizontal" />

@@ -168,7 +168,7 @@ export const ColorHighlightToolbar = () => {
 								style={{
 									color: currentColor,
 								}}
-								className={cn("h-8 w-14 p-0 font-normal")}
+								className={cn("h-8 w-10 p-0 font-normal")}
 							>
 								<span className="text-md">A</span>
 								<ChevronDownIcon className="ml-2 h-4 w-4" />

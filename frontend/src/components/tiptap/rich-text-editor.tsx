@@ -18,22 +18,13 @@ import { EditorToolbar } from "./toolbars/editor-toolbar";
 import Placeholder from "@tiptap/extension-placeholder";
 import { createPersistenceHandlers } from "./persistence";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FloatingSaveDownload } from "./floating-save-download";
 
 const extensions = [
   StarterKit.configure({
-    orderedList: {
-      HTMLAttributes: {
-        class: "list-decimal",
-      },
-    },
-    bulletList: {
-      HTMLAttributes: {
-        class: "list-disc",
-      },
-    },
-    heading: {
-      levels: [1, 2, 3, 4],
-    },
+    orderedList: { HTMLAttributes: { class: "list-decimal" } },
+    bulletList: { HTMLAttributes: { class: "list-disc" } },
+    heading: { levels: [1, 2, 3, 4] },
   }),
   Placeholder.configure({
     emptyNodeClass: "is-editor-empty",
@@ -44,7 +35,6 @@ const extensions = [
         case "detailsSummary":
           return "Section title";
         case "codeBlock":
-          // never show the placeholder when editing code
           return "";
         default:
           return "Start typing...";
@@ -52,18 +42,14 @@ const extensions = [
     },
     includeChildren: false,
   }),
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
   TextStyle,
   Subscript,
   Superscript,
   Underline,
   Link,
   Color,
-  Highlight.configure({
-    multicolor: true,
-  }),
+  Highlight.configure({ multicolor: true }),
   SearchAndReplace,
   Typography,
 ];
@@ -83,18 +69,21 @@ export function RichTextEditorDemo({ className }: { className?: string }) {
   if (!editor) return null;
 
   return (
-    <ScrollArea
-      className={cn(
-        "relative max-h-[calc(100dvh-6rem)] w-full border bg-card pb-[60px] sm:pb-0 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-thumb]]:bg-primary/50",
-        className
-      )}
-    >
-      <EditorToolbar editor={editor} />
-      <FloatingToolbar editor={editor} />
-      <EditorContent
-        editor={editor}
-        className="min-h-[600px] w-full min-w-full cursor-text"
-      />
-    </ScrollArea>
+    <div className="relative">
+      <ScrollArea
+        className={cn(
+          "relative max-h[calc(100dvh-6rem)] w-full border bg-card pb-0 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-thumb]]:bg-primary/50",
+          className
+        )}
+      >
+        <EditorToolbar editor={editor} />
+        <FloatingToolbar editor={editor} />
+        <EditorContent
+          editor={editor}
+          className="min-h-[600px] w-full min-w-full cursor-text"
+        />
+        <FloatingSaveDownload editor={editor} />
+      </ScrollArea>
+    </div>
   );
 }

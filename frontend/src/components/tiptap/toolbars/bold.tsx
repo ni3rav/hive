@@ -26,10 +26,10 @@ const BoldToolbar = React.forwardRef<HTMLButtonElement, ButtonProps>(
 						variant="ghost"
 						size="icon"
 						className={cn(
-							"h-8 w-8 p-0 sm:h-9 sm:w-9",
+							"size-8", // Use a consistent size-8 (h-8 w-8)
 							editor?.isActive("bold") && "bg-accent",
 							className,
-						)}
+)}
 						onClick={(e) => {
 							editor?.chain().focus().toggleBold().run();
 							onClick?.(e);
