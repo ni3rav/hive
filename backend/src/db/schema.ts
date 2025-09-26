@@ -5,6 +5,7 @@ import {
   uuid,
   boolean,
   jsonb,
+  text,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -45,4 +46,28 @@ export const authorTable = pgTable("authors", {
   about: varchar("about").default(""),
   socialLinks: jsonb("social_links").default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const postsTable = pgTable("posts", {
+  id: uuid().defaultRandom().primaryKey(),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => authorTable.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").notNull().unique(),
+  excerpt: varchar("excerpt").default("").notNull(),
+  tags: jsonb("tags").default([]).notNull(),
+  categories: jsonb("categories").default([]).notNull(),
+  visible: boolean("visible").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const postContentTable = pgTable("post_content", {
+  id: uuid().defaultRandom().primaryKey(),
+  postId: uuid("post_id")
+    .notNull()
+    .references(() => postsTable.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
 });
