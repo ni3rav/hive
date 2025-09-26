@@ -12,6 +12,6 @@ export const registerSchema = z.object({
 });
 
 export const verifyEmailSchema = z.object({
-  validatedUserId: z.string().min(1),
-  validatedToken: z.string().min(1),
+  validatedUserId: z.uuid("invalid userId"),
+  validatedToken: z.string().min(1, "invalid token"),
 });
