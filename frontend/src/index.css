@@ -169,7 +169,6 @@
 
 /* --- NEW THEME END --- */
 
-
 /* Base Layer Styles (Untouched) */
 @layer base {
   * {
@@ -253,8 +252,8 @@
 }
 .feature-animate {
   --lift: -3px;
-  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.4s, box-shadow 0.5s;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s,
+    box-shadow 0.5s;
 }
 .feature-animate:hover {
   transform: translateY(var(--lift));
@@ -305,4 +304,30 @@
 }
 .logo-icon {
   @apply size-8 text-primary fill-background flex items-center justify-center;
+}
+
+body {
+  --sb-track-color: #ffffff00;
+  --sb-thumb-color: var(--muted-foreground);
+  --sb-size: 7px;
+}
+
+body::-webkit-scrollbar {
+  width: var(--sb-size);
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--sb-track-color);
+  border-radius: 20px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb-color);
+  border-radius: 20px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  body {
+    scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+  }
 }
