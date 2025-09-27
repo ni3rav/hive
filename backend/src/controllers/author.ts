@@ -4,6 +4,7 @@ import {
   deleteAuthor,
   getAuthorById,
   getAuthorsByUserId,
+  updateAuthor,
 } from "../utils/author";
 import {
   createAuthorSchema,
@@ -11,6 +12,7 @@ import {
   getAuthorByIdSchema,
   getAuthorByUserIdSchema,
   sessionIdSchema,
+  updateAuthorSchema,
 } from "../utils/validations/author";
 import { getUserIdbySession } from "../utils/sessions";
 
@@ -180,5 +182,71 @@ export async function deleteAuthorController(req: Request, res: Response) {
   res.status(200).json({
     message: "author deleted successfully",
   });
+  return;
+}
+
+export async function updateAuthorController(req: Request, res: Response) {
+  const authorId = req.params.authorId;
+  const sessionId = req.cookies["session_id"];
+  const data = req.body;
+
+  const validate = updateAuthorSchema.safeParse({
+    authorId,
+    sessionId,
+    data,
+  });
+
+  if (!validate.success) {
+    if (
+      validate.error.issues.some(
+        (issue) =>
+          issue.message === "please provide at least one field to update"
+      )
+    ) {
+      //* bad request response for empty request body
+      res.status(400).json({
+        message:
+          "request body cannot be empty, please provide at least one field to update",
+      });
+      return;
+    }
+    //* default bad request response
+    res.status(400).json({
+      message: "invalid data for updating author",
+    });
+    return;
+  }
+
+  const [sessionError, userId] = await getUserIdbySession(
+    validate.data.sessionId
+  );
+
+  if (sessionError) {
+    res.status(500).json({
+      message: "internal server error while fetching user id",
+    });
+    return;
+  }
+
+  if (!userId) {
+    res.status(404).json({
+      message: "no user id found for this session",
+    });
+    return;
+  }
+
+  const [error] = await updateAuthor(
+    validate.data.authorId,
+    userId,
+    validate.data.data
+  );
+
+  if (error) {
+    res.status(500).json({
+      message: "internal server error while updating author",
+    });
+    return;
+  }
+  res.status(200).json({ message: "author updated successfully" });
   return;
 }
