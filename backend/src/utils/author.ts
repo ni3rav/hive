@@ -74,6 +74,10 @@ export async function deleteAuthor(authorId: string, userId: string) {
     const result = await db
       .delete(authorTable)
       .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
+
+    if (result.rowCount === 0) {
+      return [new Error("author not found or already deleted"), null] as const;
+    }
     return [null, result] as const;
   } catch (error) {
     return [error, null] as const;

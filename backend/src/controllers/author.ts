@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import {
   createAuthor,
+  deleteAuthor,
   getAuthorById,
   getAuthorsByUserId,
 } from "../utils/author";
 import {
   createAuthorSchema,
+  deleteAuthorSchema,
   getAuthorByIdSchema,
   getAuthorByUserIdSchema,
   sessionIdSchema,
@@ -127,4 +129,56 @@ export async function createAuthorController(req: Request, res: Response) {
     message: "author created successfully",
     author,
   });
+}
+
+export async function deleteAuthorController(req: Request, res: Response) {
+  const authorId = req.params.authorId;
+  const sessionId = req.cookies["session_id"];
+
+  const validate = deleteAuthorSchema.safeParse({ authorId, sessionId });
+
+  if (!validate.success) {
+    res.status(400).json({
+      message: "invalid data for deleting author",
+    });
+    return;
+  }
+
+  const [sessionError, userId] = await getUserIdbySession(
+    validate.data.sessionId
+  );
+
+  if (sessionError) {
+    res.status(500).json({
+      message: "internal server error while fetching user id",
+    });
+    return;
+  }
+
+  if (!userId) {
+    res.status(404).json({
+      message: "no user id found for this session",
+    });
+    return;
+  }
+
+  const [error] = await deleteAuthor(validate.data.authorId, userId);
+
+  if (error) {
+    if ((error as Error).message === "author not found") {
+      res.status(404).json({
+        message: "author not found or already deleted",
+      });
+    } else {
+      res.status(500).json({
+        message: "internal server error while deleting author",
+      });
+    }
+    return;
+  }
+
+  res.status(200).json({
+    message: "author deleted successfully",
+  });
+  return;
 }

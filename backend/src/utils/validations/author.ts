@@ -19,3 +19,8 @@ export const createAuthorSchema = z.object({
   about: z.string().optional(),
   socialLinks: z.record(z.string(), z.string()).optional(),
 })
+
+export const deleteAuthorSchema = z.object({
+  authorId: z.uuid("Invalid authorId"),
+  sessionId: z.uuid("Invalid sessionId"),
+});
