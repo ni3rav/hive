@@ -5,9 +5,6 @@ export const getAuthorByIdSchema = z.object({
   userId: z.uuid("Invalid userId"),
 });
 
-export const getAuthorByUserIdSchema = z.object({
-  userId: z.uuid("Invalid userId"),
-});
 
 export const sessionIdSchema = z.object({
   sessionId: z.uuid(),

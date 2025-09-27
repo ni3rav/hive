@@ -175,6 +175,7 @@ export async function meController(req: Request, res: Response) {
     // TODO: Add a cronjob to purge out all inactive sessions at a regular interval
     await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
     res.status(401).json({ message: "Session expired" });
+    return;
   }
 
   const user = await db.query.usersTable.findFirst({

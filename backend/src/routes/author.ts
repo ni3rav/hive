@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   // authorByIdController,
-  // authorByUserIdController,
+  listUserAuthorsController,
   createAuthorController,
   deleteAuthorController,
   updateAuthorController,
@@ -9,7 +9,7 @@ import {
 
 export const router = Router();
 
-// router.get("/:userId", authorByUserIdController);
+router.get("/", listUserAuthorsController);
 // router.get("/:userId/:authorId", authorByIdController);
 router.post("/", createAuthorController);
 router.delete("/:authorId", deleteAuthorController);

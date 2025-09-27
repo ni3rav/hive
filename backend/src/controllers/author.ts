@@ -10,35 +10,53 @@ import {
   createAuthorSchema,
   deleteAuthorSchema,
   getAuthorByIdSchema,
-  getAuthorByUserIdSchema,
   sessionIdSchema,
   updateAuthorSchema,
 } from "../utils/validations/author";
 import { getUserIdbySession } from "../utils/sessions";
+import {
+  toAuthorListResponseDto,
+  toAuthorResponseDto,
+} from "../dto/author.dto";
 
-export async function authorByUserIdController(req: Request, res: Response) {
-  const userId = req.params.userId;
+export async function listUserAuthorsController(req: Request, res: Response) {
+  const sessionId = req.cookies["session_id"];
 
-  const validate = getAuthorByUserIdSchema.safeParse({ userId });
-
-  if (!validate.success) {
-    res.status(400).json({ message: "invalid userId" });
+  if (!sessionId) {
+    res.status(400).json({ message: "session id is required" });
     return;
   }
 
-  const [error, author] = await getAuthorsByUserId(validate.data.userId);
+  const [sessionError, userId] = await getUserIdbySession(sessionId);
+
+  if (sessionError) {
+    res
+      .status(500)
+      .json({ message: "internal server error while fetching user id" });
+    return;
+  }
+
+  if (!userId) {
+    res.status(404).json({ message: "no user id found for this session" });
+    return;
+  }
+
+  const [error, authors] = await getAuthorsByUserId(userId);
 
   if (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      message: "internal server error while fetching authors for user",
+    });
     return;
   }
 
-  if (!author || author.length === 0) {
-    res.status(404).json({ message: "no author found for this user" });
+  if (!authors || authors.length === 0) {
+    res.status(404).json({ message: "no authors found for this user" });
     return;
   }
-  // TODO: add DTO here to filter out some stuff
-  res.status(200).json(author);
+
+  res.status(200).json(toAuthorListResponseDto(authors));
+  return;
 }
 
 export async function authorByIdController(req: Request, res: Response) {
@@ -66,8 +84,7 @@ export async function authorByIdController(req: Request, res: Response) {
     res.status(404).json({ message: "no author found for this id" });
     return;
   }
-  // TODO: add DTO here to filter out some stuff
-  res.status(200).json(author);
+  res.status(200).json(toAuthorResponseDto(author));
 }
 
 export async function createAuthorController(req: Request, res: Response) {
@@ -113,7 +130,7 @@ export async function createAuthorController(req: Request, res: Response) {
 
   const { name, email, about, socialLinks } = validatedBody.data;
 
-  const [error, author] = await createAuthor(userId, {
+  const [error] = await createAuthor(userId, {
     name,
     email,
     about,
@@ -129,7 +146,6 @@ export async function createAuthorController(req: Request, res: Response) {
 
   res.status(200).json({
     message: "author created successfully",
-    author,
   });
 }
 
