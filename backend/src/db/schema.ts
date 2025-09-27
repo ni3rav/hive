@@ -42,7 +42,7 @@ export const authorTable = pgTable("authors", {
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
-  email: varchar("email").notNull().unique(),
+  email: varchar("email").notNull(),
   about: varchar("about").default(""),
   socialLinks: jsonb("social_links").default({}),
   createdAt: timestamp("created_at").notNull().defaultNow(),

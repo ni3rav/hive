@@ -8,3 +8,14 @@ export const getAuthorByIdSchema = z.object({
 export const getAuthorByUserIdSchema = z.object({
   userId: z.uuid("Invalid userId"),
 });
+
+export const sessionIdSchema = z.object({
+  sessionId: z.uuid(),
+});
+
+export const createAuthorSchema = z.object({
+  name: z.string().min(1, "name is required"),
+  email: z.email("invalid email"),
+  about: z.string().optional(),
+  socialLinks: z.record(z.string(), z.string()).optional(),
+})
