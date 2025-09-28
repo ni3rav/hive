@@ -15,7 +15,7 @@
   --editor-bg-default: hsl(0 0% 100%);
   --editor-bg-subtle: hsl(0 0% 98%);
   --editor-bg-muted: hsl(240 5% 96%);
-  
+
   /* Highlight Colors */
   --editor-highlight-default: hsl(0 0% 98%);
   --editor-highlight-gray: hsl(240 5% 96%);
@@ -43,9 +43,12 @@
   --editor-spacing-16: 4rem;
 
   /* Typography */
-  --editor-font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --editor-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --editor-font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+  --editor-font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --editor-font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --editor-font-serif: Georgia, Cambria, 'Times New Roman', Times, serif;
 
   /* Animation */
   --editor-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -54,8 +57,10 @@
 
   /* Shadows */
   --editor-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --editor-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --editor-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --editor-shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --editor-shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 /* Dark Mode Custom Properties */
@@ -385,17 +390,33 @@
     padding: var(--editor-spacing-8) var(--editor-spacing-4);
   }
 
-  .ProseMirror h1 { font-size: 2rem; }
-  .ProseMirror h2 { font-size: 1.75rem; }
-  .ProseMirror h3 { font-size: 1.5rem; }
-  .ProseMirror h4 { font-size: 1.25rem; }
-  .ProseMirror p { font-size: 1rem; }
+  .ProseMirror h1 {
+    font-size: 2rem;
+  }
+  .ProseMirror h2 {
+    font-size: 1.75rem;
+  }
+  .ProseMirror h3 {
+    font-size: 1.5rem;
+  }
+  .ProseMirror h4 {
+    font-size: 1.25rem;
+  }
+  .ProseMirror p {
+    font-size: 1rem;
+  }
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Print Styles */

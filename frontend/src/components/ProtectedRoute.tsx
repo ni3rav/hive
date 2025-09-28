@@ -1,5 +1,5 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth"; 
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 export const ProtectedRoute = () => {
   const { data: user, isLoading } = useAuth();
 
@@ -9,5 +9,5 @@ export const ProtectedRoute = () => {
 
   // If a user exists, show the requested page.
   // Otherwise, redirect to the login page.
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  return user ? <Outlet /> : <Navigate to='/login' replace />;
 };

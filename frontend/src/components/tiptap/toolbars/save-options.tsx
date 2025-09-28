@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Download, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Download, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useToolbar } from "./toolbar-provider";
-import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+} from '@/components/ui/tooltip';
+import { useToolbar } from './toolbar-provider';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 // type SaveDocumentResponse = { message?: string };
 
-function downloadHtmlFile(html: string, filename = "document.html") {
-  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+function downloadHtmlFile(html: string, filename = 'document.html') {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
@@ -47,25 +47,25 @@ const SaveOptionsToolbar = React.forwardRef<
   //   };
 
   const handleDownload = () => {
-    const html = editor?.getHTML() ?? "";
-    if (!html || html.trim() === "<p></p>") {
-      toast.info("Nothing to download yet.");
+    const html = editor?.getHTML() ?? '';
+    if (!html || html.trim() === '<p></p>') {
+      toast.info('Nothing to download yet.');
       return;
     }
     downloadHtmlFile(html);
   };
 
   return (
-    <div ref={ref} className={cn("flex items-center gap-1", className)}>
+    <div ref={ref} className={cn('flex items-center gap-1', className)}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-max px-3 font-normal"
+            variant='ghost'
+            size='sm'
+            className='h-8 w-max px-3 font-normal'
             // onClick={handleSaveToServer}
           >
-            <Save className="mr-2 h-4 w-4" />
+            <Save className='mr-2 h-4 w-4' />
             Save
           </Button>
         </TooltipTrigger>
@@ -77,12 +77,12 @@ const SaveOptionsToolbar = React.forwardRef<
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-max px-3 font-normal"
+            variant='ghost'
+            size='sm'
+            className='h-8 w-max px-3 font-normal'
             onClick={handleDownload}
           >
-            <Download className="mr-2 h-4 w-4" />
+            <Download className='mr-2 h-4 w-4' />
             Download
           </Button>
         </TooltipTrigger>
@@ -94,6 +94,6 @@ const SaveOptionsToolbar = React.forwardRef<
   );
 });
 
-SaveOptionsToolbar.displayName = "SaveOptionsToolbar";
+SaveOptionsToolbar.displayName = 'SaveOptionsToolbar';
 
 export { SaveOptionsToolbar };

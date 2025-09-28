@@ -1,5 +1,5 @@
 // src/lib/api-client.ts
-import { axiosInstance } from "./axios";
+import { axiosInstance } from './axios';
 
 const apiClient = {
   get: async <T = unknown>(url: string, config = {}): Promise<T> => {
@@ -9,7 +9,7 @@ const apiClient = {
   post: async <T = unknown, B = unknown>(
     url: string,
     body?: B,
-    config = {}
+    config = {},
   ): Promise<T> => {
     const res = await axiosInstance.post<T>(url, body, config);
     return res.data;
@@ -17,7 +17,7 @@ const apiClient = {
   put: async <T = unknown, B = unknown>(
     url: string,
     body?: B,
-    config = {}
+    config = {},
   ): Promise<T> => {
     const res = await axiosInstance.put<T>(url, body, config);
     return res.data;
@@ -25,7 +25,7 @@ const apiClient = {
   patch: async <T = unknown, B = unknown>(
     url: string,
     body?: B,
-    config = {}
+    config = {},
   ): Promise<T> => {
     const res = await axiosInstance.patch<T>(url, body, config);
     return res.data;
@@ -35,7 +35,6 @@ const apiClient = {
     return res.data;
   },
 };
-
 
 export const {
   get: apiGet,

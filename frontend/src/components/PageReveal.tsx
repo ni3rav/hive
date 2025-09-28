@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
 export const PageReveal: React.FC = () => {
-  const [done, setDone] = useState(false)
+  const [done, setDone] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setDone(true), 900) // duration of reveal
-    return () => clearTimeout(t)
-  }, [])
+    const t = setTimeout(() => setDone(true), 900); // duration of reveal
+    return () => clearTimeout(t);
+  }, []);
   return (
     <div
       aria-hidden
@@ -13,8 +13,8 @@ export const PageReveal: React.FC = () => {
         done ? 'opacity-0' : 'opacity-100'
       }`}
     >
-      <div className="absolute inset-0 bg-background" />
-      <div className="absolute inset-0 reveal-pulse" />
+      <div className='absolute inset-0 bg-background' />
+      <div className='absolute inset-0 reveal-pulse' />
     </div>
-  )
-}
+  );
+};

@@ -4,15 +4,15 @@ import {
   apiRegister,
   apiLogout,
   apiVerifyEmail,
-} from "@/api/auth";
-import type { VerifyEmailData } from "@/types/auth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+} from '@/api/auth';
+import type { VerifyEmailData } from '@/types/auth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function useAuth() {
   return useQuery({
-    queryKey: ["user"], // A unique key for this query
+    queryKey: ['user'], // A unique key for this query
     queryFn: apiGetMe, // The API function to call
     retry: false, // Don't retry if it fails (e.g., user is not logged in)
   });
@@ -25,7 +25,7 @@ export function useLogin() {
     // Connects this mutation to the apiLogin function(changes made during Login)
     onSuccess: () => {
       // Invalidate the user query so it refetches with new login data
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 }
@@ -36,7 +36,7 @@ export function useRegister() {
     mutationFn: apiRegister,
     onSuccess: () => {
       // Invalidate the user query so it refetches with new registration data
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 }
@@ -46,7 +46,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: apiLogout,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 }
@@ -59,11 +59,11 @@ export function useVerifyEmail(data: VerifyEmailData) {
       return apiVerifyEmail(data);
     },
     onSuccess: () => {
-      toast.success("Email verified successfully");
-      navigate("/dashboard");
+      toast.success('Email verified successfully');
+      navigate('/dashboard');
     },
     onError: () => {
-      toast.error("Email verification failed");
+      toast.error('Email verification failed');
     },
     retry: false,
   });

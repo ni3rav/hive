@@ -65,7 +65,7 @@ export function AnimatedGroup({
           }
         });
       },
-      { threshold, rootMargin }
+      { threshold, rootMargin },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -74,30 +74,29 @@ export function AnimatedGroup({
   const kids = React.Children.toArray(children);
 
   return (
-    <Comp
-      ref={ref}
-      className={cn('ag-group', className)}
-      data-preset={preset}
-    >
+    <Comp ref={ref} className={cn('ag-group', className)} data-preset={preset}>
       {kids.map((child, i) => {
         const delay = delayOffset + i * stagger;
         const style: CSSVars = { ['--ag-delay']: `${delay}ms` };
 
         if (React.isValidElement(child)) {
-          const childElement = child as ReactElement<{ style?: CSSVars; className?: string }>;
+          const childElement = child as ReactElement<{
+            style?: CSSVars;
+            className?: string;
+          }>;
           return React.cloneElement(childElement, {
-            className: cn(childElement.props.className, 'ag-item', `ag-${preset}`),
+            className: cn(
+              childElement.props.className,
+              'ag-item',
+              `ag-${preset}`,
+            ),
             style: { ...(childElement.props.style || {}), ...style },
             key: childElement.key ?? i,
           });
         }
 
         return (
-          <div
-            key={i}
-            className={cn('ag-item', `ag-${preset}`)}
-            style={style}
-          >
+          <div key={i} className={cn('ag-item', `ag-${preset}`)} style={style}>
             {child}
           </div>
         );

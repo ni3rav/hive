@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const loginSchema = z.object({
   validatedEmail: z.email(),
@@ -12,6 +12,6 @@ export const registerSchema = z.object({
 });
 
 export const verifyEmailSchema = z.object({
-  validatedUserId: z.uuid("invalid userId"),
-  validatedToken: z.string().min(1, "invalid token"),
+  validatedUserId: z.uuid('invalid userId'),
+  validatedToken: z.string().min(1, 'invalid token'),
 });

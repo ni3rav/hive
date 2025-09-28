@@ -1,35 +1,35 @@
-import { createRoot } from "react-dom/client";
-import "./index.css";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/query-client.ts";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Toaster } from "sonner";
-import RegisterPage from "./pages/Register";
-import LoginPage from "./pages/Login";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { DashboardLayout } from "./components/DashboardLayout";
-import { DashboardPage } from "./pages/Dashboard";
-import { ProfilePage } from "./pages/ProfilePage";
-import LandingPage from "./pages/LandingPage";
-import { Verify } from "./pages/Verify";
-import Editor from "./pages/Editor";
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query-client.ts';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import RegisterPage from './pages/Register';
+import LoginPage from './pages/Login';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { DashboardLayout } from './components/DashboardLayout';
+import { DashboardPage } from './pages/Dashboard';
+import { ProfilePage } from './pages/ProfilePage';
+import LandingPage from './pages/LandingPage';
+import { Verify } from './pages/Verify';
+import Editor from './pages/Editor';
 
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
-    path: "/", 
+    path: '/',
     element: <LandingPage />,
   },
   {
-    path: "/login",
+    path: '/login',
     element: <LoginPage />,
   },
   {
-    path: "/verify", 
+    path: '/verify',
     element: <Verify />,
   },
   {
-    path: "/register",
+    path: '/register',
     element: <RegisterPage />,
   },
 
@@ -38,7 +38,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/dashboard",
+        path: '/dashboard',
         element: <DashboardLayout />, // This layout has the sidebar
         children: [
           {
@@ -46,11 +46,11 @@ const router = createBrowserRouter([
             element: <DashboardPage />,
           },
           {
-            path: "profile", // This renders at /dashboard/profile
+            path: 'profile', // This renders at /dashboard/profile
             element: <ProfilePage />,
           },
           {
-            path: "editor", // This renders at /dashboard/editor
+            path: 'editor', // This renders at /dashboard/editor
             element: <Editor />,
           },
         ],
@@ -59,9 +59,9 @@ const router = createBrowserRouter([
   },
 ]);
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <Toaster position="bottom-right" richColors/>
+    <Toaster position='bottom-right' richColors />
     <RouterProvider router={router} />
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );

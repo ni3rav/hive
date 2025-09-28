@@ -1,7 +1,7 @@
-import { type Editor } from "@tiptap/core";
+import { type Editor } from '@tiptap/core';
 
 export const NODE_HANDLES_SELECTED_STYLE_CLASSNAME =
-  "node-handles-selected-style";
+  'node-handles-selected-style';
 
 export function isValidUrl(url: string) {
   return /^https?:\/\/\S+$/.test(url);
@@ -20,7 +20,7 @@ export const duplicateContent = (editor: Editor) => {
       selection.content().content.firstChild?.toJSON(),
       {
         updateSelection: true,
-      }
+      },
     )
     .focus(selection.to)
     .run();
@@ -31,7 +31,7 @@ export function getUrlFromString(str: string) {
     return str;
   }
   try {
-    if (str.includes(".") && !str.includes(" ")) {
+    if (str.includes('.') && !str.includes(' ')) {
       return new URL(`https://${str}`).toString();
     }
   } catch {

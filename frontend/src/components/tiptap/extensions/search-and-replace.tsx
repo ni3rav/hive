@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type Editor as CoreEditor, Extension, type Range } from "@tiptap/core";
-import type { Node as PMNode } from "@tiptap/pm/model";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { Decoration, DecorationSet, type EditorView } from "@tiptap/pm/view";
+import { type Editor as CoreEditor, Extension, type Range } from '@tiptap/core';
+import type { Node as PMNode } from '@tiptap/pm/model';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
 
-declare module "@tiptap/core" {
+declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     search: {
       /**
@@ -47,12 +47,12 @@ interface TextNodeWithPosition {
 const getRegex = (
   searchString: string,
   disableRegex: boolean,
-  caseSensitive: boolean
+  caseSensitive: boolean,
 ): RegExp => {
   const escapedString = disableRegex
-    ? searchString.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")
+    ? searchString.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
     : searchString;
-  return new RegExp(escapedString, caseSensitive ? "gu" : "gui");
+  return new RegExp(escapedString, caseSensitive ? 'gu' : 'gui');
 };
 
 interface ProcessedSearches {
@@ -65,7 +65,7 @@ function processSearches(
   searchTerm: RegExp,
   selectedResultIndex: number,
   searchResultClass: string,
-  selectedResultClass: string
+  selectedResultClass: string,
 ): ProcessedSearches {
   const decorations: Decoration[] = [];
   const results: Range[] = [];
@@ -77,13 +77,13 @@ function processSearches(
 
   doc.descendants((node, pos) => {
     if (node.isText) {
-      textNodesWithPosition.push({ text: node.text || "", pos });
+      textNodesWithPosition.push({ text: node.text || '', pos });
     }
   });
 
   for (const { text, pos } of textNodesWithPosition) {
     const matches = Array.from(text.matchAll(searchTerm)).filter(
-      ([matchText]) => matchText.trim()
+      ([matchText]) => matchText.trim(),
     );
 
     for (const match of matches) {
@@ -104,7 +104,7 @@ function processSearches(
       Decoration.inline(from, to, {
         class:
           selectedResultIndex === i ? selectedResultClass : searchResultClass,
-      })
+      }),
     );
   }
 
@@ -117,7 +117,7 @@ function processSearches(
 const replace = (
   replaceTerm: string,
   results: Range[],
-  { state, dispatch }: any
+  { state, dispatch }: any,
 ) => {
   const firstResult = results[0];
 
@@ -136,7 +136,7 @@ const rebaseNextResult = (
   replaceTerm: string,
   index: number,
   lastOffset: number,
-  results: Range[]
+  results: Range[],
 ): [number, Range[]] | null => {
   const nextIndex = index + 1;
 
@@ -166,7 +166,7 @@ const rebaseNextResult = (
 const replaceAll = (
   replaceTerm: string,
   results: Range[],
-  { tr, dispatch }: { tr: any; dispatch: any }
+  { tr, dispatch }: { tr: any; dispatch: any },
 ) => {
   if (!results.length) {
     return;
@@ -217,7 +217,7 @@ const selectNext = (editor: CoreEditor) => {
       .domAtPos(from)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      .node.scrollIntoView({ behavior: "smooth", block: "center" });
+      .node.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 };
 
@@ -245,13 +245,13 @@ const selectPrevious = (editor: CoreEditor) => {
       .domAtPos(from)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      .node.scrollIntoView({ behavior: "smooth", block: "center" });
+      .node.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const searchAndReplacePluginKey = new PluginKey(
-  "searchAndReplacePlugin"
+  'searchAndReplacePlugin',
 );
 
 export interface SearchAndReplaceOptions {
@@ -275,22 +275,22 @@ export const SearchAndReplace = Extension.create<
   SearchAndReplaceOptions,
   SearchAndReplaceStorage
 >({
-  name: "searchAndReplace",
+  name: 'searchAndReplace',
 
   addOptions() {
     return {
-      searchResultClass: " bg-yellow-200",
-      selectedResultClass: "bg-yellow-500",
+      searchResultClass: ' bg-yellow-200',
+      selectedResultClass: 'bg-yellow-500',
       disableRegex: true,
     };
   },
 
   addStorage() {
     return {
-      searchTerm: "",
-      replaceTerm: "",
+      searchTerm: '',
+      replaceTerm: '',
       results: [],
-      lastSearchTerm: "",
+      lastSearchTerm: '',
       selectedResult: 0,
       lastSelectedResult: 0,
       caseSensitive: false,
@@ -412,7 +412,7 @@ export const SearchAndReplace = Extension.create<
               getRegex(searchTerm, disableRegex, caseSensitive),
               selectedResult,
               searchResultClass,
-              selectedResultClass
+              selectedResultClass,
             );
 
             editor.storage.searchAndReplace.results = results;

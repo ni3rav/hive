@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import React from "react";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import { useToolbar } from "./toolbar-provider";
-import { useMediaQuery } from "@/hooks/use-media-querry";
-import { MobileToolbarGroup, MobileToolbarItem } from "./mobile-toolbar-group";
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { useToolbar } from './toolbar-provider';
+import { useMediaQuery } from '@/hooks/use-media-querry';
+import { MobileToolbarGroup, MobileToolbarItem } from './mobile-toolbar-group';
 
 const levels = [1, 2, 3, 4] as const;
 
@@ -26,25 +26,27 @@ export const HeadingsToolbar = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className, ...props }, ref) => {
   const { editor } = useToolbar();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const activeLevel = levels.find((level) =>
-    editor?.isActive("heading", { level })
+    editor?.isActive('heading', { level }),
   );
 
   if (isMobile) {
     return (
-      <MobileToolbarGroup label={activeLevel ? `H${activeLevel}` : "Normal"}>
+      <MobileToolbarGroup label={activeLevel ? `H${activeLevel}` : 'Normal'}>
         <MobileToolbarItem
           onClick={() => editor?.chain().focus().setParagraph().run()}
-          active={!editor?.isActive("heading")}
+          active={!editor?.isActive('heading')}
         >
           Normal
         </MobileToolbarItem>
         {levels.map((level) => (
           <MobileToolbarItem
             key={level}
-            onClick={() => editor?.chain().focus().toggleHeading({ level }).run()}
-            active={editor?.isActive("heading", { level })}
+            onClick={() =>
+              editor?.chain().focus().toggleHeading({ level }).run()
+            }
+            active={editor?.isActive('heading', { level })}
           >
             H{level}
           </MobileToolbarItem>
@@ -59,26 +61,26 @@ export const HeadingsToolbar = React.forwardRef<
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               className={cn(
-                "h-8 w-max gap-1 px-3 font-normal",
-                editor?.isActive("heading") && "bg-accent",
-                className
+                'h-8 w-max gap-1 px-3 font-normal',
+                editor?.isActive('heading') && 'bg-accent',
+                className,
               )}
               ref={ref}
               {...props}
             >
-              {activeLevel ? `H${activeLevel}` : "Normal"}
-              <ChevronDown className="h-4 w-4" />
+              {activeLevel ? `H${activeLevel}` : 'Normal'}
+              <ChevronDown className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
+          <DropdownMenuContent align='start'>
             <DropdownMenuItem
               onClick={() => editor?.chain().focus().setParagraph().run()}
               className={cn(
-                "flex items-center gap-2 h-fit",
-                !editor?.isActive("heading") && "bg-accent"
+                'flex items-center gap-2 h-fit',
+                !editor?.isActive('heading') && 'bg-accent',
               )}
             >
               Normal
@@ -90,8 +92,8 @@ export const HeadingsToolbar = React.forwardRef<
                   editor?.chain().focus().toggleHeading({ level }).run()
                 }
                 className={cn(
-                  "flex items-center gap-2",
-                  editor?.isActive("heading", { level }) && "bg-accent"
+                  'flex items-center gap-2',
+                  editor?.isActive('heading', { level }) && 'bg-accent',
                 )}
               >
                 H{level}
@@ -107,4 +109,4 @@ export const HeadingsToolbar = React.forwardRef<
   );
 });
 
-HeadingsToolbar.displayName = "HeadingsToolbar";
+HeadingsToolbar.displayName = 'HeadingsToolbar';

@@ -1,38 +1,38 @@
-import type { Editor } from "@tiptap/core";
+import type { Editor } from '@tiptap/core';
 
-export const DEFAULT_TIPTAP_STORAGE_KEY = "tiptap-editor-content";
+export const DEFAULT_TIPTAP_STORAGE_KEY = 'tiptap-editor-content';
 
 export function loadEditorContent(
-  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY
+  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY,
 ) {
   try {
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch (error) {
-    console.error("Failed to load editor content from storage", error);
+    console.error('Failed to load editor content from storage', error);
     return null;
   }
 }
 
 export function saveEditorContent(
   json: unknown,
-  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY
+  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY,
 ) {
   try {
     localStorage.setItem(storageKey, JSON.stringify(json));
   } catch (error) {
-    console.error("Failed to persist editor content", error);
+    console.error('Failed to persist editor content', error);
   }
 }
 
 export function clearEditorContent(
-  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY
+  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY,
 ) {
   try {
     localStorage.removeItem(storageKey);
   } catch (error) {
-    console.error("Failed to clear editor content", error);
+    console.error('Failed to clear editor content', error);
   }
 }
 
@@ -40,7 +40,7 @@ type OnCreateProps = { editor: Editor };
 type OnUpdateProps = { editor: Editor };
 
 export function createPersistenceHandlers(
-  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY
+  storageKey: string = DEFAULT_TIPTAP_STORAGE_KEY,
 ) {
   return {
     onCreate: ({ editor }: OnCreateProps) => {
