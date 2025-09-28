@@ -1,4 +1,4 @@
-import { authorTable } from "../db/schema";
+import { authorTable } from '../db/schema';
 
 export interface AuthorResponseDto {
   name: string;
@@ -8,7 +8,7 @@ export interface AuthorResponseDto {
 }
 
 export function toAuthorResponseDto(
-  author: typeof authorTable.$inferSelect
+  author: typeof authorTable.$inferSelect,
 ): AuthorResponseDto {
   return {
     name: author.name,
@@ -22,7 +22,7 @@ export function toAuthorResponseDto(
 }
 
 export function toAuthorListResponseDto(
-  authors: (typeof authorTable.$inferSelect)[]
+  authors: (typeof authorTable.$inferSelect)[],
 ): AuthorResponseDto[] {
   return authors.map(toAuthorResponseDto);
 }

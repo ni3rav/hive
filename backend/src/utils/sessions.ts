@@ -1,8 +1,8 @@
-import { db } from "../db";
-import { sessionsTable } from "../db/schema";
-import { randomUUID } from "crypto";
-import { eq } from "drizzle-orm";
-import { sessionIdSchema } from "./validations/author";
+import { db } from '../db';
+import { sessionsTable } from '../db/schema';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { sessionIdSchema } from './validations/author';
 
 export async function createSession(userId: string) {
   const sessionId = randomUUID();
@@ -14,12 +14,12 @@ export async function createSession(userId: string) {
 }
 
 export async function getUserIdbySession(
-  sessionId: string
+  sessionId: string,
 ): Promise<[Error | null, string | null]> {
   const validatedData = sessionIdSchema.safeParse({ sessionId });
 
   if (!validatedData.success) {
-    return [new Error("invalid session id"), null];
+    return [new Error('invalid session id'), null];
   }
 
   try {
@@ -29,14 +29,14 @@ export async function getUserIdbySession(
     });
 
     if (!session) {
-      return [new Error("session not found"), null];
+      return [new Error('session not found'), null];
     }
 
     if (new Date() > new Date(session.expiresAt)) {
       await db
         .delete(sessionsTable)
         .where(eq(sessionsTable.id, validatedData.data.sessionId));
-      return [new Error("session expired"), null];
+      return [new Error('session expired'), null];
     }
 
     return [null, session.userId];

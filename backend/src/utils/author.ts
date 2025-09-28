@@ -1,6 +1,6 @@
-import { db } from "../db";
-import { authorTable } from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { db } from '../db';
+import { authorTable } from '../db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function getAuthorsByUserId(userId: string) {
   try {
@@ -31,7 +31,7 @@ export async function createAuthor(
     email: string;
     about?: string;
     socialLinks?: Record<string, string>;
-  }
+  },
 ) {
   try {
     const [author] = await db
@@ -56,7 +56,7 @@ export async function updateAuthor(
     email?: string;
     about?: string;
     socialLinks?: Record<string, string>;
-  }
+  },
 ) {
   try {
     const result = await db
@@ -76,7 +76,7 @@ export async function deleteAuthor(authorId: string, userId: string) {
       .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
 
     if (result.rowCount === 0) {
-      return [new Error("author not found or already deleted"), null] as const;
+      return [new Error('author not found or already deleted'), null] as const;
     }
     return [null, result] as const;
   } catch (error) {

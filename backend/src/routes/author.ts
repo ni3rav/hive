@@ -1,16 +1,16 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   // authorByIdController,
   listUserAuthorsController,
   createAuthorController,
   deleteAuthorController,
   updateAuthorController,
-} from "../controllers/author";
+} from '../controllers/author';
 
 export const router = Router();
 
-router.get("/", listUserAuthorsController);
+router.get('/', listUserAuthorsController);
 // router.get("/:userId/:authorId", authorByIdController);
-router.post("/", createAuthorController);
-router.delete("/:authorId", deleteAuthorController);
-router.patch("/:authorId", updateAuthorController);
+router.post('/', createAuthorController);
+router.delete('/:authorId', deleteAuthorController);
+router.patch('/:authorId', updateAuthorController);
