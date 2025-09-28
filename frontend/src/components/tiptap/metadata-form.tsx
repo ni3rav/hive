@@ -50,7 +50,7 @@ export function MetadataForm({
       type='single'
       collapsible
       value={isExpanded ? 'metadata' : ''}
-      onValueChange={(value) => setIsExpanded(value === 'metadata')}
+      onValueChange={(value: string) => setIsExpanded(value === 'metadata')}
     >
       <AccordionItem value='metadata'>
         <AccordionTrigger className='hover:no-underline'>
