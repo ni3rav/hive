@@ -52,6 +52,7 @@ export function Features() {
         })
 
         return () => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             featureRefs.current.forEach((ref) => {
                 if (ref) observer.unobserve(ref)
             })

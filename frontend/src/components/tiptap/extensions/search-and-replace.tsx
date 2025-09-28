@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type Editor as CoreEditor, Extension, type Range } from "@tiptap/core";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
@@ -248,6 +249,7 @@ const selectPrevious = (editor: CoreEditor) => {
   }
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const searchAndReplacePluginKey = new PluginKey(
   "searchAndReplacePlugin"
 );

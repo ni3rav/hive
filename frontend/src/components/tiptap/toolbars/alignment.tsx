@@ -33,6 +33,7 @@ export const AlignmentTooolbar = () => {
   };
 
   const isDisabled =
+    // eslint-disable-next-line no-constant-binary-expression
     editor?.isActive("image") ?? editor?.isActive("video") ?? !editor ?? false;
 
   const currentTextAlign = () => {

@@ -7,6 +7,7 @@ export interface ToolbarContextProps {
 	editor: Editor;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ToolbarContext = React.createContext<ToolbarContextProps | null>(
 	null,
 );
@@ -24,6 +25,7 @@ export const ToolbarProvider = ({ editor, children }: ToolbarProviderProps) => {
 	);
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToolbar = () => {
 	const context = React.useContext(ToolbarContext);
 
