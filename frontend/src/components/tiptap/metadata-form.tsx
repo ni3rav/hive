@@ -25,6 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
+import { loadMetadata, saveMetadata } from '@/components/tiptap/persistence';
 
 interface MetadataFormProps {
   isExpanded: boolean;
@@ -44,6 +45,23 @@ export function MetadataForm({
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
+
+  React.useEffect(() => {
+    const persisted = loadMetadata();
+    if (persisted) {
+      setMetadata(persisted);
+    }
+  }, [setMetadata]);
+
+  React.useEffect(() => {
+    const serializableMetadata = {
+      ...metadata,
+      publishedAt: metadata.publishedAt
+        ? new Date(metadata.publishedAt).toISOString()
+        : null,
+    };
+    saveMetadata(serializableMetadata);
+  }, [metadata]);
 
   return (
     <Accordion
