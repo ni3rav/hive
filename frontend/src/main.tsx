@@ -13,7 +13,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import LandingPage from './pages/LandingPage';
 import { Verify } from './pages/Verify';
 import Editor from './pages/Editor';
-
+import AuthorsPage from './pages/Author'; 
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
@@ -33,21 +33,24 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
   },
 
-  // --- Protected Routes ---
   {
     element: <ProtectedRoute />,
     children: [
       {
         path: '/dashboard',
-        element: <DashboardLayout />, // This layout has the sidebar
+        element: <DashboardLayout />, 
         children: [
           {
-            index: true, // This renders at /dashboard
+            index: true, 
             element: <DashboardPage />,
           },
           {
-            path: 'editor', // This renders at /dashboard/editor
+            path: 'editor', 
             element: <Editor />,
+          },
+          {
+          path: 'authors', 
+          element: <AuthorsPage />,
           },
         ],
       },

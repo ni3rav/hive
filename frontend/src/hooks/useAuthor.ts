@@ -11,14 +11,39 @@ import { toast } from 'sonner';
 export function useUserAuthors() {
   return useQuery({
     queryKey: ['user-authors'],
-    queryFn: apiGetUserAuthors,
+    queryFn: async () => {
+      try {
+        return await apiGetUserAuthors();
+      } catch (error: unknown) {
+        interface ErrorWithResponse {
+          response?: {
+            status?: number;
+            [key: string]: unknown;
+          };
+          [key: string]: unknown;
+        }
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'response' in error &&
+          typeof (error as ErrorWithResponse).response === 'object' &&
+          (error as ErrorWithResponse).response !== null &&
+          'status' in (error as ErrorWithResponse).response! &&
+          (error as ErrorWithResponse).response!.status === 404
+        ) {
+          throw new Error('NOT_FOUND');
+        }
+        throw error;
+      }
+    },
+    retry: false,
   });
 }
 
-export function useCreateAuthor(data: Author) {
+export function useCreateAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiCreateAuthor(data),
+    mutationFn: (data: Author) => apiCreateAuthor(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
@@ -29,10 +54,11 @@ export function useCreateAuthor(data: Author) {
   });
 }
 
-export function useUpdateAuthor(authorId: string, data: Partial<Author>) {
+export function useUpdateAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiUpdateAuthor(authorId, data),
+    mutationFn: ({ authorId, data }: { authorId: string; data: Partial<Author> }) =>
+      apiUpdateAuthor(authorId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
@@ -43,10 +69,10 @@ export function useUpdateAuthor(authorId: string, data: Partial<Author>) {
   });
 }
 
-export function useDeleteAuthor(authorId: string) {
+export function useDeleteAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiDeleteAuthor(authorId),
+    mutationFn: (authorId: string) => apiDeleteAuthor(authorId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
