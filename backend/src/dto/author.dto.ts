@@ -1,6 +1,7 @@
 import { authorTable } from '../db/schema';
 
 export interface AuthorResponseDto {
+  authorId: string;
   name: string;
   email: string;
   about?: string;
@@ -11,6 +12,7 @@ export function toAuthorResponseDto(
   author: typeof authorTable.$inferSelect,
 ): AuthorResponseDto {
   return {
+    authorId: author.id,
     name: author.name,
     email: author.email,
     about: author.about ?? undefined,
