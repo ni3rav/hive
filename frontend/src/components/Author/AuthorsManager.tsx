@@ -1,12 +1,30 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useDeleteAuthor, useCreateAuthor, useUpdateAuthor, useUserAuthors } from '@/hooks/useAuthor';
+import {
+  useDeleteAuthor,
+  useCreateAuthor,
+  useUpdateAuthor,
+  useUserAuthors,
+} from '@/hooks/useAuthor';
 import type { Author } from '@/types/author';
 import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AuthorsManager() {
@@ -18,11 +36,10 @@ export default function AuthorsManager() {
   const createAuthorMutation = useCreateAuthor();
   const updateAuthorMutation = useUpdateAuthor();
   const deleteAuthorMutation = useDeleteAuthor();
-  // Add delete dialog state
+
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // This useEffect handles the redirect when no authors are found
   useEffect(() => {
     if (isError && (error as Error)?.message === 'NOT_FOUND') {
       setView('create');
@@ -64,7 +81,7 @@ export default function AuthorsManager() {
     if (view === 'create') {
       createAuthorMutation.mutate(authorData, {
         onSuccess: () => {
-          toast.success('Author created successfully!');
+          // --- CHANGE: Toast removed, handled by hook ---
           setView('list');
         },
       });
@@ -73,10 +90,10 @@ export default function AuthorsManager() {
         { authorId: selectedAuthor.id, data: authorData },
         {
           onSuccess: () => {
-            toast.success('Author updated successfully!');
+            // --- CHANGE: Toast removed, handled by hook ---
             setView('list');
           },
-        }
+        },
       );
     }
   };
@@ -91,13 +108,19 @@ export default function AuthorsManager() {
       <div className="p-6">
         <Card>
           <CardHeader>
-            <CardTitle><Skeleton className="h-6 w-40" /></CardTitle>
-            <CardDescription><Skeleton className="h-4 w-64" /></CardDescription>
+            <CardTitle>
+              <Skeleton className="h-6 w-40" />
+            </CardTitle>
+            <CardDescription>
+              <Skeleton className="h-4 w-64" />
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Skeleton className="h-10 w-full" />
             <div className="space-y-3">
-              <Skeleton className="h-14 w-full" /><Skeleton className="h-14 w-full" /><Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
             </div>
           </CardContent>
         </Card>
@@ -105,9 +128,12 @@ export default function AuthorsManager() {
     );
   }
 
-  // Only show a generic error if it's NOT our special 'NOT_FOUND' error.
   if (isError && (error as Error)?.message !== 'NOT_FOUND') {
-    return <div className="p-8 text-center text-red-500">Error fetching authors.</div>;
+    return (
+      <div className="p-8 text-center text-red-500">
+        Error fetching authors.
+      </div>
+    );
   }
 
   return (
@@ -125,7 +151,9 @@ export default function AuthorsManager() {
             initialData={selectedAuthor}
             onSave={handleSaveAuthor}
             onCancel={handleCancel}
-            isSubmitting={createAuthorMutation.isPending || updateAuthorMutation.isPending}
+            isSubmitting={
+              createAuthorMutation.isPending || updateAuthorMutation.isPending
+            }
           />
         )}
       </div>
@@ -135,14 +163,23 @@ export default function AuthorsManager() {
           <DialogHeader>
             <DialogTitle>Delete author</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the author.
+              This action cannot be undone. This will permanently delete the
+              author.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={cancelDelete} disabled={deleteAuthorMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={cancelDelete}
+              disabled={deleteAuthorMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={deleteAuthorMutation.isPending}>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteAuthorMutation.isPending}
+            >
               {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogFooter>

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, Plus } from 'lucide-react';
+import { Check, ChevronsUpDown, Settings } from 'lucide-react'; // Changed Plus to Settings
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -22,12 +22,23 @@ interface AuthorSelectProps {
   allowCreate?: boolean;
 }
 
-export default function AuthorSelect({ value, onChange, placeholder = 'Select author...', allowCreate = true }: AuthorSelectProps) {
+export default function AuthorSelect({
+  value,
+  onChange,
+  placeholder = 'Select author...',
+  allowCreate = true,
+}: AuthorSelectProps) {
   const navigate = useNavigate();
-  const { data: authors = [], isLoading } = useUserAuthors() as { data: Author[]; isLoading: boolean };
+  const { data: authors = [], isLoading } = useUserAuthors() as {
+    data: Author[];
+    isLoading: boolean;
+  };
   const [open, setOpen] = React.useState(false);
 
-  const selected = React.useMemo(() => authors.find((a) => a.id === value) ?? null, [authors, value]);
+  const selected = React.useMemo(
+    () => authors.find((a) => a.id === value) ?? null,
+    [authors, value],
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,12 +50,19 @@ export default function AuthorSelect({ value, onChange, placeholder = 'Select au
           className="w-full justify-between"
         >
           <span className={cn('truncate', !selected && 'text-muted-foreground')}>
-            {selected ? selected.name : isLoading ? 'Loading authors...' : placeholder}
+            {selected
+              ? selected.name
+              : isLoading
+                ? 'Loading authors...'
+                : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent
+        className="w-[--radix-popover-trigger-width] p-0"
+        align="start"
+      >
         <Command>
           <CommandInput placeholder="Search authors..." />
           <CommandList>
@@ -58,9 +76,14 @@ export default function AuthorSelect({ value, onChange, placeholder = 'Select au
                     onChange(author.id!, author);
                     setOpen(false);
                   }}
-                  className="cursor-pointer data-[selected]:bg-yellow-100 data-[selected]:text-yellow-900 focus:bg-yellow-100"
+                  className="cursor-pointer"
                 >
-                  <Check className={cn('mr-2 h-4 w-4', value === author.id ? 'opacity-100' : 'opacity-0')} />
+                  <Check
+                    className={cn(
+                      'mr-2 h-4 w-4',
+                      value === author.id ? 'opacity-100' : 'opacity-0',
+                    )}
+                  />
                   <div className="truncate">{author.name}</div>
                 </CommandItem>
               ))}
@@ -70,12 +93,14 @@ export default function AuthorSelect({ value, onChange, placeholder = 'Select au
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    navigate('/author?mode=create');
+                    // --- CHANGE: Navigate to the authors management page ---
+                    navigate('/dashboard/authors');
                   }}
                   className="cursor-pointer text-primary"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create new author
+                  {/* --- CHANGE: Updated icon and text --- */}
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage authors
                 </CommandItem>
               </CommandGroup>
             )}
