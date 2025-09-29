@@ -11,36 +11,7 @@ import { toast } from 'sonner';
 export function useUserAuthors() {
   return useQuery({
     queryKey: ['user-authors'],
-    queryFn: async () => {
-      try {
-        const raw = await apiGetUserAuthors();
-        const normalized = (Array.isArray(raw) ? raw : []).map((a: Partial<Author>) => ({
-          ...a,
-          id: a?.id ?? (a as { authorId?: string }).authorId, 
-        })) as Author[];
-        return normalized;
-      } catch (error: unknown) {
-        interface ErrorWithResponse {
-          response?: {
-            status?: number;
-            [key: string]: unknown;
-          };
-          [key: string]: unknown;
-        }
-        if (
-          typeof error === 'object' &&
-          error !== null &&
-          'response' in error &&
-          typeof (error as ErrorWithResponse).response === 'object' &&
-          (error as ErrorWithResponse).response !== null &&
-          'status' in (error as ErrorWithResponse).response! &&
-          (error as ErrorWithResponse).response!.status === 404
-        ) {
-          throw new Error('NOT_FOUND');
-        }
-        throw error;
-      }
-    },
+    queryFn: apiGetUserAuthors,
     retry: false,
   });
 }
@@ -63,8 +34,13 @@ export function useCreateAuthor() {
 export function useUpdateAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ authorId, data }: { authorId: string; data: Partial<Author> }) =>
-      apiUpdateAuthor(authorId, data),
+    mutationFn: ({
+      authorId,
+      data,
+    }: {
+      authorId: string;
+      data: Partial<Author>;
+    }) => apiUpdateAuthor(authorId, data),
     onSuccess: () => {
       toast.success('Author updated');
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
