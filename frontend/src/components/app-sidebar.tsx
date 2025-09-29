@@ -17,10 +17,7 @@ import {
   SquareTerminal,
   Settings2,
   Hexagon,
-  Users,      
-  FileText,   
-  Layers,    
-  Tag,        
+  User,
 } from 'lucide-react';
 
 const navData = {
@@ -31,24 +28,9 @@ const navData = {
       icon: SquareTerminal,
     },
     {
-      title: 'Posts',
-      url: '/dashboard/posts',
-      icon: FileText,     
-    },
-    {
-      title: 'Authors',
-      url: '/dashboard/authors',
-      icon: Users,        
-    },
-    {
-      title: 'Categories',
-      url: '/dashboard/categories',
-      icon: Layers,       
-    },
-    {
-      title: 'Tags',
-      url: '/dashboard/tags',
-      icon: Tag,          
+      title: 'Profile',
+      url: '/dashboard/profile',
+      icon: User,
     },
     {
       title: 'Editor',
@@ -68,6 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible='icon' {...props}>
+      {/* --- LOGO FIX --- */}
       <SidebarHeader>
         <a
           href='/dashboard'
