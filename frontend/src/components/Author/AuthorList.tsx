@@ -1,6 +1,6 @@
 import type { Author } from '@/types/author';
 import { useMemo, useState } from 'react';
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,14 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface AuthorListProps {
+type Props = {
   authors: Author[];
-  onAddAuthor: () => void;
-  onEditAuthor: (author: Author) => void;
-  onDeleteAuthor: (authorId: string) => void;
-}
+  onEditAuthor: (a: Author) => void;
+  onDeleteAuthor: (authorId: string) => void; // ensure this prop exists
+  onAddAuthor?: () => void;
+};
 
-export default function AuthorList({ authors, onAddAuthor, onEditAuthor, onDeleteAuthor }: AuthorListProps) {
+export default function AuthorList({ authors, onAddAuthor, onEditAuthor, onDeleteAuthor }: Props) {
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -32,6 +32,14 @@ export default function AuthorList({ authors, onAddAuthor, onEditAuthor, onDelet
         a.about?.toLowerCase().includes(q),
     );
   }, [authors, search]);
+
+  // Replace any window.confirm/alert with a straight callback
+  const handleDeleteClick = (id: string) => {
+    // Before:
+    // if (window.confirm('Are you sure?')) { onDeleteAuthor(id) }
+    // After:
+    onDeleteAuthor(id);
+  };
 
   return (
     <Card className="animate-in fade-in-50 zoom-in-95 duration-300">
@@ -81,28 +89,55 @@ export default function AuthorList({ authors, onAddAuthor, onEditAuthor, onDelet
                     <div className="truncate text-sm text-muted-foreground">{author.email}</div>
                   </div>
                 </div>
+
+                {/* Actions: buttons on >= sm, menu on < sm */}
                 <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="Actions" className="hover:bg-muted/60">
-                        <MoreHorizontal size={18} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuItem
-                        onClick={() => onEditAuthor(author)}
-                        className="focus:bg-yellow-100 data-[highlighted]:bg-yellow-100 data-[highlighted]:text-yellow-900"
-                      >
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onDeleteAuthor(author.id!)}
-                        className="text-red-600 focus:text-red-600 focus:bg-red-50 data-[highlighted]:bg-red-50"
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {/* Desktop / larger screens */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEditAuthor(author)}
+                      className="whitespace-nowrap"
+                    >
+                      <Pencil size={16} className="mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteClick(author.id!)}
+                      className="whitespace-nowrap"
+                    >
+                      <Trash2 size={16} className="mr-1" />
+                      Delete
+                    </Button>
+                  </div>
+
+                  {/* Mobile / small screens */}
+                  <div className="sm:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" aria-label="Actions" className="hover:bg-muted/60">
+                          <MoreHorizontal size={18} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                          onClick={() => onEditAuthor(author)}
+                          className="focus:bg-yellow-100 data-[highlighted]:bg-yellow-100 data-[highlighted]:text-yellow-900"
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(author.id!)}
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50 data-[highlighted]:bg-red-50"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             ))}

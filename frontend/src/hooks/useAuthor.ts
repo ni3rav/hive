@@ -13,7 +13,12 @@ export function useUserAuthors() {
     queryKey: ['user-authors'],
     queryFn: async () => {
       try {
-        return await apiGetUserAuthors();
+        const raw = await apiGetUserAuthors();
+        const normalized = (Array.isArray(raw) ? raw : []).map((a: Partial<Author>) => ({
+          ...a,
+          id: a?.id ?? (a as { authorId?: string }).authorId, 
+        })) as Author[];
+        return normalized;
       } catch (error: unknown) {
         interface ErrorWithResponse {
           response?: {
@@ -45,6 +50,7 @@ export function useCreateAuthor() {
   return useMutation({
     mutationFn: (data: Author) => apiCreateAuthor(data),
     onSuccess: () => {
+      toast.success('Author created');
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {
@@ -60,6 +66,7 @@ export function useUpdateAuthor() {
     mutationFn: ({ authorId, data }: { authorId: string; data: Partial<Author> }) =>
       apiUpdateAuthor(authorId, data),
     onSuccess: () => {
+      toast.success('Author updated');
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {
@@ -74,6 +81,7 @@ export function useDeleteAuthor() {
   return useMutation({
     mutationFn: (authorId: string) => apiDeleteAuthor(authorId),
     onSuccess: () => {
+      toast.success('Author deleted');
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {

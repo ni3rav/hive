@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useUserAuthors, useCreateAuthor, useUpdateAuthor, useDeleteAuthor } from '@/hooks/useAuthor';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useDeleteAuthor, useCreateAuthor, useUpdateAuthor, useUserAuthors } from '@/hooks/useAuthor';
 import type { Author } from '@/types/author';
 import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
@@ -16,6 +18,9 @@ export default function AuthorsManager() {
   const createAuthorMutation = useCreateAuthor();
   const updateAuthorMutation = useUpdateAuthor();
   const deleteAuthorMutation = useDeleteAuthor();
+  // Add delete dialog state
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // This useEffect handles the redirect when no authors are found
   useEffect(() => {
@@ -35,12 +40,24 @@ export default function AuthorsManager() {
     setView('edit');
   };
 
-  const handleDeleteAuthor = (authorId: string) => {
-    if (window.confirm('Are you sure you want to delete this author?')) {
-      deleteAuthorMutation.mutate(authorId, {
-        onSuccess: () => toast.success('Author deleted successfully!'),
-      });
-    }
+  const onDeleteAuthor = (authorId: string) => {
+    setPendingDeleteId(authorId);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return;
+    deleteAuthorMutation.mutate(pendingDeleteId, {
+      onSettled: () => {
+        setIsDeleteOpen(false);
+        setPendingDeleteId(null);
+      },
+    });
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteOpen(false);
+    setPendingDeleteId(null);
   };
 
   const handleSaveAuthor = (authorData: Author) => {
@@ -94,22 +111,43 @@ export default function AuthorsManager() {
   }
 
   return (
-    <div className="p-6">
-      {view === 'list' ? (
-        <AuthorList
-          authors={Array.isArray(authors) ? authors : []}
-          onAddAuthor={handleAddAuthor}
-          onEditAuthor={handleEditAuthor}
-          onDeleteAuthor={handleDeleteAuthor}
-        />
-      ) : (
-        <AuthorForm
-          initialData={selectedAuthor}
-          onSave={handleSaveAuthor}
-          onCancel={handleCancel}
-          isSubmitting={createAuthorMutation.isPending || updateAuthorMutation.isPending}
-        />
-      )}
-    </div>
+    <>
+      <div className="p-6">
+        {view === 'list' ? (
+          <AuthorList
+            authors={Array.isArray(authors) ? authors : []}
+            onAddAuthor={handleAddAuthor}
+            onEditAuthor={handleEditAuthor}
+            onDeleteAuthor={onDeleteAuthor}
+          />
+        ) : (
+          <AuthorForm
+            initialData={selectedAuthor}
+            onSave={handleSaveAuthor}
+            onCancel={handleCancel}
+            isSubmitting={createAuthorMutation.isPending || updateAuthorMutation.isPending}
+          />
+        )}
+      </div>
+
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete author</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the author.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelDelete} disabled={deleteAuthorMutation.isPending}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleteAuthorMutation.isPending}>
+              {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
