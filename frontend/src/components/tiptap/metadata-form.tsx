@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,6 @@ import {
 import {
   Calendar as CalendarIcon,
   Settings,
-  Users,
   Folder,
   Tag,
 } from 'lucide-react';
@@ -26,6 +25,10 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
 import { loadMetadata, saveMetadata } from '@/components/tiptap/persistence';
+import { Label } from '@/components/ui/label';
+import AuthorSelect from '@/components/Author/AuthorSelect';
+import { useUserAuthors } from '@/hooks/useAuthor';
+import type { Author } from '@/types/author';
 
 interface MetadataFormProps {
   isExpanded: boolean;
@@ -62,6 +65,18 @@ export function MetadataForm({
     };
     saveMetadata(serializableMetadata);
   }, [metadata]);
+  const [authorId, setAuthorId] = useState<string | null>(null);
+  const [authorObj, setAuthorObj] = useState<Author | null>(null);
+
+  const { data: authors = [], isLoading } = useUserAuthors() as { data: Author[]; isLoading: boolean };
+  const recentAuthors = useMemo(() => {
+    return (authors ?? []).slice(-3).reverse();
+  }, [authors]);
+
+  const handleSelectAuthor = (id: string | null, a?: Author | null) => {
+    setAuthorId(id);
+    setAuthorObj(a ?? authors.find((x) => x.id === id) ?? null);
+  };
 
   return (
     <Accordion
@@ -122,12 +137,36 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>
                 Authors
               </label>
-              <div className='relative flex items-center'>
-                <Users className='absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none' />
-                <Input
-                  className={cn('h-9 w-full pl-10', formFieldClasses)}
-                  placeholder='Select authors'
-                />
+              {/* REPLACED: plain Input with quick-picks + dropdown */}
+              <div className='flex flex-wrap items-center gap-2'>
+                {/* Quick picks: last 3 authors */}
+                {isLoading ? (
+                  <div className="text-sm text-muted-foreground">Loading authors...</div>
+                ) : recentAuthors.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No authors yet.</div>
+                ) : (
+                  recentAuthors.map((a) => (
+                    <Button
+                      key={a.id}
+                      size="sm"
+                      variant={authorId === a.id ? 'default' : 'outline'}
+                      onClick={() => handleSelectAuthor(a.id!, a)}
+                      className="whitespace-nowrap"
+                    >
+                      {a.name}
+                    </Button>
+                  ))
+                )}
+
+                {/* Search all authors + create new */}
+                <div className="min-w-[220px]">
+                  <AuthorSelect
+                    value={authorId}
+                    onChange={handleSelectAuthor}
+                    placeholder="Search author..."
+                    allowCreate
+                  />
+                </div>
               </div>
 
               <label className='text-muted-foreground font-medium'>
@@ -200,6 +239,57 @@ export function MetadataForm({
           </div>
         </AccordionContent>
       </AccordionItem>
+      <div className="space-y-4">
+        {/* Author field */}
+        <div className="space-y-2">
+          <Label>Author</Label>
+
+          {/* Quick picks: first 3 recent authors */}
+          <div className="flex flex-wrap gap-2">
+            {isLoading ? (
+              <div className="text-sm text-muted-foreground">
+                Loading authors...
+              </div>
+            ) : recentAuthors.length === 0 ? (
+              <div className="text-sm text-muted-foreground">No authors yet.</div>
+            ) : (
+              recentAuthors.map((a) => (
+                <Button
+                  key={a.id}
+                  size="sm"
+                  variant={authorId === a.id ? 'default' : 'outline'}
+                  onClick={() => handleSelectAuthor(a.id!, a)}
+                  className="whitespace-nowrap"
+                >
+                  {a.name}
+                </Button>
+              ))
+            )}
+
+            {/* Search author + create navigation */}
+            <div className="min-w-[220px]">
+              <AuthorSelect
+                value={authorId}
+                onChange={handleSelectAuthor}
+                placeholder="Search author..."
+                allowCreate
+              />
+            </div>
+          </div>
+
+          {authorObj ? (
+            <div className="text-xs text-muted-foreground">
+              Selected: {authorObj.name}
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground">
+              Pick from quick list or search.
+            </div>
+          )}
+        </div>
+      </div>
     </Accordion>
   );
 }
+
+export default MetadataForm;

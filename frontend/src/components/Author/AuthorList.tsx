@@ -89,8 +89,6 @@ export default function AuthorList({ authors, onAddAuthor, onEditAuthor, onDelet
                     <div className="truncate text-sm text-muted-foreground">{author.email}</div>
                   </div>
                 </div>
-
-                {/* Actions: buttons on >= sm, menu on < sm */}
                 <div className="flex items-center gap-2">
                   {/* Desktop / larger screens */}
                   <div className="hidden sm:flex items-center gap-2">
