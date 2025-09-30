@@ -6,6 +6,7 @@ import {
   boolean,
   jsonb,
   text,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
@@ -35,6 +36,32 @@ export const verificationLinksTable = pgTable('verification_links', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   expiresAt: timestamp('expires_at').notNull().defaultNow(),
 });
+
+export const workspacesTable = pgTable('workspaces', {
+  id: uuid().defaultRandom().primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const workspaceUsersTable = pgTable(
+  'workspace_users',
+  {
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    role: varchar('role', { length: 50 }).default('member').notNull(),
+    joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: 'workspace_user_id',
+      columns: [t.workspaceId, t.userId],
+    }),
+  ],
+);
 
 export const authorTable = pgTable('authors', {
   id: uuid().defaultRandom().primaryKey(),
