@@ -15,6 +15,13 @@
       "when": 1759251085369,
       "tag": "0001_equal_mulholland_black",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759257422244,
+      "tag": "0002_real_triton",
+      "breakpoints": true
     }
   ]
 }
