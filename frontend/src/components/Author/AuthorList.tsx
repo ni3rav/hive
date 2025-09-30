@@ -75,13 +75,7 @@ export default function AuthorList({
       <CardContent>
         {filtered.length === 0 ? (
           <div className='flex flex-col items-center justify-center rounded-lg border border-dashed p-10 text-center animate-in fade-in-50'>
-            <div className='mb-2 text-sm text-muted-foreground'>
-              No authors found.
-            </div>
-            <Button onClick={onAddAuthor} size='sm'>
-              <Plus size={16} className='mr-1' />
-              Create author
-            </Button>
+            No Authors found, Create one to get started.
           </div>
         ) : (
           <div className='divide-y'>

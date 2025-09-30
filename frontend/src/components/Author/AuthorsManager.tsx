@@ -105,22 +105,22 @@ export default function AuthorsManager() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className='p-6'>
         <Card>
           <CardHeader>
             <CardTitle>
-              <Skeleton className="h-6 w-40" />
+              <Skeleton className='h-6 w-40' />
             </CardTitle>
             <CardDescription>
-              <Skeleton className="h-4 w-64" />
+              <Skeleton className='h-4 w-64' />
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <div className="space-y-3">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
+          <CardContent className='space-y-4'>
+            <Skeleton className='h-10 w-full' />
+            <div className='space-y-3'>
+              <Skeleton className='h-14 w-full' />
+              <Skeleton className='h-14 w-full' />
+              <Skeleton className='h-14 w-full' />
             </div>
           </CardContent>
         </Card>
@@ -129,16 +129,29 @@ export default function AuthorsManager() {
   }
 
   if (isError && (error as Error)?.message !== 'NOT_FOUND') {
+    if (view === 'create') {
+      return (
+        <AuthorForm
+          initialData={null}
+          onSave={handleSaveAuthor}
+          onCancel={handleCancel}
+          isSubmitting={createAuthorMutation.isPending}
+        />
+      );
+    }
     return (
-      <div className="p-8 text-center text-red-500">
-        Error fetching authors.
-      </div>
+      <AuthorList
+        authors={[]}
+        onAddAuthor={handleAddAuthor}
+        onEditAuthor={handleEditAuthor}
+        onDeleteAuthor={onDeleteAuthor}
+      />
     );
   }
 
   return (
     <>
-      <div className="p-6">
+      <div className='p-6'>
         {view === 'list' ? (
           <AuthorList
             authors={Array.isArray(authors) ? authors : []}
@@ -169,14 +182,14 @@ export default function AuthorsManager() {
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={cancelDelete}
               disabled={deleteAuthorMutation.isPending}
             >
               Cancel
             </Button>
             <Button
-              variant="destructive"
+              variant='destructive'
               onClick={confirmDelete}
               disabled={deleteAuthorMutation.isPending}
             >
