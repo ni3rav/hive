@@ -1,5 +1,3 @@
-'use client';
-
 import { UnderlineIcon } from 'lucide-react';
 import React from 'react';
 

@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,10 +15,10 @@ import {
   SquareTerminal,
   Settings2,
   Hexagon,
-  Users,      
-  FileText,   
-  Layers,    
-  Tag,        
+  Users,
+  FileText,
+  Layers,
+  Tag,
 } from 'lucide-react';
 
 const navData = {
@@ -33,22 +31,22 @@ const navData = {
     {
       title: 'Posts',
       url: '/dashboard/posts',
-      icon: FileText,     
+      icon: FileText,
     },
     {
       title: 'Authors',
       url: '/dashboard/authors',
-      icon: Users,        
+      icon: Users,
     },
     {
       title: 'Categories',
       url: '/dashboard/categories',
-      icon: Layers,       
+      icon: Layers,
     },
     {
       title: 'Tags',
       url: '/dashboard/tags',
-      icon: Tag,          
+      icon: Tag,
     },
     {
       title: 'Editor',

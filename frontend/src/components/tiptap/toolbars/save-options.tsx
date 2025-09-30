@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Download, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,8 +9,6 @@ import {
 import { useToolbar } from './toolbar-provider';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-// type SaveDocumentResponse = { message?: string };
 
 function downloadHtmlFile(html: string, filename = 'document.html') {
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });

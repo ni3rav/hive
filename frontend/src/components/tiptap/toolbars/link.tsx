@@ -1,4 +1,3 @@
-'use client';
 /* eslint-disable */
 // @ts-nocheck
 import { PopoverClose } from '@radix-ui/react-popover';

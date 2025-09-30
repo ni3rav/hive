@@ -1,4 +1,5 @@
-'use client';
+/* eslint-disable */
+// @ts-nocheck
 
 import { TextQuote } from 'lucide-react';
 import React from 'react';

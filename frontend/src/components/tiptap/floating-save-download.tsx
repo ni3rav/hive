@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import type { Editor } from '@tiptap/core';
 import { Button } from '@/components/ui/button';

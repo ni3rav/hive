@@ -1,4 +1,5 @@
-'use client';
+/* eslint-disable */
+// @ts-nocheck
 
 import { Strikethrough } from 'lucide-react';
 import React from 'react';

@@ -1,4 +1,3 @@
-'use client';
 /* eslint-disable */
 // @ts-nocheck
 import { Button } from '@/components/ui/button';

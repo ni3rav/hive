@@ -1,4 +1,3 @@
-'use client';
 import './tiptap.css';
 import { cn } from '@/lib/utils';
 import SearchAndReplace from '@/components/tiptap/extensions/search-and-replace';

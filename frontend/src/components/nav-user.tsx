@@ -1,8 +1,10 @@
-'use client';
-
 import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
 
 export function NavUser({
   user,
@@ -30,21 +32,21 @@ export function NavUser({
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton
-          size="lg"
-          className="justify-center group-data-[state=expanded]:justify-start"
+          size='lg'
+          className='justify-center group-data-[state=expanded]:justify-start'
           onClick={goToProfile}
-          aria-label="Open profile"
-          title="Open profile"
+          aria-label='Open profile'
+          title='Open profile'
         >
-          <Avatar className="h-8 w-8 rounded-lg">
+          <Avatar className='h-8 w-8 rounded-lg'>
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+            <AvatarFallback className='rounded-lg bg-primary text-primary-foreground'>
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden">
-            <span className="truncate font-medium">{user.name}</span>
-            <span className="truncate text-xs">{user.email}</span>
+          <div className='grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden'>
+            <span className='truncate font-medium'>{user.name}</span>
+            <span className='truncate text-xs'>{user.email}</span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

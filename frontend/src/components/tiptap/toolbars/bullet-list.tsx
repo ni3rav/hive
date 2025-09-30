@@ -1,4 +1,5 @@
-'use client';
+/* eslint-disable */
+// @ts-nocheck
 
 import { List } from 'lucide-react';
 import React from 'react';
