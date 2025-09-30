@@ -5,6 +5,7 @@ import {
   apiLogout,
   apiVerifyEmail,
 } from '@/api/auth';
+import { clearAllPersistence } from '@/components/tiptap/persistence';
 import type { VerifyEmailData } from '@/types/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -46,6 +47,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: apiLogout,
     onSuccess: () => {
+      clearAllPersistence();
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
