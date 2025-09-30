@@ -57,7 +57,7 @@ export const postsTable = pgTable('posts', {
   slug: varchar('slug').notNull().unique(),
   excerpt: varchar('excerpt').default('').notNull(),
   tags: varchar('tags', { length: 255 }).array().default([]).notNull(),
-  categories: varchar('categories', { length: 255 }).array().default([]).notNull(),
+  category: varchar('category', { length: 255 }).default('').notNull(),
   visible: boolean('visible').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   publishedAt: timestamp('published_at').notNull().defaultNow(),
