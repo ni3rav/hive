@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Calendar, Edit3, Settings, BarChart3, Search } from 'lucide-react';
 
 const features = [

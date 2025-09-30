@@ -1,4 +1,3 @@
-import React from 'react';
 import { Hexagon } from 'lucide-react';
 
 const col1 = [

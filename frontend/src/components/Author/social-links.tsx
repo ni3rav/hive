@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,63 +15,7 @@ import {
   X,
 } from 'lucide-react';
 
-type Preset = {
-  id: string;
-  label: string;
-  type: 'url' | 'email';
-  placeholder?: string;
-};
-
-const PRESETS: Preset[] = [
-  {
-    id: 'x',
-    label: 'X',
-    type: 'url',
-    placeholder: 'https://x.com/your-handle',
-  },
-  {
-    id: 'instagram',
-    label: 'Instagram',
-    type: 'url',
-    placeholder: 'https://instagram.com/your-username',
-  },
-  {
-    id: 'facebook',
-    label: 'Facebook',
-    type: 'url',
-    placeholder: 'https://facebook.com/your-profile',
-  },
-  {
-    id: 'discord',
-    label: 'Discord',
-    type: 'url',
-    placeholder: 'https://discord.gg/your-invite-or-profile',
-  },
-  {
-    id: 'github',
-    label: 'GitHub',
-    type: 'url',
-    placeholder: 'https://github.com/your-username',
-  },
-  {
-    id: 'linkedin',
-    label: 'LinkedIn',
-    type: 'url',
-    placeholder: 'https://www.linkedin.com/in/your-id',
-  },
-  {
-    id: 'email',
-    label: 'Email',
-    type: 'email',
-    placeholder: 'you@example.com',
-  },
-  {
-    id: 'website',
-    label: 'Website',
-    type: 'url',
-    placeholder: 'https://your-site.com',
-  },
-];
+// Removed unused presets and related types to satisfy linter
 
 type SocialEntry = {
   id: string;
@@ -107,11 +50,6 @@ export function SocialLinksInput({
       ? entries
       : [{ id: crypto.randomUUID(), platform: '', link: '', error: null }];
   });
-
-  const platformIds = React.useMemo(
-    () => new Set(rows.map((r) => normalizeKey(r.platform))),
-    [rows],
-  );
 
   React.useEffect(() => {
     const obj: SocialLinksValue = {};
@@ -149,18 +87,15 @@ export function SocialLinksInput({
           const detected = detectPlatform(patch.link);
           merged.platform = detected.platform;
         }
-        merged.error = validateRow(
-          merged,
-          prev.filter((x) => x.id !== id),
-        );
+        merged.error = validateRow(merged);
         return merged;
       }),
     );
   }
 
-  function validateRow(row: SocialEntry, others: SocialEntry[]) {
+  function validateRow(row: SocialEntry) {
     if (!row.link) return null; // allow empty row without error
-    const { platform, normalizedUrl, isEmail } = detectPlatform(row.link);
+    const { normalizedUrl, isEmail } = detectPlatform(row.link);
 
     if (isEmail) {
       return isValidEmail(row.link) ? null : 'Enter a valid email address';
@@ -264,10 +199,6 @@ function normalizeKey(input: string) {
   return (input || '').trim().toLowerCase().replace(/\s+/g, '-'); // spaces to dashes
 }
 
-function getPresetByKey(key: string): Preset | undefined {
-  return PRESETS.find((p) => p.id === key);
-}
-
 function isValidEmail(email: string) {
   // simple email check
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -286,14 +217,6 @@ function autoPrefixHttp(value: string) {
   if (!value) return value;
   if (/^https?:\/\//i.test(value)) return value;
   return `https://${value}`;
-}
-
-function inputIdForPlatform(key: string) {
-  return `social-link-${key || 'custom'}`;
-}
-
-function platformInputId(id: string) {
-  return `platform-${id}`;
 }
 
 function detectPlatform(raw: string): {
