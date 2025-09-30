@@ -80,7 +80,7 @@ export default function AuthorList({
             </div>
             <Button onClick={onAddAuthor} size='sm'>
               <Plus size={16} className='mr-1' />
-              Create your first author
+              Create author
             </Button>
           </div>
         ) : (
