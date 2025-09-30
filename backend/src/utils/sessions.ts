@@ -1,7 +1,8 @@
-import { db } from "../db";
-import { sessionsTable } from "../db/schema";
-import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { db } from '../db';
+import { sessionsTable } from '../db/schema';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import { sessionIdSchema } from './validations/author';
 
 export async function createSession(userId: string) {
   const sessionId = randomUUID();
@@ -12,17 +13,34 @@ export async function createSession(userId: string) {
   return { sessionId, expiresAt };
 }
 
-export async function getSession(sessionId: string) {
-  const session = await db
-    .select()
-    .from(sessionsTable)
-    .where(eq(sessionsTable.id, sessionId))
-    .then((res) => res[0]);
+export async function getUserIdbySession(
+  sessionId: string,
+): Promise<[Error | null, string | null]> {
+  const validatedData = sessionIdSchema.safeParse({ sessionId });
 
-  if (!session || session.expiresAt < new Date()) return null;
-  return session;
-}
+  if (!validatedData.success) {
+    return [new Error('invalid session id'), null];
+  }
 
-export async function deleteSession(sessionId: string) {
-  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+  try {
+    const session = await db.query.sessionsTable.findFirst({
+      where: (sessionsTable, { eq }) =>
+        eq(sessionsTable.id, validatedData.data.sessionId),
+    });
+
+    if (!session) {
+      return [new Error('session not found'), null];
+    }
+
+    if (new Date() > new Date(session.expiresAt)) {
+      await db
+        .delete(sessionsTable)
+        .where(eq(sessionsTable.id, validatedData.data.sessionId));
+      return [new Error('session expired'), null];
+    }
+
+    return [null, session.userId];
+  } catch (err) {
+    return [err as Error, null];
+  }
 }

@@ -7,6 +7,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "lint": "eslint 'src/**/*.ts'",
+    "prettier": "prettier --write 'src/**/*.ts'",
     "drizzle-push": "npx drizzle-kit push",
     "generate": "npx drizzle-kit generate",
     "migrate": "npx drizzle-kit migrate",
@@ -28,6 +29,7 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@eslint/js": "^9.36.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
@@ -36,10 +38,15 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.1.0",
     "@types/pg": "^8.15.5",
-    "drizzle-kit": "^0.18.1",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.6.0",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "tsx": "^4.20.3"
+    "tsx": "^4.20.3",
+    "typescript-eslint": "^8.44.1"
   }
 }

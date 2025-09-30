@@ -1,4 +1,4 @@
-import { cleanEnv, str, port } from "envalid";
+import { cleanEnv, str, port } from 'envalid';
 
 export const env = cleanEnv(process.env, {
   POSTGRES_PASSWORD: str(),

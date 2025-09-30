@@ -1,45 +1,61 @@
-"use client";
-
-import * as React from "react";
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import * as React from 'react';
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   BookOpen,
   SquareTerminal,
   Settings2,
   Hexagon,
-  User,
-} from "lucide-react";
+  Users,
+  FileText,
+  Layers,
+  Tag,
+} from 'lucide-react';
 
 const navData = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard", 
+      title: 'Dashboard',
+      url: '/dashboard',
       icon: SquareTerminal,
     },
     {
-      title: "Profile",
-      url: "/dashboard/profile", 
-      icon: User,
+      title: 'Posts',
+      url: '/dashboard/posts',
+      icon: FileText,
     },
     {
-      title: "Documentation",
-      url: "/dashboard/docs", 
+      title: 'Authors',
+      url: '/dashboard/authors',
+      icon: Users,
+    },
+    {
+      title: 'Categories',
+      url: '/dashboard/categories',
+      icon: Layers,
+    },
+    {
+      title: 'Tags',
+      url: '/dashboard/tags',
+      icon: Tag,
+    },
+    {
+      title: 'Editor',
+      url: '/dashboard/editor',
       icon: BookOpen,
     },
     {
-      title: "Settings",
-      url: "/dashboard/settings",
+      title: 'Settings',
+      url: '/dashboard/settings',
       icon: Settings2,
     },
   ],
@@ -48,13 +64,15 @@ const navData = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user, isLoading } = useAuth();
 
- return (
-    <Sidebar collapsible="icon" {...props}>
-      {/* --- LOGO FIX --- */}
+  return (
+    <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <a href="/dashboard" className="flex h-14 items-center justify-center group-data-[state=expanded]:justify-start group-data-[state=expanded]:px-3">
-            <Hexagon className="size-8 text-primary fill-background flex items-center justify-center"/>
-          <span className="ml-2 text-lg font-semibold group-data-[state=collapsed]:hidden">
+        <a
+          href='/dashboard'
+          className='flex h-14 items-center justify-center group-data-[state=expanded]:justify-start group-data-[state=expanded]:px-3'
+        >
+          <Hexagon className='size-8 text-primary fill-background flex items-center justify-center' />
+          <span className='ml-2 text-lg font-semibold group-data-[state=collapsed]:hidden'>
             Hive
           </span>
         </a>
@@ -64,7 +82,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         {isLoading ? (
-          <Skeleton className="h-14 w-full" />
+          <Skeleton className='h-14 w-full' />
         ) : user ? (
           <NavUser user={user} />
         ) : null}

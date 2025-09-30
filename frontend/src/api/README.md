@@ -1,6 +1,7 @@
 1. import wrappers based on the request type
 2. import types from `@/types`
-3. use types with the wrapper and the endpoint url (don't write while url just the endpoint)
+3. use types with the wrapper and the endpoint url (don't write while url just
+   the endpoint)
 
 #### Example
 

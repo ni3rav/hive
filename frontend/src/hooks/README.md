@@ -1,5 +1,6 @@
 1. Import the api function from `@/api`
-2. use `useMutation` or `useQuery` for _GET_ or _POST_(along with _PUT_, _DELETE_) respectively
+2. use `useMutation` or `useQuery` for _GET_ or _POST_(along with _PUT_,
+   _DELETE_) respectively
 
 ## Example
 
@@ -27,8 +28,8 @@ export const useUserById = (id: string) => {
 ### POST, DELETE, PUT
 
 ```javascript
-import { useMutation } from "@tanstack/react-query";
-import { createUser } from "@/api/user";
+import { useMutation } from '@tanstack/react-query';
+import { createUser } from '@/api/user';
 
 export const useCreateUser = () => {
   return useMutation({
@@ -44,7 +45,7 @@ export const useCreateUser = () => {
 #### GET
 
 ```javascript
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers } from '@/hooks/useUsers';
 
 export const UsersPage = () => {
   const { data, isLoading, isError, isSuccess, error } = useUsers();

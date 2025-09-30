@@ -1,10 +1,9 @@
-// src/lib/axios.ts
-import axios from "axios";
+import axios from 'axios';
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_HEYAA_API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
   withCredentials: true,
 });
