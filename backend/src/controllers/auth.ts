@@ -126,6 +126,13 @@ export async function loginController(req: Request, res: Response) {
   //* creating session and setting cookies in the end
   const { sessionId, expiresAt } = await createSession(user.id);
 
+  if (!sessionId || !expiresAt) {
+    res
+      .status(500)
+      .json({ message: 'internal server error while creating session' });
+    return;
+  }
+
   res.cookie('session_id', sessionId, {
     httpOnly: true,
     sameSite: 'lax',
@@ -241,6 +248,13 @@ export async function verifyController(req: Request, res: Response) {
 
   //* creating session and setting cookies in the end
   const { sessionId, expiresAt } = await createSession(userId);
+
+  if (!sessionId || !expiresAt) {
+    res
+      .status(500)
+      .json({ message: 'internal server error while creating session' });
+    return;
+  }
 
   res.cookie('session_id', sessionId, {
     httpOnly: true,

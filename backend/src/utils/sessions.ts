@@ -8,9 +8,13 @@ export async function createSession(userId: string) {
   const sessionId = randomUUID();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
 
-  await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });
-
-  return { sessionId, expiresAt };
+  try {
+    await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });
+    return { sessionId, expiresAt };
+  } catch (err) {
+    console.error('Error creating session:', err);
+    return { sessionId: null, expiresAt: null };
+  }
 }
 
 export async function getUserIdbySession(
