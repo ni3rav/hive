@@ -39,7 +39,8 @@ export const verificationLinksTable = pgTable('verification_links', {
 
 export const workspacesTable = pgTable('workspaces', {
   id: uuid().defaultRandom().primaryKey(),
-  name: varchar('name', { length: 50 }).notNull(),
+  name: varchar('name', { length: 30 }).notNull(),
+  slug: varchar('slug', { length: 35 }).notNull().unique(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
