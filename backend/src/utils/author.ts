@@ -13,16 +13,6 @@ export async function getAuthorsByUserId(userId: string) {
   }
 }
 
-export async function getAuthorById(authorId: string, userId: string) {
-  try {
-    const result = await db.query.authorTable.findFirst({
-      where: and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)),
-    });
-    return [null, result] as const;
-  } catch (error) {
-    return [error, null] as const;
-  }
-}
 
 export async function createAuthor(
   userId: string,

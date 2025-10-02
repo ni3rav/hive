@@ -2,28 +2,23 @@ import { Request, Response } from 'express';
 import {
   createAuthor,
   deleteAuthor,
-  getAuthorById,
   getAuthorsByUserId,
   updateAuthor,
 } from '../utils/author';
 import {
   createAuthorSchema,
   deleteAuthorSchema,
-  getAuthorByIdSchema,
   sessionIdSchema,
   updateAuthorSchema,
 } from '../utils/validations/author';
 import { getUserIdbySession } from '../utils/sessions';
-import {
-  toAuthorListResponseDto,
-  toAuthorResponseDto,
-} from '../dto/author.dto';
+import { toAuthorListResponseDto } from '../dto/author.dto';
 
 export async function listUserAuthorsController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    res.status(400).json({ message: 'session id is required' });
+    res.status(401).json({ message: 'session id is required' });
     return;
   }
 
@@ -59,34 +54,6 @@ export async function listUserAuthorsController(req: Request, res: Response) {
   return;
 }
 
-export async function authorByIdController(req: Request, res: Response) {
-  const authorId = req.params.authorId;
-  const userId = req.params.userId;
-
-  const validate = getAuthorByIdSchema.safeParse({ authorId, userId });
-
-  if (!validate.success) {
-    res.status(400).json({ message: 'invalid authorId or userId' });
-    return;
-  }
-
-  const [error, author] = await getAuthorById(
-    validate.data.authorId,
-    validate.data.userId,
-  );
-
-  if (error) {
-    res.status(500).json({ message: 'Internal server error' });
-    return;
-  }
-
-  if (!author) {
-    res.status(404).json({ message: 'no author found for this id' });
-    return;
-  }
-  res.status(200).json(toAuthorResponseDto(author));
-}
-
 export async function createAuthorController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
@@ -104,7 +71,7 @@ export async function createAuthorController(req: Request, res: Response) {
   });
 
   if (!validatedSessionId.success) {
-    res.status(400).json({
+    res.status(401).json({
       message: 'invalid session id',
     });
     return;
