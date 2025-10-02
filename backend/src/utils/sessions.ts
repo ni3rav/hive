@@ -2,7 +2,7 @@ import { db } from '../db';
 import { sessionsTable } from '../db/schema';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
-import { sessionIdSchema } from './validations/author';
+import { sessionIdSchema } from './validations/common';
 
 export async function createSession(userId: string) {
   const sessionId = randomUUID();

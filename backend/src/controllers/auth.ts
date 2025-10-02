@@ -23,6 +23,7 @@ export async function registerController(req: Request, res: Response) {
   if (!validatedBody.success) {
     res.status(400).json({
       message: 'Invalid Payload',
+      issues: validatedBody.error.issues,
     });
     return;
   }
@@ -77,6 +78,7 @@ export async function loginController(req: Request, res: Response) {
   if (!validatedBody.success) {
     res.status(400).json({
       message: 'Invalid Payload',
+      issues: validatedBody.error.issues,
     });
     return;
   }
@@ -208,6 +210,7 @@ export async function verifyController(req: Request, res: Response) {
   if (!validatedBody.success) {
     res.status(400).json({
       message: 'Invalid Payload',
+      issues: validatedBody.error.issues,
     });
     return;
   }

@@ -45,12 +45,8 @@ export async function listUserAuthorsController(req: Request, res: Response) {
     return;
   }
 
-  if (!authors || authors.length === 0) {
-    res.status(404).json({ message: 'no authors found for this user' });
-    return;
-  }
 
-  res.status(200).json(toAuthorListResponseDto(authors));
+  res.status(200).json(toAuthorListResponseDto(authors || []));
   return;
 }
 
@@ -62,6 +58,7 @@ export async function createAuthorController(req: Request, res: Response) {
   if (!validatedBody.success) {
     res.status(400).json({
       message: 'invalid data for creating author',
+      issues: validatedBody.error.issues,
     });
     return;
   }
@@ -73,6 +70,7 @@ export async function createAuthorController(req: Request, res: Response) {
   if (!validatedSessionId.success) {
     res.status(401).json({
       message: 'invalid session id',
+      issues: validatedSessionId.error.issues,
     });
     return;
   }
@@ -125,6 +123,7 @@ export async function deleteAuthorController(req: Request, res: Response) {
   if (!validate.success) {
     res.status(400).json({
       message: 'invalid data for deleting author',
+      issues: validate.error.issues,
     });
     return;
   }
@@ -190,12 +189,14 @@ export async function updateAuthorController(req: Request, res: Response) {
       res.status(400).json({
         message:
           'request body cannot be empty, please provide at least one field to update',
+        issues: validate.error.issues,
       });
       return;
     }
     //* default bad request response
     res.status(400).json({
       message: 'invalid data for updating author',
+      issues: validate.error.issues,
     });
     return;
   }

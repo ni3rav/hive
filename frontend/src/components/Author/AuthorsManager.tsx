@@ -31,7 +31,7 @@ export default function AuthorsManager() {
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
 
-  const { data: authors, isLoading, isError, error } = useUserAuthors();
+  const { data: authors, isLoading, isError } = useUserAuthors();
 
   const createAuthorMutation = useCreateAuthor();
   const updateAuthorMutation = useUpdateAuthor();
@@ -40,12 +40,13 @@ export default function AuthorsManager() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
+  // show create view if user has no authors (empty array is valid now)
   useEffect(() => {
-    if (isError && (error as Error)?.message === 'NOT_FOUND') {
+    if (!isLoading && !isError && authors && authors.length === 0) {
       setView('create');
       toast.info("You don't have an author profile yet. Let's create one!");
     }
-  }, [isError, error]);
+  }, [isLoading, isError, authors]);
 
   const handleAddAuthor = () => {
     setSelectedAuthor(null);
@@ -128,7 +129,7 @@ export default function AuthorsManager() {
     );
   }
 
-  if (isError && (error as Error)?.message !== 'NOT_FOUND') {
+  if (isError) {
     if (view === 'create') {
       return (
         <AuthorForm

@@ -26,14 +26,13 @@ export async function createWorkspaceController(req: Request, res: Response) {
     return;
   }
 
-  const { workspaceName, workspaceSlug } = req.body;
-  const validatedBody = createWorkspaceSchema.safeParse({
-    name: workspaceName,
-    slug: workspaceSlug,
-  });
+  const validatedBody = createWorkspaceSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({ message: 'invalid data for creating workspace' });
+    res.status(400).json({
+      message: 'invalid data for creating workspace',
+      issues: validatedBody.error.issues,
+    });
     return;
   }
   const { name, slug } = validatedBody.data;

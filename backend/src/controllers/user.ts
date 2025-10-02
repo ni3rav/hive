@@ -10,6 +10,7 @@ export async function editProfileController(req: Request, res: Response) {
   if (!validatedBody.success) {
     return res.status(400).json({
       message: 'Invalid Payload',
+      issues: validatedBody.error.issues,
     });
   }
 

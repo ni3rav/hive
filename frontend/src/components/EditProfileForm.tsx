@@ -12,6 +12,7 @@ import {
 import { useEditProfile } from '@/hooks/userProfile';
 import { type User } from '@/types/auth';
 import { Loader2, Check, X } from 'lucide-react';
+import { getErrorMessage } from '@/lib/error-utils';
 
 interface EditProfileFormProps {
   user: User;
@@ -79,15 +80,7 @@ export function EditProfileForm({
         onSuccess?.();
       },
       onError: (error: unknown) => {
-        let errorMessage = 'Failed to update profile';
-        if (error && typeof error === 'object' && 'response' in error) {
-          const response = (
-            error as { response?: { data?: { message?: string } } }
-          ).response;
-          if (response?.data?.message) {
-            errorMessage = response.data.message;
-          }
-        }
+        const errorMessage = getErrorMessage(error, 'Failed to update profile');
         setErrors({ general: errorMessage });
       },
     });
