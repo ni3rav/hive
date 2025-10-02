@@ -15,8 +15,14 @@ app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 
-if (!env.isProd) {
-  app.use(morgan('dev'));
+if (env.isDevelopment) {
+  app.use(
+    morgan(':method :url :status :res[content-length] - :response-time ms'),
+  );
+}
+
+if (env.isProduction) {
+  app.use(morgan('combined'));
 }
 
 app.use('/api/auth', authRouter);
