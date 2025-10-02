@@ -13,41 +13,44 @@ import {
 } from '../utils/validations/author';
 import { getUserIdbySession } from '../utils/sessions';
 import { toAuthorListResponseDto } from '../dto/author.dto';
+import {
+  validationError,
+  unauthorized,
+  notFound,
+  created,
+  ok,
+  serverError,
+} from '../utils/responses';
 
 export async function listUserAuthorsController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    res.status(401).json({ message: 'session id is required' });
-    return;
+    return unauthorized(res, 'No active session');
   }
 
   const [sessionError, userId] = await getUserIdbySession(sessionId);
 
   if (sessionError) {
-    res
-      .status(500)
-      .json({ message: 'internal server error while fetching user id' });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (!userId) {
-    res.status(404).json({ message: 'no user id found for this session' });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   const [error, authors] = await getAuthorsByUserId(userId);
 
   if (error) {
-    res.status(500).json({
-      message: 'internal server error while fetching authors for user',
-    });
-    return;
+    console.error('Error fetching authors:', error);
+    return serverError(res, 'Failed to fetch authors');
   }
 
-
-  res.status(200).json(toAuthorListResponseDto(authors || []));
-  return;
+  return ok(
+    res,
+    'Authors retrieved successfully',
+    toAuthorListResponseDto(authors || []),
+  );
 }
 
 export async function createAuthorController(req: Request, res: Response) {
@@ -56,11 +59,11 @@ export async function createAuthorController(req: Request, res: Response) {
   const validatedBody = createAuthorSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'invalid data for creating author',
-      issues: validatedBody.error.issues,
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
 
   const validatedSessionId = sessionIdSchema.safeParse({
@@ -68,11 +71,7 @@ export async function createAuthorController(req: Request, res: Response) {
   });
 
   if (!validatedSessionId.success) {
-    res.status(401).json({
-      message: 'invalid session id',
-      issues: validatedSessionId.error.issues,
-    });
-    return;
+    return unauthorized(res, 'Invalid session');
   }
 
   const [sessionError, userId] = await getUserIdbySession(
@@ -80,22 +79,16 @@ export async function createAuthorController(req: Request, res: Response) {
   );
 
   if (sessionError) {
-    res.status(500).json({
-      message: 'internal server error while fetching user id',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (!userId) {
-    res.status(404).json({
-      message: 'no user id found for this session',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   const { name, email, about, socialLinks } = validatedBody.data;
 
-  const [error] = await createAuthor(userId, {
+  const [error, author] = await createAuthor(userId, {
     name,
     email,
     about,
@@ -103,15 +96,11 @@ export async function createAuthorController(req: Request, res: Response) {
   });
 
   if (error) {
-    res.status(500).json({
-      message: 'internal server error while creating author',
-    });
-    return;
+    console.error('Error creating author:', error);
+    return serverError(res, 'Failed to create author');
   }
 
-  res.status(200).json({
-    message: 'author created successfully',
-  });
+  return created(res, 'Author created successfully', author);
 }
 
 export async function deleteAuthorController(req: Request, res: Response) {
@@ -121,11 +110,7 @@ export async function deleteAuthorController(req: Request, res: Response) {
   const validate = deleteAuthorSchema.safeParse({ authorId, sessionId });
 
   if (!validate.success) {
-    res.status(400).json({
-      message: 'invalid data for deleting author',
-      issues: validate.error.issues,
-    });
-    return;
+    return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
   const [sessionError, userId] = await getUserIdbySession(
@@ -133,38 +118,25 @@ export async function deleteAuthorController(req: Request, res: Response) {
   );
 
   if (sessionError) {
-    res.status(500).json({
-      message: 'internal server error while fetching user id',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (!userId) {
-    res.status(404).json({
-      message: 'no user id found for this session',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   const [error] = await deleteAuthor(validate.data.authorId, userId);
 
   if (error) {
     if ((error as Error).message === 'author not found') {
-      res.status(404).json({
-        message: 'author not found or already deleted',
-      });
+      return notFound(res, 'Author not found');
     } else {
-      res.status(500).json({
-        message: 'internal server error while deleting author',
-      });
+      console.error('Error deleting author:', error);
+      return serverError(res, 'Failed to delete author');
     }
-    return;
   }
 
-  res.status(200).json({
-    message: 'author deleted successfully',
-  });
-  return;
+  return ok(res, 'Author deleted successfully');
 }
 
 export async function updateAuthorController(req: Request, res: Response) {
@@ -179,26 +151,7 @@ export async function updateAuthorController(req: Request, res: Response) {
   });
 
   if (!validate.success) {
-    if (
-      validate.error.issues.some(
-        (issue) =>
-          issue.message === 'please provide at least one field to update',
-      )
-    ) {
-      //* bad request response for empty request body
-      res.status(400).json({
-        message:
-          'request body cannot be empty, please provide at least one field to update',
-        issues: validate.error.issues,
-      });
-      return;
-    }
-    //* default bad request response
-    res.status(400).json({
-      message: 'invalid data for updating author',
-      issues: validate.error.issues,
-    });
-    return;
+    return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
   const [sessionError, userId] = await getUserIdbySession(
@@ -206,31 +159,23 @@ export async function updateAuthorController(req: Request, res: Response) {
   );
 
   if (sessionError) {
-    res.status(500).json({
-      message: 'internal server error while fetching user id',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (!userId) {
-    res.status(404).json({
-      message: 'no user id found for this session',
-    });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
-  const [error] = await updateAuthor(
+  const [error, author] = await updateAuthor(
     validate.data.authorId,
     userId,
     validate.data.data,
   );
 
   if (error) {
-    res.status(500).json({
-      message: 'internal server error while updating author',
-    });
-    return;
+    console.error('Error updating author:', error);
+    return serverError(res, 'Failed to update author');
   }
-  res.status(200).json({ message: 'author updated successfully' });
-  return;
+
+  return ok(res, 'Author updated successfully', author);
 }

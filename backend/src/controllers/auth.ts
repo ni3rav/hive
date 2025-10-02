@@ -12,20 +12,31 @@ import {
   verifyEmailSchema,
 } from '../utils/validations/auth';
 import { createSession } from '../utils/sessions';
-import { env } from '../env';
 import { eq, and } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
+import {
+  validationError,
+  conflict,
+  created,
+  unauthorized,
+  forbidden,
+  notFound,
+  serverError,
+  ok,
+  badRequest,
+} from '../utils/responses';
+import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
   const validatedBody = registerSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-      issues: validatedBody.error.issues,
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { name, email, password } = validatedBody.data;
 
@@ -35,11 +46,7 @@ export async function registerController(req: Request, res: Response) {
   });
 
   if (existingUser) {
-    res.status(409).json({
-      message: 'Email already registered',
-      suggestion: 'Try logging in or use password recovery',
-    });
-    return;
+    return conflict(res, 'Email already registered');
   }
 
   //* hashing password
@@ -62,13 +69,12 @@ export async function registerController(req: Request, res: Response) {
     expiresAt: verificationLinkExpiresAt,
   });
 
-  //* currently sending at response, in future we can send it via email now we will consume this link in /verify endpoint so this endpoint would just return success message
-  res.status(201).json({
+  // TODO: In production, send verification link via email instead of response
+  return created(res, 'User registered successfully', {
     userId: user.id,
     verificationLinkToken,
     verificationLinkExpiresAt,
   });
-  return;
 }
 
 export async function loginController(req: Request, res: Response) {
@@ -76,11 +82,11 @@ export async function loginController(req: Request, res: Response) {
   const validatedBody = loginSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-      issues: validatedBody.error.issues,
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { email, password } = validatedBody.data;
 
@@ -93,19 +99,17 @@ export async function loginController(req: Request, res: Response) {
 
   //* user not found
   if (!user) {
-    res.status(404).json({ message: 'User not found' });
-    return;
+    return notFound(res, 'Invalid email or password');
   }
 
-  //* passwrod verification
+  //* password verification
   if (!(await verifyPassword(password, user.password))) {
-    res.status(401).json({ message: 'Password did not match' });
-    return;
+    return unauthorized(res, 'Invalid email or password');
   }
 
   //* email verification check
   if (!user.emailVerified) {
-    // TODO: replace it with the common verification link generator function later, but here it should not directly trigger email sending rather wait for user to hit /resend-verification endpoint if they want to (let's keep it for later)
+    // TODO: replace it with the common verification link generator function later
     const verificationLinkToken = randomBytes(32).toString('hex');
     const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
 
@@ -116,58 +120,45 @@ export async function loginController(req: Request, res: Response) {
       expiresAt: verificationLinkExpiresAt,
     });
 
-    res.status(403).json({
-      message: 'email not verified',
+    // TODO: for now, returning token but send it via email later
+    return forbidden(res, 'Email not verified', {
       userId: user.id,
       verificationLinkToken,
       verificationLinkExpiresAt,
     });
-    return;
   }
 
-  //* creating session and setting cookies in the end
+  //* creating session and setting cookies
   const { sessionId, expiresAt } = await createSession(user.id);
 
   if (!sessionId || !expiresAt) {
-    res
-      .status(500)
-      .json({ message: 'internal server error while creating session' });
-    return;
+    return serverError(res, 'Failed to create session');
   }
 
-  res.cookie('session_id', sessionId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: env.isProduction,
-    expires: expiresAt,
-  });
+  setSessionCookie(res, sessionId, expiresAt);
 
-  res.status(200).json({ message: 'Logged In' });
-  return;
+  return ok(res, 'Logged in successfully');
 }
 
 export async function logoutController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    res.status(400).json({ message: 'No sessionId found' });
-    return;
+    return unauthorized(res, 'No active session');
   }
 
   await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 
-  res.clearCookie('session_id');
+  clearSessionCookie(res);
 
-  res.status(200).json({ message: 'Logged out successfully' });
-  return;
+  return ok(res, 'Logged out successfully');
 }
 
 export async function meController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    res.status(401).json({ message: 'No sessionId found please login' });
-    return;
+    return unauthorized(res, 'No active session');
   }
 
   const session = await db.query.sessionsTable.findFirst({
@@ -175,16 +166,15 @@ export async function meController(req: Request, res: Response) {
   });
 
   if (!session) {
-    res.status(401).json({ message: 'Session not found or expired.' });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (new Date() > new Date(session.expiresAt)) {
-    // !lazy deleltion on check
+    // !lazy deletion on check
     // TODO: Add a cronjob to purge out all inactive sessions at a regular interval
     await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
-    res.status(401).json({ message: 'Session expired' });
-    return;
+    clearSessionCookie(res);
+    return unauthorized(res, 'Session expired');
   }
 
   const user = await db.query.usersTable.findFirst({
@@ -192,12 +182,10 @@ export async function meController(req: Request, res: Response) {
   });
 
   if (!user) {
-    res.status(404).json({ message: 'User not found' });
-    return;
+    return notFound(res, 'User not found');
   }
 
-  res.status(200).json({
-    id: user.id,
+  return ok(res, 'User retrieved successfully', {
     name: user.name,
     email: user.email,
   });
@@ -208,11 +196,11 @@ export async function verifyController(req: Request, res: Response) {
   const validatedBody = verifyEmailSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-      issues: validatedBody.error.issues,
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { userId, token } = validatedBody.data;
 
@@ -225,17 +213,15 @@ export async function verifyController(req: Request, res: Response) {
   });
 
   if (!verificationLink) {
-    res.status(404).json({ message: ' no verification link found' });
-    return;
+    return notFound(res, 'Verification link not found');
   }
 
   if (new Date() > new Date(verificationLink.expiresAt)) {
-    // !lazy deleltion on check
+    // !lazy deletion on check
     await db
       .delete(verificationLinksTable)
       .where(eq(verificationLinksTable.id, verificationLink.id));
-    res.status(400).json({ message: 'Verification link expired' });
-    return;
+    return badRequest(res, 'Verification link expired');
   }
 
   //* updating user to set emailVerified to true
@@ -249,23 +235,14 @@ export async function verifyController(req: Request, res: Response) {
     .delete(verificationLinksTable)
     .where(eq(verificationLinksTable.userId, userId));
 
-  //* creating session and setting cookies in the end
+  //* creating session and setting cookies
   const { sessionId, expiresAt } = await createSession(userId);
 
   if (!sessionId || !expiresAt) {
-    res
-      .status(500)
-      .json({ message: 'internal server error while creating session' });
-    return;
+    return serverError(res, 'Failed to create session');
   }
 
-  res.cookie('session_id', sessionId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: env.isProduction,
-    expires: expiresAt,
-  });
+  setSessionCookie(res, sessionId, expiresAt);
 
-  res.status(200).json({ message: 'email verified and logged in' });
-  return;
+  return ok(res, 'Email verified and logged in successfully');
 }

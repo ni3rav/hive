@@ -8,13 +8,24 @@ interface ZodIssue {
   message: string;
 }
 
+interface ApiErrorResponse {
+  success: false;
+  message: string;
+  code: string;
+  details?: {
+    issues?: ZodIssue[];
+  };
+}
+
 interface ApiError {
   response?: {
     status?: number;
-    data?: {
-      message?: string;
-      issues?: ZodIssue[];
-    };
+    data?:
+      | ApiErrorResponse
+      | {
+          message?: string;
+          issues?: ZodIssue[];
+        };
   };
 }
 
@@ -46,7 +57,27 @@ export function getErrorMessage(
 
   if (!responseData) return fallback;
 
-  if (responseData.issues && responseData.issues.length > 0) {
+  // handle new response shape with success/code/details
+  if ('success' in responseData && responseData.success === false) {
+    const standardResponse = responseData as ApiErrorResponse;
+    if (
+      standardResponse.details?.issues &&
+      standardResponse.details.issues.length > 0
+    ) {
+      const issuesText = formatValidationIssues(
+        standardResponse.details.issues,
+      );
+      return `${standardResponse.message}: ${issuesText}`;
+    }
+    return standardResponse.message;
+  }
+
+  // Handle legacy response shape (backward compatibility)
+  if (
+    'issues' in responseData &&
+    responseData.issues &&
+    responseData.issues.length > 0
+  ) {
     const issuesText = formatValidationIssues(responseData.issues);
     return responseData.message
       ? `${responseData.message}: ${issuesText}`

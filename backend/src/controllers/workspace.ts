@@ -3,37 +3,38 @@ import { getUserIdbySession } from '../utils/sessions';
 import { createWorkspaceSchema } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
+import {
+  validationError,
+  unauthorized,
+  created,
+  serverError,
+} from '../utils/responses';
 
 export async function createWorkspaceController(req: Request, res: Response) {
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    res.status(400).json({ message: 'session id is required' });
-    return;
+    return unauthorized(res, 'No active session');
   }
 
   const [sessionError, userId] = await getUserIdbySession(sessionId);
 
   if (sessionError) {
-    res
-      .status(500)
-      .json({ message: 'internal server error while fetching user id' });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   if (!userId) {
-    res.status(404).json({ message: 'no user id found for this session' });
-    return;
+    return unauthorized(res, 'Invalid or expired session');
   }
 
   const validatedBody = createWorkspaceSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'invalid data for creating workspace',
-      issues: validatedBody.error.issues,
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { name, slug } = validatedBody.data;
 
@@ -53,15 +54,13 @@ export async function createWorkspaceController(req: Request, res: Response) {
       joinedAt: new Date(),
     });
 
-    res.status(200).json({
-      message: 'workspace created successfully',
+    return created(res, 'Workspace created successfully', {
+      id: workspace.id,
       name: workspace.name,
       slug: workspace.slug,
     });
-    return;
   } catch (error) {
     console.error('Error creating workspace:', error);
-    res.status(500).json({ message: 'internal server error' });
-    return;
+    return serverError(res, 'Failed to create workspace');
   }
 }

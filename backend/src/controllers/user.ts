@@ -3,24 +3,31 @@ import { editProfileSchema } from '../utils/validations/user';
 import { sessionsTable, usersTable } from '../db/schema';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
+import {
+  validationError,
+  unauthorized,
+  notFound,
+  conflict,
+  ok,
+  serverError,
+} from '../utils/responses';
 
 export async function editProfileController(req: Request, res: Response) {
   const validatedBody = editProfileSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    return res.status(400).json({
-      message: 'Invalid Payload',
-      issues: validatedBody.error.issues,
-    });
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
 
   const { name, email } = validatedBody.data;
   const sessionId = req.cookies['session_id'];
 
   if (!sessionId) {
-    return res
-      .status(401)
-      .json({ message: 'No sessionId found. Please log in.' });
+    return unauthorized(res, 'No active session');
   }
 
   try {
@@ -29,7 +36,7 @@ export async function editProfileController(req: Request, res: Response) {
     });
 
     if (!session) {
-      return res.status(401).json({ message: 'Session not found or expired.' });
+      return unauthorized(res, 'Invalid or expired session');
     }
 
     const user = await db.query.usersTable.findFirst({
@@ -37,7 +44,7 @@ export async function editProfileController(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
+      return notFound(res, 'User not found');
     }
 
     // if email is being updated, check if it's already taken by another user
@@ -46,21 +53,26 @@ export async function editProfileController(req: Request, res: Response) {
         where: eq(usersTable.email, email),
       });
       if (existingUser && existingUser.id !== user.id) {
-        return res.status(409).json({ message: 'email already in use' });
+        return conflict(res, 'Email already in use');
       }
     }
 
-    await db
+    const [updatedUser] = await db
       .update(usersTable)
       .set({
         ...(name !== undefined ? { name } : {}),
         ...(email !== undefined ? { email } : {}),
       })
-      .where(eq(usersTable.id, user.id));
+      .where(eq(usersTable.id, user.id))
+      .returning();
 
-    return res.status(200).json({ message: 'User edited successfully.' });
+    return ok(res, 'Profile updated successfully', {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    });
   } catch (error) {
     console.error('Error updating user profile:', error);
-    return res.status(500).json({ message: 'Internal server error.' });
+    return serverError(res, 'Failed to update profile');
   }
 }

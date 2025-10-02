@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { Router } from 'express';
 import {
   loginController,
   registerController,
@@ -9,9 +9,6 @@ import {
 
 export const router = Router();
 
-router.get('/', (req: Request, res: Response) =>
-  res.send('<p>auth routes</p>'),
-);
 router.post('/register', registerController);
 router.post('/login', loginController);
 router.get('/me', meController);
