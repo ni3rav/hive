@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,14 +39,6 @@ export default function AuthorsManager() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // show create view if user has no authors (empty array is valid now)
-  useEffect(() => {
-    if (!isLoading && !isError && authors && authors.length === 0) {
-      setView('create');
-      toast.info("You don't have an author profile yet. Let's create one!");
-    }
-  }, [isLoading, isError, authors]);
-
   const handleAddAuthor = () => {
     setSelectedAuthor(null);
     setView('create');
@@ -78,9 +69,9 @@ export default function AuthorsManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveAuthor = (authorData: Author) => {
+  const handleSaveAuthor = (authorData: Author | Partial<Author>) => {
     if (view === 'create') {
-      createAuthorMutation.mutate(authorData, {
+      createAuthorMutation.mutate(authorData as Author, {
         onSuccess: () => {
           // --- CHANGE: Toast removed, handled by hook ---
           setView('list');

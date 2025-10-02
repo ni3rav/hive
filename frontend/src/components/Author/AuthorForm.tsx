@@ -15,7 +15,7 @@ import SocialLinksInput from './social-links';
 
 interface AuthorFormProps {
   initialData?: Author | null;
-  onSave: (data: Author) => void;
+  onSave: (data: Author | Partial<Author>) => void;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -43,12 +43,40 @@ export default function AuthorForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      name: formData.name,
-      email: formData.email,
-      about: formData.about,
-      socialLinks: formData.socialLinks,
-    });
+
+    // for creating new authors, send all data
+    if (!isEditing) {
+      onSave({
+        name: formData.name,
+        email: formData.email,
+        about: formData.about,
+        socialLinks: formData.socialLinks,
+      });
+      return;
+    }
+
+    // for editing, send only changed fields
+    const changedFields: Partial<Author> = {};
+
+    if (formData.name !== initialData?.name) {
+      changedFields.name = formData.name;
+    }
+    if (formData.email !== initialData?.email) {
+      changedFields.email = formData.email;
+    }
+    if (formData.about !== initialData?.about) {
+      changedFields.about = formData.about;
+    }
+
+    // deep comparison for socialLinks
+    const socialLinksChanged =
+      JSON.stringify(formData.socialLinks) !==
+      JSON.stringify(initialData?.socialLinks);
+    if (socialLinksChanged) {
+      changedFields.socialLinks = formData.socialLinks;
+    }
+
+    onSave(changedFields);
   };
 
   return (
