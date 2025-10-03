@@ -7,6 +7,7 @@ import {
 import type { Author } from '@/types/author';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export function useUserAuthors() {
   return useQuery({
@@ -25,7 +26,8 @@ export function useCreateAuthor() {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {
-      toast.error('Failed to create author');
+      const message = getErrorMessage(error, 'Failed to create author');
+      toast.error(message);
       console.error('Error creating author:', error);
     },
   });
@@ -46,7 +48,8 @@ export function useUpdateAuthor() {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {
-      toast.error('Failed to update author');
+      const message = getErrorMessage(error, 'Failed to update author');
+      toast.error(message);
       console.error('Error updating author:', error);
     },
   });
@@ -61,7 +64,8 @@ export function useDeleteAuthor() {
       queryClient.invalidateQueries({ queryKey: ['user-authors'] });
     },
     onError: (error) => {
-      toast.error('Failed to delete author');
+      const message = getErrorMessage(error, 'Failed to delete author');
+      toast.error(message);
       console.error('Error deleting author:', error);
     },
   });

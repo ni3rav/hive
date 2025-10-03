@@ -6,6 +6,7 @@ import {
   boolean,
   jsonb,
   text,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
@@ -36,6 +37,33 @@ export const verificationLinksTable = pgTable('verification_links', {
   expiresAt: timestamp('expires_at').notNull().defaultNow(),
 });
 
+export const workspacesTable = pgTable('workspaces', {
+  id: uuid().defaultRandom().primaryKey(),
+  name: varchar('name', { length: 30 }).notNull(),
+  slug: varchar('slug', { length: 35 }).notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const workspaceUsersTable = pgTable(
+  'workspace_users',
+  {
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    role: varchar('role', { length: 50 }).default('member').notNull(),
+    joinedAt: timestamp('joined_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: 'workspace_user_id',
+      columns: [t.workspaceId, t.userId],
+    }),
+  ],
+);
+
 export const authorTable = pgTable('authors', {
   id: uuid().defaultRandom().primaryKey(),
   userId: uuid('user_id')
@@ -57,7 +85,7 @@ export const postsTable = pgTable('posts', {
   slug: varchar('slug').notNull().unique(),
   excerpt: varchar('excerpt').default('').notNull(),
   tags: varchar('tags', { length: 255 }).array().default([]).notNull(),
-  categories: varchar('categories', { length: 255 }).array().default([]).notNull(),
+  category: varchar('category', { length: 255 }).default('').notNull(),
   visible: boolean('visible').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   publishedAt: timestamp('published_at').notNull().defaultNow(),

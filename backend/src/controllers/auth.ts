@@ -11,63 +11,86 @@ import {
   registerSchema,
   verifyEmailSchema,
 } from '../utils/validations/auth';
-import { createSession } from '../utils/sessions';
-import { env } from '../env';
+import {
+  createSession,
+  generateVerificationLinkToken,
+  getUserIdbySession,
+} from '../utils/sessions';
 import { eq, and } from 'drizzle-orm';
-import { randomBytes } from 'crypto';
+import {
+  validationError,
+  conflict,
+  created,
+  unauthorized,
+  forbidden,
+  notFound,
+  serverError,
+  ok,
+  badRequest,
+} from '../utils/responses';
+import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
   const validatedBody = registerSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { name, email, password } = validatedBody.data;
 
-  //* email check
-  const existingUser = await db.query.usersTable.findFirst({
-    where: eq(usersTable.email, email),
-  });
-
-  if (existingUser) {
-    res.status(409).json({
-      message: 'Email already registered',
-      suggestion: 'Try logging in or use password recovery',
+  try {
+    //* email check
+    const existingUser = await db.query.usersTable.findFirst({
+      where: eq(usersTable.email, email),
     });
-    return;
+
+    if (existingUser) {
+      return conflict(res, 'Email already registered');
+    }
+
+    //* hashing password
+    const [hashError, hashedPassword] = await hashPassword(password);
+
+    if (hashError || !hashedPassword) {
+      return serverError(res, 'Failed to hash password');
+    }
+
+    // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
+    const { token, expiresAt } = generateVerificationLinkToken();
+
+    //* wrapping operations in transaction
+    const user = await db.transaction(async (tx) => {
+      //* creating user
+      const [user] = await tx
+        .insert(usersTable)
+        .values({ name, email, password: hashedPassword, emailVerified: false })
+        .returning();
+
+      //* storing verification link in db
+      await tx.insert(verificationLinksTable).values({
+        userId: user.id,
+        token: token,
+        expiresAt: expiresAt,
+      });
+
+      return user;
+    });
+
+    // TODO: In production, send verification link via email instead of response
+    return created(res, 'User registered successfully', {
+      userId: user.id,
+      verificationLinkToken: token,
+      verificationLinkExpiresAt: expiresAt,
+    });
+  } catch (error) {
+    console.error('Error in registerController:', error);
+    return serverError(res, 'Failed to register user');
   }
-
-  //* hashing password
-  const hashedPassword = await hashPassword(password);
-
-  //* creating user
-  const [user] = await db
-    .insert(usersTable)
-    .values({ name, email, password: hashedPassword, emailVerified: false })
-    .returning();
-
-  // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
-  const verificationLinkToken = randomBytes(32).toString('hex');
-  const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
-
-  //* storing verification link in db
-  await db.insert(verificationLinksTable).values({
-    userId: user.id,
-    token: verificationLinkToken,
-    expiresAt: verificationLinkExpiresAt,
-  });
-
-  //* currently sending at response, in future we can send it via email now we will consume this link in /verify endpoint so this endpoint would just return success message
-  res.status(201).json({
-    userId: user.id,
-    verificationLinkToken,
-    verificationLinkExpiresAt,
-  });
-  return;
 }
 
 export async function loginController(req: Request, res: Response) {
@@ -75,123 +98,110 @@ export async function loginController(req: Request, res: Response) {
   const validatedBody = loginSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { email, password } = validatedBody.data;
 
-  //* finding user in db
-  const user = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.email, email))
-    .then((res) => res[0]);
+  try {
+    //* finding user in db
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .then((res) => res[0]);
 
-  //* user not found
-  if (!user) {
-    res.status(404).json({ message: 'User not found' });
-    return;
+    //* user not found
+    if (!user) {
+      return unauthorized(res, 'Invalid email or password');
+    }
+
+    //* password verification
+    const [verifyError, isValid] = await verifyPassword(
+      password,
+      user.password,
+    );
+
+    if (verifyError || !isValid) {
+      return unauthorized(res, 'Invalid email or password');
+    }
+
+    //* email verification check
+    if (!user.emailVerified) {
+      // TODO: replace it with the common verification link generator function later
+      const { token, expiresAt } = generateVerificationLinkToken();
+
+      //* storing verification link in db
+      await db.insert(verificationLinksTable).values({
+        userId: user.id,
+        token: token,
+        expiresAt: expiresAt,
+      });
+
+      // TODO: for now, returning token but send it via email later
+      return forbidden(res, 'Email not verified', {
+        userId: user.id,
+        verificationLinkToken: token,
+        verificationLinkExpiresAt: expiresAt,
+      });
+    }
+
+    //* creating session and setting cookies
+    const [sessionError, session] = await createSession(user.id);
+
+    if (sessionError || !session) {
+      return serverError(res, 'Failed to create session');
+    }
+
+    setSessionCookie(res, session.sessionId, session.expiresAt);
+
+    return ok(res, 'Logged in successfully');
+  } catch (error) {
+    console.error('Error in loginController:', error);
+    return serverError(res, 'Failed to login');
   }
-
-  //* passwrod verification
-  if (!(await verifyPassword(password, user.password))) {
-    res.status(401).json({ message: 'Password did not match' });
-    return;
-  }
-
-  //* email verification check
-  if (!user.emailVerified) {
-    // TODO: replace it with the common verification link generator function later, but here it should not directly trigger email sending rather wait for user to hit /resend-verification endpoint if they want to (let's keep it for later)
-    const verificationLinkToken = randomBytes(32).toString('hex');
-    const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
-
-    //* storing verification link in db
-    await db.insert(verificationLinksTable).values({
-      userId: user.id,
-      token: verificationLinkToken,
-      expiresAt: verificationLinkExpiresAt,
-    });
-
-    res.status(403).json({
-      message: 'email not verified',
-      userId: user.id,
-      verificationLinkToken,
-      verificationLinkExpiresAt,
-    });
-    return;
-  }
-
-  //* creating session and setting cookies in the end
-  const { sessionId, expiresAt } = await createSession(user.id);
-
-  res.cookie('session_id', sessionId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: env.isProduction,
-    expires: expiresAt,
-  });
-
-  res.status(200).json({ message: 'Logged In' });
-  return;
 }
 
 export async function logoutController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
+  const sessionId: string = req.cookies['session_id'];
 
-  if (!sessionId) {
-    res.status(400).json({ message: 'No sessionId found' });
-    return;
+  try {
+    await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+
+    clearSessionCookie(res);
+
+    return ok(res, 'Logged out successfully');
+  } catch (error) {
+    console.error('Error in logoutController:', error);
+    return serverError(res, 'Failed to logout');
   }
-
-  await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
-
-  res.clearCookie('session_id');
-
-  res.status(200).json({ message: 'Logged out successfully' });
-  return;
 }
 
 export async function meController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
+  const sessionId: string = req.cookies['session_id'];
 
-  if (!sessionId) {
-    res.status(401).json({ message: 'No sessionId found please login' });
-    return;
+  const [, userId] = await getUserIdbySession(sessionId);
+
+  try {
+    const user = await db.query.usersTable.findFirst({
+      where: eq(usersTable.id, userId!),
+    });
+
+    if (!user) {
+      return notFound(res, 'User not found');
+    }
+
+    return ok(res, 'User retrieved successfully', {
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error('Error in meController:', error);
+    return serverError(res, 'Failed to retrieve user');
   }
-
-  const session = await db.query.sessionsTable.findFirst({
-    where: eq(sessionsTable.id, sessionId),
-  });
-
-  if (!session) {
-    res.status(401).json({ message: 'Session not found or expired.' });
-    return;
-  }
-
-  if (new Date() > new Date(session.expiresAt)) {
-    // !lazy deleltion on check
-    // TODO: Add a cronjob to purge out all inactive sessions at a regular interval
-    await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
-    res.status(401).json({ message: 'Session expired' });
-    return;
-  }
-
-  const user = await db.query.usersTable.findFirst({
-    where: eq(usersTable.id, session.userId),
-  });
-
-  if (!user) {
-    res.status(404).json({ message: 'User not found' });
-    return;
-  }
-
-  res.status(200).json({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-  });
 }
 
 export async function verifyController(req: Request, res: Response) {
@@ -199,56 +209,61 @@ export async function verifyController(req: Request, res: Response) {
   const validatedBody = verifyEmailSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    res.status(400).json({
-      message: 'Invalid Payload',
-    });
-    return;
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
   }
   const { userId, token } = validatedBody.data;
 
-  //* fetching verification link from db
-  const verificationLink = await db.query.verificationLinksTable.findFirst({
-    where: and(
-      eq(verificationLinksTable.userId, userId),
-      eq(verificationLinksTable.token, token),
-    ),
-  });
+  try {
+    //* fetching verification link from db
+    const verificationLink = await db.query.verificationLinksTable.findFirst({
+      where: and(
+        eq(verificationLinksTable.userId, userId),
+        eq(verificationLinksTable.token, token),
+      ),
+    });
 
-  if (!verificationLink) {
-    res.status(404).json({ message: ' no verification link found' });
-    return;
+    if (!verificationLink) {
+      return notFound(res, 'Verification link not found');
+    }
+
+    if (new Date() > new Date(verificationLink.expiresAt)) {
+      // !lazy deletion on check
+      await db
+        .delete(verificationLinksTable)
+        .where(eq(verificationLinksTable.id, verificationLink.id));
+      return badRequest(res, 'Verification link expired');
+    }
+
+    //* wrapping operations in transaction
+    await db.transaction(async (tx) => {
+      //* updating user to set emailVerified to true
+      await tx
+        .update(usersTable)
+        .set({ emailVerified: true })
+        .where(eq(usersTable.id, userId));
+
+      //* deleting all verification links for this user
+      await tx
+        .delete(verificationLinksTable)
+        .where(eq(verificationLinksTable.userId, userId));
+
+      //* creating session and setting cookies
+      const [sessionError, session] = await createSession(userId, tx);
+
+      if (sessionError || !session) {
+        throw new Error('Failed to create session');
+      }
+
+      setSessionCookie(res, session.sessionId, session.expiresAt);
+    });
+
+    return ok(res, 'Email verified and logged in successfully');
+  } catch (error) {
+    console.error('Error in verifyController:', error);
+    return serverError(res, 'Failed to verify email');
   }
-
-  if (new Date() > new Date(verificationLink.expiresAt)) {
-    // !lazy deleltion on check
-    await db
-      .delete(verificationLinksTable)
-      .where(eq(verificationLinksTable.id, verificationLink.id));
-    res.status(400).json({ message: 'Verification link expired' });
-    return;
-  }
-
-  //* updating user to set emailVerified to true
-  await db
-    .update(usersTable)
-    .set({ emailVerified: true })
-    .where(eq(usersTable.id, userId));
-
-  //* deleting all verification links for this user
-  await db
-    .delete(verificationLinksTable)
-    .where(eq(verificationLinksTable.userId, userId));
-
-  //* creating session and setting cookies in the end
-  const { sessionId, expiresAt } = await createSession(userId);
-
-  res.cookie('session_id', sessionId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: env.isProduction,
-    expires: expiresAt,
-  });
-
-  res.status(200).json({ message: 'email verified and logged in' });
-  return;
 }

@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { RegisterForm } from '@/components/register'; //! you dont need to put .tsx in the import
+import { RegisterForm } from '@/components/register';
 import { useRegister } from '@/hooks/useAuth';
 import { registerSchema } from '@/lib/validations/auth';
+import { getErrorMessage, getStatusMessage } from '@/lib/error-utils';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -37,15 +38,18 @@ export default function RegisterPage() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
           const status: number | undefined = error.response?.status;
-          const serverMessage = error.response?.data?.message;
-          const errorMap: Record<number, string> = {
+          const statusMessage = getStatusMessage(status);
+          const errorMessage = getErrorMessage(error);
+
+          // custom messages for specific cases
+          const customMap: Record<number, string> = {
             409: 'This email is already registered. Please log in.',
-            400: 'Invalid data provided. Please check your inputs.',
           };
 
           const message =
-            (status !== undefined && errorMap[status]) ||
-            serverMessage ||
+            (status !== undefined && customMap[status]) ||
+            errorMessage ||
+            statusMessage ||
             'An unexpected error occurred.';
           toast.error(message);
         },

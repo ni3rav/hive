@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +30,7 @@ export default function AuthorsManager() {
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
 
-  const { data: authors, isLoading, isError, error } = useUserAuthors();
+  const { data: authors, isLoading, isError } = useUserAuthors();
 
   const createAuthorMutation = useCreateAuthor();
   const updateAuthorMutation = useUpdateAuthor();
@@ -39,13 +38,6 @@ export default function AuthorsManager() {
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
-  useEffect(() => {
-    if (isError && (error as Error)?.message === 'NOT_FOUND') {
-      setView('create');
-      toast.info("You don't have an author profile yet. Let's create one!");
-    }
-  }, [isError, error]);
 
   const handleAddAuthor = () => {
     setSelectedAuthor(null);
@@ -77,9 +69,9 @@ export default function AuthorsManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveAuthor = (authorData: Author) => {
+  const handleSaveAuthor = (authorData: Author | Partial<Author>) => {
     if (view === 'create') {
-      createAuthorMutation.mutate(authorData, {
+      createAuthorMutation.mutate(authorData as Author, {
         onSuccess: () => {
           // --- CHANGE: Toast removed, handled by hook ---
           setView('list');
@@ -128,7 +120,7 @@ export default function AuthorsManager() {
     );
   }
 
-  if (isError && (error as Error)?.message !== 'NOT_FOUND') {
+  if (isError) {
     if (view === 'create') {
       return (
         <AuthorForm

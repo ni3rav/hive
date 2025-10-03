@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { Router } from 'express';
 import {
   loginController,
   registerController,
@@ -6,14 +6,12 @@ import {
   logoutController,
   verifyController,
 } from '../controllers/auth';
+import { authMiddleware } from '../middleware/auth';
 
 export const router = Router();
 
-router.get('/', (req: Request, res: Response) =>
-  res.send('<p>auth routes</p>'),
-);
 router.post('/register', registerController);
 router.post('/login', loginController);
-router.get('/me', meController);
-router.post('/logout', logoutController);
+router.get('/me', authMiddleware, meController);
+router.post('/logout', authMiddleware, logoutController);
 router.post('/verify', verifyController);

@@ -1,16 +1,38 @@
 import { db } from '../db';
 import { sessionsTable } from '../db/schema';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
-import { sessionIdSchema } from './validations/author';
+import { sessionIdSchema } from './validations/common';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../db/schema';
 
-export async function createSession(userId: string) {
+export const SESSION_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
+export const VERIFICATION_LINK_AGE = 1000 * 60 * 15; // 15 minutes
+
+export function generateVerificationLinkToken() {
+  return {
+    token: randomBytes(32).toString('hex'),
+    expiresAt: new Date(Date.now() + VERIFICATION_LINK_AGE),
+  };
+}
+
+export async function createSession(
+  userId: string,
+  tx?: NodePgDatabase<typeof schema> | typeof db,
+): Promise<[Error | null, { sessionId: string; expiresAt: Date } | null]> {
   const sessionId = randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+  const expiresAt = new Date(Date.now() + SESSION_AGE);
+  const dbInstance = tx || db;
 
-  await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });
-
-  return { sessionId, expiresAt };
+  try {
+    await dbInstance
+      .insert(sessionsTable)
+      .values({ id: sessionId, userId, expiresAt });
+    return [null, { sessionId, expiresAt }];
+  } catch (err) {
+    console.error('Error creating session:', err);
+    return [err as Error, null];
+  }
 }
 
 export async function getUserIdbySession(
