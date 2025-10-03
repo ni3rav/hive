@@ -7,16 +7,18 @@ import { sessionIdSchema } from './validations/common';
 export const SESSION_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
 export const VERIFICATION_LINK_AGE = 1000 * 60 * 15; // 15 minutes
 
-export async function createSession(userId: string) {
+export async function createSession(
+  userId: string,
+): Promise<[Error | null, { sessionId: string; expiresAt: Date } | null]> {
   const sessionId = randomUUID();
   const expiresAt = new Date(Date.now() + SESSION_AGE); // 7 days
 
   try {
     await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });
-    return { sessionId, expiresAt };
+    return [null, { sessionId, expiresAt }];
   } catch (err) {
     console.error('Error creating session:', err);
-    return { sessionId: null, expiresAt: null };
+    return [err as Error, null];
   }
 }
 

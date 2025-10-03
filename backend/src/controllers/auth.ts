@@ -137,13 +137,13 @@ export async function loginController(req: Request, res: Response) {
   }
 
   //* creating session and setting cookies
-  const { sessionId, expiresAt } = await createSession(user.id);
+  const [sessionError, session] = await createSession(user.id);
 
-  if (!sessionId || !expiresAt) {
+  if (sessionError || !session) {
     return serverError(res, 'Failed to create session');
   }
 
-  setSessionCookie(res, sessionId, expiresAt);
+  setSessionCookie(res, session.sessionId, session.expiresAt);
 
   return ok(res, 'Logged in successfully');
 }
@@ -222,13 +222,13 @@ export async function verifyController(req: Request, res: Response) {
     .where(eq(verificationLinksTable.userId, userId));
 
   //* creating session and setting cookies
-  const { sessionId, expiresAt } = await createSession(userId);
+  const [sessionError, session] = await createSession(userId);
 
-  if (!sessionId || !expiresAt) {
+  if (sessionError || !session) {
     return serverError(res, 'Failed to create session');
   }
 
-  setSessionCookie(res, sessionId, expiresAt);
+  setSessionCookie(res, session.sessionId, session.expiresAt);
 
   return ok(res, 'Email verified and logged in successfully');
 }
