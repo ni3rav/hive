@@ -37,24 +37,29 @@ export async function editProfileController(req: Request, res: Response) {
       return notFound(res, 'User not found');
     }
 
-    // if email is being updated, check if it's already taken by another user
-    if (email !== undefined && email !== user.email) {
-      const existingUser = await db.query.usersTable.findFirst({
-        where: eq(usersTable.email, email),
-      });
-      if (existingUser && existingUser.id !== user.id) {
-        return conflict(res, 'Email already in use');
+    //* wrapping operations in transaction to prevent race conditions
+    const updatedUser = await db.transaction(async (tx) => {
+      // if email is being updated, check if it's already taken by another user
+      if (email !== undefined && email !== user.email) {
+        const existingUser = await tx.query.usersTable.findFirst({
+          where: eq(usersTable.email, email),
+        });
+        if (existingUser && existingUser.id !== user.id) {
+          throw new Error('Email already in use');
+        }
       }
-    }
 
-    const [updatedUser] = await db
-      .update(usersTable)
-      .set({
-        ...(name !== undefined ? { name } : {}),
-        ...(email !== undefined ? { email } : {}),
-      })
-      .where(eq(usersTable.id, user.id))
-      .returning();
+      const [updatedUser] = await tx
+        .update(usersTable)
+        .set({
+          ...(name !== undefined ? { name } : {}),
+          ...(email !== undefined ? { email } : {}),
+        })
+        .where(eq(usersTable.id, user.id))
+        .returning();
+
+      return updatedUser;
+    });
 
     return ok(res, 'Profile updated successfully', {
       id: updatedUser.id,
@@ -63,6 +68,12 @@ export async function editProfileController(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Error updating user profile:', error);
+
+    // Handle specific error for email conflict
+    if ((error as Error).message === 'Email already in use') {
+      return conflict(res, 'Email already in use');
+    }
+
     return serverError(res, 'Failed to update profile');
   }
 }

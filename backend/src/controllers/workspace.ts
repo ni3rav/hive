@@ -21,19 +21,24 @@ export async function createWorkspaceController(req: Request, res: Response) {
   const [, userId] = await getUserIdbySession(sessionId);
 
   try {
-    const [workspace] = await db
-      .insert(workspacesTable)
-      .values({
-        name: name,
-        slug: slug,
-      })
-      .returning();
+    //* wrapping operations in transaction
+    const workspace = await db.transaction(async (tx) => {
+      const [workspace] = await tx
+        .insert(workspacesTable)
+        .values({
+          name: name,
+          slug: slug,
+        })
+        .returning();
 
-    await db.insert(workspaceUsersTable).values({
-      workspaceId: workspace.id,
-      userId: userId!,
-      role: 'owner',
-      joinedAt: new Date(),
+      await tx.insert(workspaceUsersTable).values({
+        workspaceId: workspace.id,
+        userId: userId!,
+        role: 'owner',
+        joinedAt: new Date(),
+      });
+
+      return workspace;
     });
 
     return created(res, 'Workspace created successfully', {

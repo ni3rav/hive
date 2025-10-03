@@ -3,6 +3,8 @@ import { sessionsTable } from '../db/schema';
 import { randomBytes, randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { sessionIdSchema } from './validations/common';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '../db/schema';
 
 export const SESSION_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
 export const VERIFICATION_LINK_AGE = 1000 * 60 * 15; // 15 minutes
@@ -16,12 +18,16 @@ export function generateVerificationLinkToken() {
 
 export async function createSession(
   userId: string,
+  tx?: NodePgDatabase<typeof schema> | typeof db,
 ): Promise<[Error | null, { sessionId: string; expiresAt: Date } | null]> {
   const sessionId = randomUUID();
   const expiresAt = new Date(Date.now() + SESSION_AGE);
+  const dbInstance = tx || db;
 
   try {
-    await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });
+    await dbInstance
+      .insert(sessionsTable)
+      .values({ id: sessionId, userId, expiresAt });
     return [null, { sessionId, expiresAt }];
   } catch (err) {
     console.error('Error creating session:', err);
