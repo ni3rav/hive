@@ -4,9 +4,12 @@ import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { sessionIdSchema } from './validations/common';
 
+export const SESSION_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
+export const VERIFICATION_LINK_AGE = 1000 * 60 * 15; // 15 minutes
+
 export async function createSession(userId: string) {
   const sessionId = randomUUID();
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+  const expiresAt = new Date(Date.now() + SESSION_AGE); // 7 days
 
   try {
     await db.insert(sessionsTable).values({ id: sessionId, userId, expiresAt });

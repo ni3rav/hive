@@ -11,7 +11,7 @@ import {
   registerSchema,
   verifyEmailSchema,
 } from '../utils/validations/auth';
-import { createSession } from '../utils/sessions';
+import { createSession, VERIFICATION_LINK_AGE } from '../utils/sessions';
 import { eq, and } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import {
@@ -60,7 +60,9 @@ export async function registerController(req: Request, res: Response) {
 
   // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
   const verificationLinkToken = randomBytes(32).toString('hex');
-  const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
+  const verificationLinkExpiresAt = new Date(
+    Date.now() + VERIFICATION_LINK_AGE,
+  ); // 15 minutes
 
   //* storing verification link in db
   await db.insert(verificationLinksTable).values({
@@ -99,7 +101,7 @@ export async function loginController(req: Request, res: Response) {
 
   //* user not found
   if (!user) {
-    return notFound(res, 'Invalid email or password');
+    return unauthorized(res, 'Invalid email or password');
   }
 
   //* password verification
@@ -111,7 +113,9 @@ export async function loginController(req: Request, res: Response) {
   if (!user.emailVerified) {
     // TODO: replace it with the common verification link generator function later
     const verificationLinkToken = randomBytes(32).toString('hex');
-    const verificationLinkExpiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
+    const verificationLinkExpiresAt = new Date(
+      Date.now() + VERIFICATION_LINK_AGE,
+    ); // 15 minutes
 
     //* storing verification link in db
     await db.insert(verificationLinksTable).values({
