@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { env } from './env';
 import morgan from 'morgan';
 import cors from 'cors';
+import { authMiddleware } from './middleware/auth';
 
 export const app = express();
 
@@ -26,6 +27,6 @@ if (env.isProduction) {
 }
 
 app.use('/api/auth', authRouter);
-app.use('/api/user', userRouter);
-app.use('/api/author', authorRouter);
-app.use('/api/workspace', workspaceRouter);
+app.use('/api/user', authMiddleware, userRouter);
+app.use('/api/author', authMiddleware, authorRouter);
+app.use('/api/workspace', authMiddleware, workspaceRouter);

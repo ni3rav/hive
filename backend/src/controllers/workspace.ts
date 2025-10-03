@@ -1,32 +1,11 @@
 import { Request, Response } from 'express';
-import { getUserIdbySession } from '../utils/sessions';
 import { createWorkspaceSchema } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
-import {
-  validationError,
-  unauthorized,
-  created,
-  serverError,
-} from '../utils/responses';
+import { getUserIdbySession } from '../utils/sessions';
+import { validationError, created, serverError } from '../utils/responses';
 
 export async function createWorkspaceController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
-
-  if (!sessionId) {
-    return unauthorized(res, 'No active session');
-  }
-
-  const [sessionError, userId] = await getUserIdbySession(sessionId);
-
-  if (sessionError) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (!userId) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
   const validatedBody = createWorkspaceSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
@@ -37,6 +16,9 @@ export async function createWorkspaceController(req: Request, res: Response) {
     );
   }
   const { name, slug } = validatedBody.data;
+  const sessionId: string = req.cookies['session_id'];
+
+  const [, userId] = await getUserIdbySession(sessionId);
 
   try {
     const [workspace] = await db
@@ -49,7 +31,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
 
     await db.insert(workspaceUsersTable).values({
       workspaceId: workspace.id,
-      userId: userId,
+      userId: userId!,
       role: 'owner',
       joinedAt: new Date(),
     });

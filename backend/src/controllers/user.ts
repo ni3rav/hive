@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { editProfileSchema } from '../utils/validations/user';
-import { sessionsTable, usersTable } from '../db/schema';
+import { usersTable } from '../db/schema';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
+import { getUserIdbySession } from '../utils/sessions';
 import {
   validationError,
-  unauthorized,
   notFound,
   conflict,
   ok,
@@ -24,23 +24,13 @@ export async function editProfileController(req: Request, res: Response) {
   }
 
   const { name, email } = validatedBody.data;
-  const sessionId = req.cookies['session_id'];
+  const sessionId: string = req.cookies['session_id'];
 
-  if (!sessionId) {
-    return unauthorized(res, 'No active session');
-  }
+  const [, userId] = await getUserIdbySession(sessionId);
 
   try {
-    const session = await db.query.sessionsTable.findFirst({
-      where: eq(sessionsTable.id, sessionId),
-    });
-
-    if (!session) {
-      return unauthorized(res, 'Invalid or expired session');
-    }
-
     const user = await db.query.usersTable.findFirst({
-      where: eq(usersTable.id, session.userId),
+      where: eq(usersTable.id, userId!),
     });
 
     if (!user) {

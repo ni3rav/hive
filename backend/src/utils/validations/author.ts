@@ -19,12 +19,10 @@ export const createAuthorSchema = z.object({
 
 export const deleteAuthorSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
-  sessionId: z.uuid('Invalid sessionId'),
 });
 
 export const updateAuthorSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
-  sessionId: z.uuid('Invalid sessionId'),
   data: z
     .object({
       name: z.string().trim().min(1, 'Name is required').optional(),

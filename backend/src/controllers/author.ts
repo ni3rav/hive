@@ -8,14 +8,12 @@ import {
 import {
   createAuthorSchema,
   deleteAuthorSchema,
-  sessionIdSchema,
   updateAuthorSchema,
 } from '../utils/validations/author';
 import { getUserIdbySession } from '../utils/sessions';
 import { toAuthorListResponseDto } from '../dto/author.dto';
 import {
   validationError,
-  unauthorized,
   notFound,
   created,
   ok,
@@ -23,23 +21,10 @@ import {
 } from '../utils/responses';
 
 export async function listUserAuthorsController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
+  const sessionId: string = req.cookies['session_id'];
+  const [, userId] = await getUserIdbySession(sessionId);
 
-  if (!sessionId) {
-    return unauthorized(res, 'No active session');
-  }
-
-  const [sessionError, userId] = await getUserIdbySession(sessionId);
-
-  if (sessionError) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (!userId) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  const [error, authors] = await getAuthorsByUserId(userId);
+  const [error, authors] = await getAuthorsByUserId(userId!);
 
   if (error) {
     console.error('Error fetching authors:', error);
@@ -54,8 +39,6 @@ export async function listUserAuthorsController(req: Request, res: Response) {
 }
 
 export async function createAuthorController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
-
   const validatedBody = createAuthorSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
@@ -66,29 +49,12 @@ export async function createAuthorController(req: Request, res: Response) {
     );
   }
 
-  const validatedSessionId = sessionIdSchema.safeParse({
-    sessionId: sessionId,
-  });
-
-  if (!validatedSessionId.success) {
-    return unauthorized(res, 'Invalid session');
-  }
-
-  const [sessionError, userId] = await getUserIdbySession(
-    validatedSessionId.data.sessionId,
-  );
-
-  if (sessionError) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (!userId) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
   const { name, email, about, socialLinks } = validatedBody.data;
+  const sessionId: string = req.cookies['session_id'];
 
-  const [error, author] = await createAuthor(userId, {
+  const [, userId] = await getUserIdbySession(sessionId);
+
+  const [error, author] = await createAuthor(userId!, {
     name,
     email,
     about,
@@ -105,27 +71,17 @@ export async function createAuthorController(req: Request, res: Response) {
 
 export async function deleteAuthorController(req: Request, res: Response) {
   const authorId = req.params.authorId;
-  const sessionId = req.cookies['session_id'];
 
-  const validate = deleteAuthorSchema.safeParse({ authorId, sessionId });
+  const validate = deleteAuthorSchema.safeParse({ authorId });
 
   if (!validate.success) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const [sessionError, userId] = await getUserIdbySession(
-    validate.data.sessionId,
-  );
+  const sessionId: string = req.cookies['session_id'];
+  const [, userId] = await getUserIdbySession(sessionId);
 
-  if (sessionError) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (!userId) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  const [error] = await deleteAuthor(validate.data.authorId, userId);
+  const [error] = await deleteAuthor(validate.data.authorId, userId!);
 
   if (error) {
     if ((error as Error).message === 'author not found') {
@@ -141,12 +97,10 @@ export async function deleteAuthorController(req: Request, res: Response) {
 
 export async function updateAuthorController(req: Request, res: Response) {
   const authorId = req.params.authorId;
-  const sessionId = req.cookies['session_id'];
   const data = req.body;
 
   const validate = updateAuthorSchema.safeParse({
     authorId,
-    sessionId,
     data,
   });
 
@@ -154,21 +108,12 @@ export async function updateAuthorController(req: Request, res: Response) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const [sessionError, userId] = await getUserIdbySession(
-    validate.data.sessionId,
-  );
-
-  if (sessionError) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (!userId) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
+  const sessionId: string = req.cookies['session_id'];
+  const [, userId] = await getUserIdbySession(sessionId);
 
   const [error, author] = await updateAuthor(
     validate.data.authorId,
-    userId,
+    userId!,
     validate.data.data,
   );
 

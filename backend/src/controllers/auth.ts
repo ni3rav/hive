@@ -11,7 +11,11 @@ import {
   registerSchema,
   verifyEmailSchema,
 } from '../utils/validations/auth';
-import { createSession, VERIFICATION_LINK_AGE } from '../utils/sessions';
+import {
+  createSession,
+  getUserIdbySession,
+  VERIFICATION_LINK_AGE,
+} from '../utils/sessions';
 import { eq, and } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import {
@@ -145,11 +149,7 @@ export async function loginController(req: Request, res: Response) {
 }
 
 export async function logoutController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
-
-  if (!sessionId) {
-    return unauthorized(res, 'No active session');
-  }
+  const sessionId: string = req.cookies['session_id'];
 
   await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 
@@ -159,30 +159,12 @@ export async function logoutController(req: Request, res: Response) {
 }
 
 export async function meController(req: Request, res: Response) {
-  const sessionId = req.cookies['session_id'];
+  const sessionId: string = req.cookies['session_id'];
 
-  if (!sessionId) {
-    return unauthorized(res, 'No active session');
-  }
-
-  const session = await db.query.sessionsTable.findFirst({
-    where: eq(sessionsTable.id, sessionId),
-  });
-
-  if (!session) {
-    return unauthorized(res, 'Invalid or expired session');
-  }
-
-  if (new Date() > new Date(session.expiresAt)) {
-    // !lazy deletion on check
-    // TODO: Add a cronjob to purge out all inactive sessions at a regular interval
-    await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
-    clearSessionCookie(res);
-    return unauthorized(res, 'Session expired');
-  }
+  const [, userId] = await getUserIdbySession(sessionId);
 
   const user = await db.query.usersTable.findFirst({
-    where: eq(usersTable.id, session.userId),
+    where: eq(usersTable.id, userId!),
   });
 
   if (!user) {
