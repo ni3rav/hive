@@ -54,7 +54,11 @@ export async function registerController(req: Request, res: Response) {
   }
 
   //* hashing password
-  const hashedPassword = await hashPassword(password);
+  const [hashError, hashedPassword] = await hashPassword(password);
+
+  if (hashError || !hashedPassword) {
+    return serverError(res, 'Failed to hash password');
+  }
 
   //* creating user
   const [user] = await db
@@ -109,7 +113,9 @@ export async function loginController(req: Request, res: Response) {
   }
 
   //* password verification
-  if (!(await verifyPassword(password, user.password))) {
+  const [verifyError, isValid] = await verifyPassword(password, user.password);
+
+  if (verifyError || !isValid) {
     return unauthorized(res, 'Invalid email or password');
   }
 
