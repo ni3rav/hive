@@ -13,11 +13,10 @@ import {
 } from '../utils/validations/auth';
 import {
   createSession,
+  generateVerificationLinkToken,
   getUserIdbySession,
-  VERIFICATION_LINK_AGE,
 } from '../utils/sessions';
 import { eq, and } from 'drizzle-orm';
-import { randomBytes } from 'crypto';
 import {
   validationError,
   conflict,
@@ -68,23 +67,20 @@ export async function registerController(req: Request, res: Response) {
       .returning();
 
     // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
-    const verificationLinkToken = randomBytes(32).toString('hex');
-    const verificationLinkExpiresAt = new Date(
-      Date.now() + VERIFICATION_LINK_AGE,
-    ); // 15 minutes
+    const { token, expiresAt } = generateVerificationLinkToken();
 
     //* storing verification link in db
     await db.insert(verificationLinksTable).values({
       userId: user.id,
-      token: verificationLinkToken,
-      expiresAt: verificationLinkExpiresAt,
+      token: token,
+      expiresAt: expiresAt,
     });
 
     // TODO: In production, send verification link via email instead of response
     return created(res, 'User registered successfully', {
       userId: user.id,
-      verificationLinkToken,
-      verificationLinkExpiresAt,
+      verificationLinkToken: token,
+      verificationLinkExpiresAt: expiresAt,
     });
   } catch (error) {
     console.error('Error in registerController:', error);
@@ -131,23 +127,20 @@ export async function loginController(req: Request, res: Response) {
     //* email verification check
     if (!user.emailVerified) {
       // TODO: replace it with the common verification link generator function later
-      const verificationLinkToken = randomBytes(32).toString('hex');
-      const verificationLinkExpiresAt = new Date(
-        Date.now() + VERIFICATION_LINK_AGE,
-      ); // 15 minutes
+      const { token, expiresAt } = generateVerificationLinkToken();
 
       //* storing verification link in db
       await db.insert(verificationLinksTable).values({
         userId: user.id,
-        token: verificationLinkToken,
-        expiresAt: verificationLinkExpiresAt,
+        token: token,
+        expiresAt: expiresAt,
       });
 
       // TODO: for now, returning token but send it via email later
       return forbidden(res, 'Email not verified', {
         userId: user.id,
-        verificationLinkToken,
-        verificationLinkExpiresAt,
+        verificationLinkToken: token,
+        verificationLinkExpiresAt: expiresAt,
       });
     }
 
