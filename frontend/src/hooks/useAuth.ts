@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 
 export function useAuth() {
   return useQuery({
-    queryKey: QueryKeys.userKeys().base, // A unique key for this query
+    queryKey: QueryKeys.userKeys().me(), // A unique key for this query
     queryFn: apiGetMe, // The API function to call
     retry: false, // Don't retry if it fails (e.g., user is not logged in)
   });
