@@ -8,10 +8,11 @@ import type { Author } from '@/types/author';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
+import { QueryKeys } from '@/lib/query-key-factory';
 
 export function useUserAuthors() {
   return useQuery({
-    queryKey: ['user-authors'],
+    queryKey: QueryKeys.authorKeys().base,
     queryFn: apiGetUserAuthors,
     retry: false,
   });
@@ -23,7 +24,7 @@ export function useCreateAuthor() {
     mutationFn: (data: Author) => apiCreateAuthor(data),
     onSuccess: () => {
       toast.success('Author created');
-      queryClient.invalidateQueries({ queryKey: ['user-authors'] });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
     },
     onError: (error) => {
       const message = getErrorMessage(error, 'Failed to create author');
@@ -45,7 +46,7 @@ export function useUpdateAuthor() {
     }) => apiUpdateAuthor(authorId, data),
     onSuccess: () => {
       toast.success('Author updated');
-      queryClient.invalidateQueries({ queryKey: ['user-authors'] });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
     },
     onError: (error) => {
       const message = getErrorMessage(error, 'Failed to update author');
@@ -61,7 +62,7 @@ export function useDeleteAuthor() {
     mutationFn: (authorId: string) => apiDeleteAuthor(authorId),
     onSuccess: () => {
       toast.success('Author deleted');
-      queryClient.invalidateQueries({ queryKey: ['user-authors'] });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
     },
     onError: (error) => {
       const message = getErrorMessage(error, 'Failed to delete author');
