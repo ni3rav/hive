@@ -6,26 +6,38 @@ import {
   boolean,
   jsonb,
   text,
+  index,
   primaryKey,
 } from 'drizzle-orm/pg-core';
 
-export const usersTable = pgTable('users', {
-  id: uuid().defaultRandom().primaryKey(),
-  name: varchar({ length: 255 }).notNull(),
-  email: varchar({ length: 255 }).notNull().unique(),
-  emailVerified: boolean('email_verified').notNull().default(false),
-  password: varchar({ length: 300 }).notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-});
+export const usersTable = pgTable(
+  'users',
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    name: varchar({ length: 255 }).notNull(),
+    email: varchar({ length: 255 }).notNull().unique(),
+    emailVerified: boolean('email_verified').notNull().default(false),
+    password: varchar({ length: 300 }).notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+  },
+  (t) => [index('idx_user_email').on(t.email)],
+);
 
-export const sessionsTable = pgTable('sessions', {
-  id: uuid().defaultRandom().primaryKey(), // session id
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  expiresAt: timestamp('expires_at').notNull(),
-});
+export const sessionsTable = pgTable(
+  'sessions',
+  {
+    id: uuid().defaultRandom().primaryKey(), // session id
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    expiresAt: timestamp('expires_at').notNull(),
+  },
+  (t) => [
+    index('idx_session_user_id').on(t.userId),
+    index('idx_session_expires_id').on(t.expiresAt),
+  ],
+);
 
 export const verificationLinksTable = pgTable('verification_links', {
   id: uuid().defaultRandom().primaryKey(),
@@ -64,17 +76,21 @@ export const workspaceUsersTable = pgTable(
   ],
 );
 
-export const authorTable = pgTable('authors', {
-  id: uuid().defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => usersTable.id, { onDelete: 'cascade' }),
-  name: varchar('name').notNull(),
-  email: varchar('email').notNull(),
-  about: varchar('about').default(''),
-  socialLinks: jsonb('social_links').default({}),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const authorTable = pgTable(
+  'authors',
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    name: varchar('name').notNull(),
+    email: varchar('email').notNull(),
+    about: varchar('about').default(''),
+    socialLinks: jsonb('social_links').default({}),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [index('idx_authors_user_id').on(t.userId)],
+);
 
 export const postsTable = pgTable('posts', {
   id: uuid().defaultRandom().primaryKey(),
