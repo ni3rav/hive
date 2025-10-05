@@ -13,7 +13,6 @@ export async function getAuthorsByUserId(userId: string) {
   }
 }
 
-
 export async function createAuthor(
   userId: string,
   data: {
@@ -52,7 +51,9 @@ export async function updateAuthor(
     const result = await db
       .update(authorTable)
       .set(data)
-      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
+      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)))
+      .returning();
+    console.log(result);
     return [null, result] as const;
   } catch (error) {
     return [error, null] as const;

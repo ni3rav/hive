@@ -122,5 +122,9 @@ export async function updateAuthorController(req: Request, res: Response) {
     return serverError(res, 'Failed to update author');
   }
 
-  return ok(res, 'Author updated successfully', author);
+  return ok(
+    res,
+    'Author updated successfully',
+    author ? toAuthorListResponseDto(author) : [],
+  );
 }
