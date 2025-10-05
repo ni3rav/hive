@@ -35,6 +35,9 @@ export default function AuthorForm({
     socialLinks: initialData?.socialLinks as Author['socialLinks'],
   });
 
+  const [hasSocialLinksErrors, setHasSocialLinksErrors] = useState(false);
+  const [socialLinksError, setSocialLinksError] = useState<string | null>(null);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -44,7 +47,15 @@ export default function AuthorForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // for creating new authors, send all data
+    if (hasSocialLinksErrors) {
+      setSocialLinksError(
+        'Please fill in all social link fields or remove empty ones',
+      );
+      return;
+    }
+
+    setSocialLinksError(null);
+
     if (!isEditing) {
       onSave({
         name: formData.name,
@@ -55,7 +66,6 @@ export default function AuthorForm({
       return;
     }
 
-    // for editing, send only changed fields
     const changedFields: Partial<Author> = {};
 
     if (formData.name !== initialData?.name) {
@@ -68,7 +78,6 @@ export default function AuthorForm({
       changedFields.about = formData.about;
     }
 
-    // deep comparison for socialLinks
     const socialLinksChanged =
       JSON.stringify(formData.socialLinks) !==
       JSON.stringify(initialData?.socialLinks);
@@ -135,13 +144,30 @@ export default function AuthorForm({
                   socialLinks: value,
                 }))
               }
+              onValidationChange={(hasErrors) => {
+                setHasSocialLinksErrors(hasErrors);
+                if (!hasErrors) {
+                  setSocialLinksError(null);
+                }
+              }}
             />
+            {socialLinksError && (
+              <p className='text-sm text-destructive'>{socialLinksError}</p>
+            )}
           </div>
           <div className='flex justify-end gap-3'>
-            <Button type='button' variant='ghost' onClick={onCancel}>
+            <Button
+              type='button'
+              variant='ghost'
+              onClick={onCancel}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type='submit' disabled={isSubmitting}>
+            <Button
+              type='submit'
+              disabled={isSubmitting || hasSocialLinksErrors}
+            >
               {isSubmitting ? 'Saving...' : 'Save Author'}
             </Button>
           </div>
