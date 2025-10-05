@@ -10,15 +10,13 @@ export default function RegisterPage() {
   const { mutate: register, isPending } = useRegister();
 
   const handleRegister = (name: string, email: string, password: string) => {
-    //* zod validations for registration
     const validatedData = registerSchema.safeParse({
       name,
       email,
       password,
     });
     if (!validatedData.success) {
-      console.log('validatedData', validatedData.error);
-      toast.error('please enter a valid name, email and password');
+      toast.error('Please enter a valid name, email and password');
       return;
     }
     const {

@@ -15,7 +15,7 @@ export default function LoginPage() {
       password,
     });
     if (!validatedData.success) {
-      toast.error('Invalid email or password');
+      toast.error('Please enter a valid email and password');
       return;
     }
     const { email: validatedEmail, password: validatedPassword } =

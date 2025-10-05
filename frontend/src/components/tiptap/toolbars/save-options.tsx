@@ -32,20 +32,20 @@ const SaveOptionsToolbar = React.forwardRef<
   //     try {
   //       const html = editor?.getHTML() ?? "";
   //       if (!html || html.trim() === "<p></p>") {
-  //         toast.info("Nothing to save yet.");
+  //         toast.info("Nothing to save yet");
   //         return;
   //       }
   //       await saveHtmlToServer(html);
   //       toast.success("Saved to server");
   //     } catch {
-  //       toast.error("Failed to save. Please try again.");
+  //       toast.error("Failed to save, please try again");
   //     }
   //   };
 
   const handleDownload = () => {
     const html = editor?.getHTML() ?? '';
     if (!html || html.trim() === '<p></p>') {
-      toast.info('Nothing to download yet.');
+      toast.info('Nothing to download yet');
       return;
     }
     downloadHtmlFile(html);
