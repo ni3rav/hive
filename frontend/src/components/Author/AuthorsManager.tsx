@@ -14,7 +14,7 @@ import {
   useUpdateAuthor,
   useUserAuthors,
 } from '@/hooks/useAuthor';
-import type { Author } from '@/types/author';
+import type { Author, CreateAuthorData } from '@/types/author';
 import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
 import {
@@ -69,9 +69,11 @@ export default function AuthorsManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveAuthor = (authorData: Author | Partial<Author>) => {
+  const handleSaveAuthor = (
+    authorData: CreateAuthorData | Partial<CreateAuthorData>,
+  ) => {
     if (view === 'create') {
-      createAuthorMutation.mutate(authorData as Author, {
+      createAuthorMutation.mutate(authorData as CreateAuthorData, {
         onSuccess: () => {
           // --- CHANGE: Toast removed, handled by hook ---
           setView('list');

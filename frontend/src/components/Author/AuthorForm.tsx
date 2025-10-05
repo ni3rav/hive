@@ -1,4 +1,4 @@
-import type { Author } from '@/types/author';
+import type { Author, CreateAuthorData } from '@/types/author';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ import SocialLinksInput from './social-links';
 
 interface AuthorFormProps {
   initialData?: Author | null;
-  onSave: (data: Author | Partial<Author>) => void;
+  onSave: (data: CreateAuthorData | Partial<CreateAuthorData>) => void;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -66,7 +66,7 @@ export default function AuthorForm({
       return;
     }
 
-    const changedFields: Partial<Author> = {};
+    const changedFields: Partial<CreateAuthorData> = {};
 
     if (formData.name !== initialData?.name) {
       changedFields.name = formData.name;
@@ -124,7 +124,6 @@ export default function AuthorForm({
             />
           </div>
           <div className='space-y-2'>
-            {/* "(Optional)" removed from label */}
             <Label htmlFor='about'>About</Label>
             <Textarea
               id='about'
