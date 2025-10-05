@@ -10,15 +10,18 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 
 export function LoginForm({
   onFormSubmit,
   onSignupClick,
+  isPending = false,
   className,
   ...props
 }: {
   onFormSubmit: (email: string, password: string) => void | Promise<void>;
   onSignupClick: () => void;
+  isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,6 +53,7 @@ export function LoginForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isPending}
                   />
                 </div>
                 <div className='grid gap-3'>
@@ -68,10 +72,18 @@ export function LoginForm({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isPending}
                   />
                 </div>
-                <Button type='submit' className='w-full'>
-                  Login
+                <Button type='submit' className='w-full' disabled={isPending}>
+                  {isPending ? (
+                    <>
+                      <Spinner className='mr-2' />
+                      Logging in...
+                    </>
+                  ) : (
+                    'Login'
+                  )}
                 </Button>
               </div>
               <div className='text-center text-sm'>

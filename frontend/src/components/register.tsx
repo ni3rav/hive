@@ -10,10 +10,12 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 
 export function RegisterForm({
   onRegSubmit,
   onLoginClick,
+  isPending = false,
   className,
   ...props
 }: {
@@ -23,6 +25,7 @@ export function RegisterForm({
     password: string,
   ) => void | Promise<void>;
   onLoginClick: () => void;
+  isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -55,6 +58,7 @@ export function RegisterForm({
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    disabled={isPending}
                   />
                 </div>
                 <div className='grid gap-3'>
@@ -66,6 +70,7 @@ export function RegisterForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    disabled={isPending}
                   />
                 </div>
                 <div className='grid gap-3'>
@@ -76,10 +81,18 @@ export function RegisterForm({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    disabled={isPending}
                   />
                 </div>
-                <Button type='submit' className='w-full'>
-                  Create Account
+                <Button type='submit' className='w-full' disabled={isPending}>
+                  {isPending ? (
+                    <>
+                      <Spinner className='mr-2' />
+                      Creating account...
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
                 </Button>
               </div>
               <div className='text-center text-sm'>

@@ -7,7 +7,7 @@ import { getErrorMessage, getStatusMessage } from '@/lib/error-utils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { mutate: login } = useLogin();
+  const { mutate: login, isPending } = useLogin();
 
   const handleLogin = (email: string, password: string) => {
     const validatedData = loginSchema.safeParse({
@@ -56,6 +56,7 @@ export default function LoginPage() {
       <LoginForm
         onFormSubmit={handleLogin}
         onSignupClick={() => navigate('/register')}
+        isPending={isPending}
       />
     </div>
   );

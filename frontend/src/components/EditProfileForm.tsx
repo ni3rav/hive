@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/card';
 import { useEditProfile } from '@/hooks/userProfile';
 import { type User } from '@/types/auth';
-import { Loader2, Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { getErrorMessage } from '@/lib/error-utils';
 
 interface EditProfileFormProps {
@@ -138,7 +139,7 @@ export function EditProfileForm({
             >
               {editProfileMutation.isPending ? (
                 <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  <Spinner className='mr-2' />
                   Updating...
                 </>
               ) : (

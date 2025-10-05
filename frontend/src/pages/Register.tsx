@@ -7,7 +7,7 @@ import { getErrorMessage, getStatusMessage } from '@/lib/error-utils';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { mutate: register } = useRegister();
+  const { mutate: register, isPending } = useRegister();
 
   const handleRegister = (name: string, email: string, password: string) => {
     //* zod validations for registration
@@ -65,6 +65,7 @@ export default function RegisterPage() {
       <RegisterForm
         onRegSubmit={handleRegister}
         onLoginClick={() => navigate('/login')}
+        isPending={isPending}
       />
     </div>
   );
