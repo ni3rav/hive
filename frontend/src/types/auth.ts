@@ -10,10 +10,10 @@ export type RegisterData = {
 };
 
 export type User = {
-  avatar: string;
   id: string;
   name: string;
   email: string;
+  avatar?: string;
 };
 
 export type EditProfileData = {

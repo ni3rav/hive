@@ -11,7 +11,10 @@ import {
   updateAuthorSchema,
 } from '../utils/validations/author';
 import { getUserIdbySession } from '../utils/sessions';
-import { toAuthorListResponseDto } from '../dto/author.dto';
+import {
+  toAuthorListResponseDto,
+  toAuthorResponseDto,
+} from '../dto/author.dto';
 import {
   validationError,
   notFound,
@@ -111,7 +114,7 @@ export async function updateAuthorController(req: Request, res: Response) {
   const sessionId: string = req.cookies['session_id'];
   const [, userId] = await getUserIdbySession(sessionId);
 
-  const [error, author] = await updateAuthor(
+  const [error, authors] = await updateAuthor(
     validate.data.authorId,
     userId!,
     validate.data.data,
@@ -122,9 +125,11 @@ export async function updateAuthorController(req: Request, res: Response) {
     return serverError(res, 'Failed to update author');
   }
 
+  const author = authors && authors.length > 0 ? authors[0] : null;
+
   return ok(
     res,
     'Author updated successfully',
-    author ? toAuthorListResponseDto(author) : [],
+    author ? toAuthorResponseDto(author) : undefined,
   );
 }

@@ -4,7 +4,7 @@ import {
   apiGetUserAuthors,
   apiUpdateAuthor,
 } from '@/api/author';
-import type { Author } from '@/types/author';
+import type { CreateAuthorData } from '@/types/author';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
@@ -21,7 +21,7 @@ export function useUserAuthors() {
 export function useCreateAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Author) => apiCreateAuthor(data),
+    mutationFn: (data: CreateAuthorData) => apiCreateAuthor(data),
     onSuccess: () => {
       toast.success('Author created');
       queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
@@ -42,7 +42,7 @@ export function useUpdateAuthor() {
       data,
     }: {
       authorId: string;
-      data: Partial<Author>;
+      data: Partial<CreateAuthorData>;
     }) => apiUpdateAuthor(authorId, data),
     onSuccess: () => {
       toast.success('Author updated');
