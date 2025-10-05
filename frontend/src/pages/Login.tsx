@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { LoginForm } from '@/components/login.tsx';
 import { useLogin } from '@/hooks/useAuth';
 import { loginSchema } from '@/lib/validations/auth';
-import { getErrorMessage, getStatusMessage } from '@/lib/error-utils';
+import { getAuthErrorMessage } from '@/lib/error-utils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -28,23 +28,8 @@ export default function LoginPage() {
           toast.success('Login successful! Welcome back.');
           navigate('/dashboard');
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onError: (error: any) => {
-          const status = error.response?.status;
-          const statusMessage = getStatusMessage(status);
-          const errorMessage = getErrorMessage(error);
-
-          // Custom messages for specific login errors
-          const customMap: Record<number, string> = {
-            404: 'User not found. Please check your email or register.',
-            401: 'Incorrect password. Please try again.',
-          };
-
-          const message =
-            (status && customMap[status]) ||
-            errorMessage ||
-            statusMessage ||
-            'An unexpected error occurred.';
+        onError: (error: unknown) => {
+          const message = getAuthErrorMessage(error, 'login', 'Login failed');
           toast.error(message);
         },
       },

@@ -101,3 +101,32 @@ export function getStatusMessage(status: number | undefined): string | null {
 
   return statusMap[status] || null;
 }
+
+export function getAuthErrorMessage(
+  error: unknown,
+  context: 'login' | 'register' | 'verify',
+  fallback = 'Authentication failed',
+): string {
+  const apiError = error as ApiError;
+  const status = apiError.response?.status;
+
+  const customMessages: Record<string, Record<number, string>> = {
+    login: {
+      404: 'Invalid email or password',
+      401: 'Invalid email or password',
+    },
+    register: {
+      409: 'This email is already registered. Please log in.',
+    },
+    verify: {
+      400: 'Invalid or expired verification link',
+      404: 'Verification link not found',
+    },
+  };
+
+  if (status && customMessages[context]?.[status]) {
+    return customMessages[context][status];
+  }
+
+  return getErrorMessage(error, fallback);
+}

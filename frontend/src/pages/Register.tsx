@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { RegisterForm } from '@/components/register';
 import { useRegister } from '@/hooks/useAuth';
 import { registerSchema } from '@/lib/validations/auth';
-import { getErrorMessage, getStatusMessage } from '@/lib/error-utils';
+import { getAuthErrorMessage } from '@/lib/error-utils';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -38,22 +38,12 @@ export default function RegisterPage() {
           toast.success('Registration successful!.');
           navigate('/dashboard');
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onError: (error: any) => {
-          const status: number | undefined = error.response?.status;
-          const statusMessage = getStatusMessage(status);
-          const errorMessage = getErrorMessage(error);
-
-          // custom messages for specific cases
-          const customMap: Record<number, string> = {
-            409: 'This email is already registered. Please log in.',
-          };
-
-          const message =
-            (status !== undefined && customMap[status]) ||
-            errorMessage ||
-            statusMessage ||
-            'An unexpected error occurred.';
+        onError: (error: unknown) => {
+          const message = getAuthErrorMessage(
+            error,
+            'register',
+            'Registration failed',
+          );
           toast.error(message);
         },
       },

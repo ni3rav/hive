@@ -11,6 +11,7 @@ import type { VerifyEmailData } from '@/types/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { getAuthErrorMessage } from '@/lib/error-utils';
 
 export function useAuth() {
   return useQuery({
@@ -65,8 +66,13 @@ export function useVerifyEmail(data: VerifyEmailData) {
       toast.success('Email verified successfully');
       navigate('/dashboard');
     },
-    onError: () => {
-      toast.error('Email verification failed');
+    onError: (error: unknown) => {
+      const message = getAuthErrorMessage(
+        error,
+        'verify',
+        'Email verification failed',
+      );
+      toast.error(message);
     },
     retry: false,
   });
