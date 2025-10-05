@@ -53,7 +53,6 @@ export async function updateAuthor(
       .set(data)
       .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)))
       .returning();
-    console.log(result);
     return [null, result] as const;
   } catch (error) {
     return [error, null] as const;
