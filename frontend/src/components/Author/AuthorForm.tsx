@@ -1,5 +1,5 @@
 import type { Author, CreateAuthorData } from '@/types/author';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,6 +43,23 @@ export default function AuthorForm({
   ) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
+  const handleSocialLinksChange = useCallback(
+    (value: Author['socialLinks']) => {
+      setFormData((prev) => ({
+        ...prev,
+        socialLinks: value,
+      }));
+    },
+    [],
+  );
+
+  const handleValidationChange = useCallback((hasErrors: boolean) => {
+    setHasSocialLinksErrors(hasErrors);
+    if (!hasErrors) {
+      setSocialLinksError(null);
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,18 +154,8 @@ export default function AuthorForm({
             <SocialLinksInput
               label='Social Links (Optional)'
               defaultValue={initialData?.socialLinks}
-              onChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  socialLinks: value,
-                }))
-              }
-              onValidationChange={(hasErrors) => {
-                setHasSocialLinksErrors(hasErrors);
-                if (!hasErrors) {
-                  setSocialLinksError(null);
-                }
-              }}
+              onChange={handleSocialLinksChange}
+              onValidationChange={handleValidationChange}
             />
             {socialLinksError && (
               <p className='text-sm text-destructive'>{socialLinksError}</p>
