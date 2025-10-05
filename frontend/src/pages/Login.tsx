@@ -11,14 +11,15 @@ export default function LoginPage() {
 
   const handleLogin = (email: string, password: string) => {
     const validatedData = loginSchema.safeParse({
-      validatedEmail: email,
-      validatedPassword: password,
+      email,
+      password,
     });
     if (!validatedData.success) {
       toast.error('Invalid email or password');
       return;
     }
-    const { validatedEmail, validatedPassword } = validatedData.data;
+    const { email: validatedEmail, password: validatedPassword } =
+      validatedData.data;
 
     login(
       { email: validatedEmail, password: validatedPassword },

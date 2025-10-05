@@ -30,15 +30,15 @@ export function Verify() {
 
   useEffect(() => {
     const validatedData = verifyEmailSchema.safeParse({
-      validatedToken: token,
-      validatedUserId: userId,
+      token,
+      userId,
     });
 
     if (!validatedData.success) {
       const fieldErrors = validatedData.error.format();
       const errorMessage =
-        fieldErrors.validatedToken?._errors[0] ||
-        fieldErrors.validatedUserId?._errors[0] ||
+        fieldErrors.token?._errors[0] ||
+        fieldErrors.userId?._errors[0] ||
         'Invalid verification link';
 
       toast.error(errorMessage);

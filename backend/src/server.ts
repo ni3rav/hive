@@ -8,6 +8,7 @@ import { env } from './env';
 import morgan from 'morgan';
 import cors from 'cors';
 import { authMiddleware } from './middleware/auth';
+import { notFound } from './utils/responses';
 
 export const app = express();
 
@@ -30,3 +31,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', authMiddleware, userRouter);
 app.use('/api/author', authMiddleware, authorRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
+
+app.use((req, res) => {
+  return notFound(res, 'Route not found', { path: req.originalUrl });
+});

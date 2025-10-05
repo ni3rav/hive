@@ -12,17 +12,20 @@ export default function RegisterPage() {
   const handleRegister = (name: string, email: string, password: string) => {
     //* zod validations for registration
     const validatedData = registerSchema.safeParse({
-      validatedName: name,
-      validatedEmail: email,
-      validatedPassword: password,
+      name,
+      email,
+      password,
     });
     if (!validatedData.success) {
       console.log('validatedData', validatedData.error);
       toast.error('please enter a valid name, email and password');
       return;
     }
-    const { validatedName, validatedEmail, validatedPassword } =
-      validatedData.data;
+    const {
+      name: validatedName,
+      email: validatedEmail,
+      password: validatedPassword,
+    } = validatedData.data;
 
     register(
       {
