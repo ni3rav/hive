@@ -4,6 +4,8 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query-client.ts';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorFallback } from './components/ErrorFallback';
 import RegisterPage from './pages/Register';
 import LoginPage from './pages/Login';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -13,7 +15,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import LandingPage from './pages/LandingPage';
 import { Verify } from './pages/Verify';
 import Editor from './pages/Editor';
-import AuthorsPage from './pages/Author'; 
+import AuthorsPage from './pages/Author';
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
@@ -38,19 +40,19 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/dashboard',
-        element: <DashboardLayout />, 
+        element: <DashboardLayout />,
         children: [
           {
-            index: true, 
+            index: true,
             element: <DashboardPage />,
           },
           {
-            path: 'editor', 
+            path: 'editor',
             element: <Editor />,
           },
           {
-          path: 'authors', 
-          element: <AuthorsPage />,
+            path: 'authors',
+            element: <AuthorsPage />,
           },
         ],
       },
@@ -65,6 +67,8 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <Toaster position='bottom-right' richColors />
-    <RouterProvider router={router} />
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   </QueryClientProvider>,
 );
