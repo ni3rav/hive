@@ -59,7 +59,9 @@ export function useVerifyEmail(data: VerifyEmailData) {
   const navigate = useNavigate();
   return useMutation({
     mutationFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // delibrately delaying the verification process for 2 seconds
+      if (!import.meta.env.PROD) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
       return apiVerifyEmail(data);
     },
     onSuccess: () => {
