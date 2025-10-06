@@ -16,6 +16,7 @@ import LandingPage from './pages/LandingPage';
 import { Verify } from './pages/Verify';
 import Editor from './pages/Editor';
 import AuthorsPage from './pages/Author';
+import NotFound from './pages/NotFound';
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
@@ -34,6 +35,8 @@ const router = createBrowserRouter([
     path: '/register',
     element: <RegisterPage />,
   },
+
+  { path: '*', element: <NotFound className='h-screen' /> },
 
   {
     element: <ProtectedRoute />,
@@ -54,6 +57,7 @@ const router = createBrowserRouter([
             path: 'authors',
             element: <AuthorsPage />,
           },
+          { path: '*', element: <NotFound /> },
         ],
       },
       {
