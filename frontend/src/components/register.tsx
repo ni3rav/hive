@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +11,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export function RegisterForm({
   onRegSubmit,
@@ -27,9 +30,24 @@ export function RegisterForm({
   onLoginClick: () => void;
   isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(1, 'Name is required'),
+        email: z.string().email('Enter a valid email'),
+        password: z.string().min(6, 'Password must be at least 6 characters'),
+      }),
+    [],
+  );
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+  } = useForm<{ name: string; email: string; password: string }>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: '', email: '', password: '' },
+    mode: 'onChange',
+  });
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -42,10 +60,9 @@ export function RegisterForm({
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              onRegSubmit(name, email, password);
-            }}
+            onSubmit={handleSubmit((v) =>
+              onRegSubmit(v.name, v.email, v.password),
+            )}
           >
             <div className='grid gap-6'>
               <div className='grid gap-6'>
@@ -56,10 +73,14 @@ export function RegisterForm({
                     type='text'
                     placeholder='Your Name'
                     required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     disabled={isPending}
+                    {...register('name')}
                   />
+                  {errors.name?.message && (
+                    <p className='text-sm text-destructive'>
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
                 <div className='grid gap-3'>
                   <Label htmlFor='email'>Email</Label>
@@ -68,10 +89,14 @@ export function RegisterForm({
                     type='email'
                     placeholder='m@example.com'
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     disabled={isPending}
+                    {...register('email')}
                   />
+                  {errors.email?.message && (
+                    <p className='text-sm text-destructive'>
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
                 <div className='grid gap-3'>
                   <Label htmlFor='password'>Password</Label>
@@ -79,12 +104,20 @@ export function RegisterForm({
                     id='password'
                     type='password'
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     disabled={isPending}
+                    {...register('password')}
                   />
+                  {errors.password?.message && (
+                    <p className='text-sm text-destructive'>
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
-                <Button type='submit' className='w-full' disabled={isPending}>
+                <Button
+                  type='submit'
+                  className='w-full'
+                  disabled={isPending || !isDirty}
+                >
                   {isPending ? (
                     <>
                       <Spinner className='mr-2' />

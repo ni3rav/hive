@@ -15,6 +15,7 @@ import {
   Youtube,
   X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type SocialEntry = {
   id: string;
@@ -86,8 +87,24 @@ export function SocialLinksInput({
   }
 
   function updateRow(id: string, patch: Partial<SocialEntry>) {
-    setRows((prev) =>
-      prev.map((r) => {
+    setRows((prev) => {
+      if (typeof patch.link === 'string') {
+        const candidate = patch.link;
+        const candidateNorm =
+          detectPlatform(candidate).normalizedUrl || autoPrefixHttp(candidate);
+        const hasDuplicate = prev.some((r) => {
+          if (r.id === id) return false;
+          const norm =
+            detectPlatform(r.link).normalizedUrl || autoPrefixHttp(r.link);
+          return norm === candidateNorm;
+        });
+        if (hasDuplicate) {
+          toast.warning('That link is already added');
+          return prev.filter((r) => r.id !== id);
+        }
+      }
+
+      return prev.map((r) => {
         if (r.id !== id) return r;
         const merged = { ...r, ...patch };
         if (typeof patch.link === 'string') {
@@ -96,8 +113,8 @@ export function SocialLinksInput({
         }
         merged.error = validateRow(merged);
         return merged;
-      }),
-    );
+      });
+    });
   }
 
   function validateRow(row: SocialEntry) {
