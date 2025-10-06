@@ -70,7 +70,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
-    <Toaster position='bottom-right' richColors />
+    <Toaster position='top-right' richColors />
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <RouterProvider router={router} />
     </ErrorBoundary>

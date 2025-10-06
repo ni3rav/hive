@@ -56,12 +56,10 @@ export default function AuthorsManager() {
 
   const confirmDelete = () => {
     if (!pendingDeleteId) return;
-    deleteAuthorMutation.mutate(pendingDeleteId, {
-      onSettled: () => {
-        setIsDeleteOpen(false);
-        setPendingDeleteId(null);
-      },
-    });
+    const id = pendingDeleteId;
+    setIsDeleteOpen(false);
+    setPendingDeleteId(null);
+    deleteAuthorMutation.mutate(id);
   };
 
   const cancelDelete = () => {
@@ -175,19 +173,11 @@ export default function AuthorsManager() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant='outline'
-              onClick={cancelDelete}
-              disabled={deleteAuthorMutation.isPending}
-            >
+            <Button variant='outline' onClick={cancelDelete}>
               Cancel
             </Button>
-            <Button
-              variant='destructive'
-              onClick={confirmDelete}
-              disabled={deleteAuthorMutation.isPending}
-            >
-              {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete'}
+            <Button variant='destructive' onClick={confirmDelete}>
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
