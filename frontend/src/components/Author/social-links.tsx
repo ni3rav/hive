@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { z } from 'zod';
 import {
   Diamond as Discord,
   Github,
@@ -14,8 +15,7 @@ import {
   Youtube,
   X,
 } from 'lucide-react';
-
-// Removed unused presets and related types to satisfy linter
+import { toast } from 'sonner';
 
 type SocialEntry = {
   id: string;
@@ -30,11 +30,13 @@ export function SocialLinksInput({
   className,
   defaultValue,
   onChange,
+  onValidationChange,
   label = 'Social Links (Optional)',
 }: {
   className?: string;
   defaultValue?: SocialLinksValue;
   onChange?: (value: SocialLinksValue) => void;
+  onValidationChange?: (hasErrors: boolean) => void;
   label?: string;
 }) {
   const [rows, setRows] = React.useState<SocialEntry[]>(() => {
@@ -53,15 +55,21 @@ export function SocialLinksInput({
 
   React.useEffect(() => {
     const obj: SocialLinksValue = {};
+    const hasErrors = rows.some((r) => r.error !== null);
+    const hasEmptyRows = rows.some((r) => r.link.trim() === '');
+
     rows.forEach((r) => {
       const key = normalizeKey(r.platform);
       if (!key || !r.link || r.error) return;
       obj[key] = r.link;
     });
+
     if (Object.keys(obj).length > 0) {
       onChange?.(obj);
     }
-  }, [rows, onChange]);
+
+    onValidationChange?.(hasErrors || hasEmptyRows);
+  }, [rows, onChange, onValidationChange]);
 
   function addRow() {
     setRows((prev) => {
@@ -79,8 +87,24 @@ export function SocialLinksInput({
   }
 
   function updateRow(id: string, patch: Partial<SocialEntry>) {
-    setRows((prev) =>
-      prev.map((r) => {
+    setRows((prev) => {
+      if (typeof patch.link === 'string') {
+        const candidate = patch.link;
+        const candidateNorm =
+          detectPlatform(candidate).normalizedUrl || autoPrefixHttp(candidate);
+        const hasDuplicate = prev.some((r) => {
+          if (r.id === id) return false;
+          const norm =
+            detectPlatform(r.link).normalizedUrl || autoPrefixHttp(r.link);
+          return norm === candidateNorm;
+        });
+        if (hasDuplicate) {
+          toast.warning('That link is already added');
+          return prev.filter((r) => r.id !== id);
+        }
+      }
+
+      return prev.map((r) => {
         if (r.id !== id) return r;
         const merged = { ...r, ...patch };
         if (typeof patch.link === 'string') {
@@ -89,21 +113,22 @@ export function SocialLinksInput({
         }
         merged.error = validateRow(merged);
         return merged;
-      }),
-    );
+      });
+    });
   }
 
   function validateRow(row: SocialEntry) {
-    if (!row.link) return null; // allow empty row without error
+    if (!row.link) return null;
     const { normalizedUrl, isEmail } = detectPlatform(row.link);
 
     if (isEmail) {
       return isValidEmail(row.link) ? null : 'Enter a valid email address';
     }
 
-    // URL validation
     const normalized = normalizedUrl || autoPrefixHttp(row.link);
-    if (!isValidUrl(normalized)) return 'Enter a valid URL (https://...)';
+    if (!isValidUrl(normalized)) {
+      return 'Enter a valid domain (e.g., example.com)';
+    }
     return null;
   }
 
@@ -140,50 +165,45 @@ export function SocialLinksInput({
             </Button>
           </div>
 
-          {/* per-row error messages (moved to top) */}
-          <div className='space-y-1'>
-            {rows.map(
-              (row) =>
-                row.error && (
-                  <p key={`err-${row.id}`} className='text-xs text-destructive'>
-                    {row.error}
-                  </p>
-                ),
-            )}
-          </div>
-
           {rows.map((row) => {
             const { icon: Icon, platform } = detectPlatform(row.link);
             return (
-              <div
-                key={row.id}
-                className={cn(
-                  'flex items-center gap-2 rounded-md bg-card/50 p-2',
+              <div key={row.id} className='space-y-2'>
+                <div className='flex items-center gap-2 rounded-md bg-card/50 p-2'>
+                  <span className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-background text-foreground'>
+                    <Icon className='h-4 w-4' aria-hidden='true' />
+                    <span className='sr-only'>{platform || 'link'}</span>
+                  </span>
+
+                  <Input
+                    className={cn(
+                      'border shadow-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                      row.error
+                        ? 'border-destructive text-destructive focus-visible:ring-destructive'
+                        : 'border-transparent',
+                    )}
+                    value={row.link}
+                    placeholder='Enter social media URL'
+                    onChange={(e) =>
+                      updateRow(row.id, { link: e.target.value })
+                    }
+                    onBlur={() => handleNormalizeLink(row.id)}
+                    aria-invalid={!!row.error || undefined}
+                  />
+
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    className='h-9 w-9 shrink-0 p-0'
+                    onClick={() => removeRow(row.id)}
+                    aria-label='Remove link'
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
+                </div>
+                {row.error && (
+                  <p className='text-sm text-destructive pl-11'>{row.error}</p>
                 )}
-              >
-                <span className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-background text-foreground'>
-                  <Icon className='h-4 w-4' aria-hidden='true' />
-                  <span className='sr-only'>{platform || 'link'}</span>
-                </span>
-
-                <Input
-                  className='border-0 shadow-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-                  value={row.link}
-                  placeholder='Enter social media URL'
-                  onChange={(e) => updateRow(row.id, { link: e.target.value })}
-                  onBlur={() => handleNormalizeLink(row.id)}
-                  aria-invalid={!!row.error || undefined}
-                />
-
-                <Button
-                  type='button'
-                  variant='ghost'
-                  className='h-9 w-9 p-0'
-                  onClick={() => removeRow(row.id)}
-                  aria-label='Remove link'
-                >
-                  <X className='h-4 w-4' />
-                </Button>
               </div>
             );
           })}
@@ -196,27 +216,28 @@ export function SocialLinksInput({
 // Utils
 
 function normalizeKey(input: string) {
-  return (input || '').trim().toLowerCase().replace(/\s+/g, '-'); // spaces to dashes
+  return (input || '').trim().toLowerCase().replace(/\s+/g, '-');
 }
 
+const emailSchema = z.email();
+const urlSchema = z
+  .url()
+  .refine((url) => url.startsWith('https://'), 'URL must use HTTPS protocol');
+
 function isValidEmail(email: string) {
-  // simple email check
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return emailSchema.safeParse(email).success;
 }
 
 function isValidUrl(value: string) {
-  try {
-    const u = new URL(value);
-    return u.protocol === 'http:' || u.protocol === 'https:';
-  } catch {
-    return false;
-  }
+  return urlSchema.safeParse(value).success;
 }
 
 function autoPrefixHttp(value: string) {
   if (!value) return value;
-  if (/^https?:\/\//i.test(value)) return value;
-  return `https://${value}`;
+
+  const cleanUrl = value.replace(/^(https?|ftp):\/\//i, '');
+
+  return `https://${cleanUrl}`;
 }
 
 function detectPlatform(raw: string): {

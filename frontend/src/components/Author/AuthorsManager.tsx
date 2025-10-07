@@ -14,7 +14,7 @@ import {
   useUpdateAuthor,
   useUserAuthors,
 } from '@/hooks/useAuthor';
-import type { Author } from '@/types/author';
+import type { Author, CreateAuthorData } from '@/types/author';
 import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
 import {
@@ -56,12 +56,10 @@ export default function AuthorsManager() {
 
   const confirmDelete = () => {
     if (!pendingDeleteId) return;
-    deleteAuthorMutation.mutate(pendingDeleteId, {
-      onSettled: () => {
-        setIsDeleteOpen(false);
-        setPendingDeleteId(null);
-      },
-    });
+    const id = pendingDeleteId;
+    setIsDeleteOpen(false);
+    setPendingDeleteId(null);
+    deleteAuthorMutation.mutate(id);
   };
 
   const cancelDelete = () => {
@@ -69,9 +67,11 @@ export default function AuthorsManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveAuthor = (authorData: Author | Partial<Author>) => {
+  const handleSaveAuthor = (
+    authorData: CreateAuthorData | Partial<CreateAuthorData>,
+  ) => {
     if (view === 'create') {
-      createAuthorMutation.mutate(authorData as Author, {
+      createAuthorMutation.mutate(authorData as CreateAuthorData, {
         onSuccess: () => {
           // --- CHANGE: Toast removed, handled by hook ---
           setView('list');
@@ -173,19 +173,11 @@ export default function AuthorsManager() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant='outline'
-              onClick={cancelDelete}
-              disabled={deleteAuthorMutation.isPending}
-            >
+            <Button variant='outline' onClick={cancelDelete}>
               Cancel
             </Button>
-            <Button
-              variant='destructive'
-              onClick={confirmDelete}
-              disabled={deleteAuthorMutation.isPending}
-            >
-              {deleteAuthorMutation.isPending ? 'Deleting...' : 'Delete'}
+            <Button variant='destructive' onClick={confirmDelete}>
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,6 @@
 import type { Author } from '@/types/author';
 import { useMemo, useState } from 'react';
-import { MoreHorizontal, Plus, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,6 +17,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 
 type Props = {
   authors: Author[];
@@ -74,9 +82,25 @@ export default function AuthorList({
       </CardHeader>
       <CardContent>
         {filtered.length === 0 ? (
-          <div className='flex flex-col items-center justify-center rounded-lg border border-dashed p-10 text-center animate-in fade-in-50'>
-            No Authors found, Create one to get started.
-          </div>
+          <Empty className='border-dashed animate-in fade-in-50'>
+            <EmptyHeader>
+              <EmptyMedia variant='icon'>
+                <Users />
+              </EmptyMedia>
+              <EmptyTitle>No Authors Yet</EmptyTitle>
+              <EmptyDescription>
+                {search
+                  ? `No authors found matching "${search}". Try a different search term.`
+                  : "You haven't created any author profiles yet. Get started by creating your first author."}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button onClick={onAddAuthor} size='sm'>
+                <Plus />
+                Create Author
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <div className='divide-y'>
             {filtered.map((author, idx) => (

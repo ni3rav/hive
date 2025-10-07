@@ -5,6 +5,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorFallback } from '@/components/ErrorFallback';
 
 export function DashboardLayout() {
   return (
@@ -17,8 +19,9 @@ export function DashboardLayout() {
           </div>
         </header>
         <main className='flex flex-1 flex-col gap-4 p-4 pt-0'>
-          {/* This Outlet will render the correct page, like DashboardPage */}
-          <Outlet />
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </SidebarInset>
     </SidebarProvider>

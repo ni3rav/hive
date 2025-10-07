@@ -1,6 +1,5 @@
 import { useAuth, useLogout } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Card,
@@ -44,7 +43,6 @@ function ProfileActionRow({
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { data: user, isLoading, isError } = useAuth();
   const logoutMutation = useLogout();
   const [isEditing, setIsEditing] = useState(false);
@@ -52,7 +50,6 @@ export function ProfilePage() {
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/login');
       },
     });

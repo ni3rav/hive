@@ -7,26 +7,26 @@ import type {
   VerifyEmailData,
 } from '@/types/auth';
 
-export function apiLogin(data: LoginData) {
-  return apiPost('/api/auth/login', data);
+export function apiLogin(data: LoginData): Promise<void> {
+  return apiPost<void, LoginData>('/api/auth/login', data);
 }
 
-export function apiRegister(data: RegisterData) {
-  return apiPost('/api/auth/register', data);
+export function apiRegister(data: RegisterData): Promise<void> {
+  return apiPost<void, RegisterData>('/api/auth/register', data);
 }
 
 export function apiGetMe(): Promise<User> {
-  return apiGet('/api/auth/me');
+  return apiGet<User>('/api/auth/me');
 }
 
-export function apiLogout() {
-  return apiPost('/api/auth/logout');
+export function apiLogout(): Promise<void> {
+  return apiPost<void>('/api/auth/logout');
 }
 
-export function apiEditProfile(data: EditProfileData) {
-  return apiPatch('/api/user/edit', data);
+export function apiEditProfile(data: EditProfileData): Promise<User> {
+  return apiPatch<User, EditProfileData>('/api/user/edit', data);
 }
 
-export function apiVerifyEmail(data: VerifyEmailData) {
-  return apiPost('/api/auth/verify', data);
+export function apiVerifyEmail(data: VerifyEmailData): Promise<void> {
+  return apiPost<void, VerifyEmailData>('/api/auth/verify', data);
 }

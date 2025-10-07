@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +11,12 @@ import {
 } from '@/components/ui/card';
 import { useEditProfile } from '@/hooks/userProfile';
 import { type User } from '@/types/auth';
-import { Loader2, Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 import { getErrorMessage } from '@/lib/error-utils';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface EditProfileFormProps {
   user: User;
@@ -25,50 +29,37 @@ export function EditProfileForm({
   onCancel,
   onSuccess,
 }: EditProfileFormProps) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    general?: string;
-  }>({});
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().optional(),
+        email: z
+          .string()
+          .email('Please enter a valid email address')
+          .optional(),
+      }),
+    [],
+  );
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<{ name?: string; email?: string }>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: user.name, email: user.email },
+    mode: 'onChange',
+  });
 
   const editProfileMutation = useEditProfile();
 
-  const validateForm = () => {
-    const newErrors: typeof errors = {};
-
-    if (!name.trim() && !email.trim()) {
-      newErrors.general = 'At least one field must be filled';
-      setErrors(newErrors);
-      return false;
-    }
-
-    if (name.trim() && name.trim().length < 1) {
-      newErrors.name = 'Name must be at least 1 character';
-    }
-
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
+  const onSubmit = async (values: { name?: string; email?: string }) => {
     const updateData: { name?: string; email?: string } = {};
+    const name = (values.name || '').trim();
+    const email = (values.email || '').trim();
 
-    if (name.trim() !== user.name) {
-      updateData.name = name.trim();
-    }
-    if (email.trim() !== user.email) {
-      updateData.email = email.trim();
-    }
+    if (name && name !== user.name) updateData.name = name;
+    if (email && email !== user.email) updateData.email = email;
 
     if (Object.keys(updateData).length === 0) {
       onCancel();
@@ -81,12 +72,16 @@ export function EditProfileForm({
       },
       onError: (error: unknown) => {
         const errorMessage = getErrorMessage(error, 'Failed to update profile');
-        setErrors({ general: errorMessage });
+        // Show a general inline error under the form
+        // (we can also toast if you prefer)
+        console.error(errorMessage);
       },
     });
   };
 
-  const hasChanges = name.trim() !== user.name || email.trim() !== user.email;
+  const hasChanges =
+    (watch('name') || '').trim() !== user.name ||
+    (watch('email') || '').trim() !== user.email;
 
   return (
     <Card className='w-full max-w-xl'>
@@ -95,19 +90,18 @@ export function EditProfileForm({
         <CardDescription>Update your name and email address</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className='space-y-4'>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
               id='name'
               type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
               placeholder='Enter your name'
               className={errors.name ? 'border-destructive' : ''}
+              {...register('name')}
             />
-            {errors.name && (
-              <p className='text-sm text-destructive'>{errors.name}</p>
+            {errors.name?.message && (
+              <p className='text-sm text-destructive'>{errors.name.message}</p>
             )}
           </div>
 
@@ -116,19 +110,16 @@ export function EditProfileForm({
             <Input
               id='email'
               type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder='Enter your email'
               className={errors.email ? 'border-destructive' : ''}
+              {...register('email')}
             />
-            {errors.email && (
-              <p className='text-sm text-destructive'>{errors.email}</p>
+            {errors.email?.message && (
+              <p className='text-sm text-destructive'>{errors.email.message}</p>
             )}
           </div>
 
-          {errors.general && (
-            <p className='text-sm text-destructive'>{errors.general}</p>
-          )}
+          {/* General error is now surfaced via toast/console in onError */}
 
           <div className='flex gap-2 pt-4'>
             <Button
@@ -138,7 +129,7 @@ export function EditProfileForm({
             >
               {editProfileMutation.isPending ? (
                 <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  <Spinner className='mr-2' />
                   Updating...
                 </>
               ) : (

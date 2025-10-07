@@ -195,6 +195,7 @@ export async function meController(req: Request, res: Response) {
     }
 
     return ok(res, 'User retrieved successfully', {
+      id: user.id,
       name: user.name,
       email: user.email,
     });
