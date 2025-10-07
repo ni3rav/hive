@@ -6,17 +6,21 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ErrorFallback';
-import RegisterPage from './pages/Register';
-import LoginPage from './pages/Login';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
-import { DashboardPage } from './pages/Dashboard';
-import { ProfilePage } from './pages/ProfilePage';
-import LandingPage from './pages/LandingPage';
-import { Verify } from './pages/Verify';
-import Editor from './pages/Editor';
-import AuthorsPage from './pages/Author';
-import NotFound from './pages/NotFound';
+import { lazyPage } from '@/lib/lazy';
+import { Suspense } from 'react';
+import { Spinner } from './components/ui/spinner';
+
+const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
+const RegisterPage = lazyPage('/src/pages/Register.tsx');
+const LoginPage = lazyPage('/src/pages/Login.tsx');
+const Verify = lazyPage('/src/pages/Verify.tsx', 'VerifyPage');
+const NotFound = lazyPage<{ className?: string }>('/src/pages/NotFound.tsx');
+const DashboardPage = lazyPage('/src/pages/Dashboard.tsx', 'DashboardPage');
+const Editor = lazyPage('/src/pages/Editor.tsx');
+const AuthorsPage = lazyPage('/src/pages/Author.tsx');
+const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
@@ -72,7 +76,15 @@ createRoot(document.getElementById('root')!).render(
   <QueryClientProvider client={queryClient}>
     <Toaster position='top-right' richColors />
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <RouterProvider router={router} />
+      <Suspense
+        fallback={
+          <div className='flex items-center justify-center p-8'>
+            <Spinner />
+          </div>
+        }
+      >
+        <RouterProvider router={router} />
+      </Suspense>
     </ErrorBoundary>
   </QueryClientProvider>,
 );

@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function Verify() {
+export function VerifyPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token') ?? '';
@@ -136,5 +136,3 @@ export function Verify() {
     </div>
   );
 }
-
-export default Verify;
