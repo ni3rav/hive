@@ -74,7 +74,6 @@ export function EditProfileForm({
         const errorMessage = getErrorMessage(error, 'Failed to update profile');
         // Show a general inline error under the form
         // (we can also toast if you prefer)
-        // eslint-disable-next-line no-console
         console.error(errorMessage);
       },
     });
