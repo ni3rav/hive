@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
-import { hashPassword, verifyPassword } from '../utils/password';
+import {
+  createResetPasswordLink,
+  hashPassword,
+  verifyPassword,
+} from '../utils/password';
 import { db } from '../db';
 import {
   sessionsTable,
@@ -7,6 +11,7 @@ import {
   verificationLinksTable,
 } from '../db/schema';
 import {
+  generateResetLinkSchema,
   loginSchema,
   registerSchema,
   verifyEmailSchema,
@@ -29,6 +34,8 @@ import {
   badRequest,
 } from '../utils/responses';
 import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
+import { getUserFromEmail } from '../utils/user';
+import { env } from '../env';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
@@ -267,4 +274,41 @@ export async function verifyController(req: Request, res: Response) {
     console.error('Error in verifyController:', error);
     return serverError(res, 'Failed to verify email');
   }
+}
+
+export async function generateResetPasswordLinkController(
+  req: Request,
+  res: Response,
+) {
+  const validatedBody = generateResetLinkSchema.safeParse(req.body);
+
+  if (!validatedBody.success) {
+    return validationError(res, 'Invalid Email Address', validatedBody.error);
+  }
+  const userEmail = validatedBody.data.email;
+
+  const [error, user] = await getUserFromEmail(userEmail);
+
+  if (error?.message === 'No user found') {
+    return notFound(
+      res,
+      'No user found',
+      'Check if correct email address was entered or not',
+    );
+  } else if (error) {
+    console.error('Error in generateResetPasswordLinkController', error);
+    return serverError(res, 'Error while fetching user');
+  }
+
+  const { id, email } = user;
+  const [linkError, link] = await createResetPasswordLink(id, email);
+
+  if (linkError || !link) {
+    return serverError(res, 'Error while creating reset password link');
+  }
+
+  //* TODO: for now sending in response otherwise use ses here
+  const resetLink = `${env.FRONTEND_URL}/reset?email=${link.email}&token=${link.token}`;
+
+  return created(res, resetLink);
 }

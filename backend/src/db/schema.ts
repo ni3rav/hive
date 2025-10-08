@@ -49,6 +49,25 @@ export const verificationLinksTable = pgTable('verification_links', {
   expiresAt: timestamp('expires_at').notNull().defaultNow(),
 });
 
+export const passwordResetLinksTable = pgTable(
+  'password_reset_links',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => usersTable.id, { onDelete: 'cascade' }),
+    email: varchar('userEmail').notNull(),
+    token: varchar('token').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    expiresAt: timestamp('expires_at').notNull(),
+  },
+  (t) => [
+    primaryKey({
+      name: 'id',
+      columns: [t.userId, t.token],
+    }),
+  ],
+);
+
 export const workspacesTable = pgTable('workspaces', {
   id: uuid().defaultRandom().primaryKey(),
   name: varchar('name', { length: 30 }).notNull(),

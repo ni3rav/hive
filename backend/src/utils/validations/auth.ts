@@ -15,3 +15,7 @@ export const verifyEmailSchema = z.object({
   userId: z.uuid('Invalid userId'),
   token: z.string().trim().min(1, 'Invalid token'),
 });
+
+export const generateResetLinkSchema = z.object({
+  email: z.email('Invalid email'),
+});
