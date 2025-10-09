@@ -283,7 +283,7 @@ export async function generateResetPasswordLinkController(
   const validatedBody = generateResetLinkSchema.safeParse(req.body);
 
   if (!validatedBody.success) {
-    return validationError(res, 'Invalid Email Address', validatedBody.error);
+    return validationError(res, 'Invalid Email Address', validatedBody.error.message);
   }
   const userEmail = validatedBody.data.email;
 
