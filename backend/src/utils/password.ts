@@ -8,7 +8,7 @@ const RESET_PASSWORD_LINK_AGE = 1000 * 60 * 15; // 15 minutes
 
 export async function hashPassword(
   password: string,
-): Promise<[Error | null, string | null]> {
+): Promise<[Error, null] | [null, string]> {
   try {
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     return [null, hash];

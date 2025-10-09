@@ -16,7 +16,7 @@ export async function getUserFromEmail(
     }
     return [null, user];
   } catch (error) {
-    console.error('Error fetching email from user id', error);
+    console.error('Error fetching user from email id: \n', error);
     return [error as Error, null];
   }
 }
