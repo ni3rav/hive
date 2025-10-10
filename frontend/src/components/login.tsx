@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,9 +10,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
+import { loginSchema } from '@/lib/validations/auth';
 
 export function LoginForm({
   onFormSubmit,
@@ -26,20 +27,13 @@ export function LoginForm({
   onSignupClick: () => void;
   isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const schema = useMemo(
-    () =>
-      z.object({
-        email: z.string().email('Enter a valid email'),
-        password: z.string().min(1, 'Password is required'),
-      }),
-    [],
-  );
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<{ email: string; password: string }>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
     mode: 'onChange',
   });
@@ -81,13 +75,16 @@ export function LoginForm({
                     <a
                       href='#'
                       className='ml-auto text-sm underline-offset-4 hover:underline'
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/forgot-password');
+                      }}
                     >
                       Forgot your password?
                     </a>
                   </div>
-                  <Input
+                  <PasswordInput
                     id='password'
-                    type='password'
                     required
                     disabled={isPending}
                     {...register('password')}
