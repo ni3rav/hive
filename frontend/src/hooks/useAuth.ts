@@ -4,6 +4,8 @@ import {
   apiRegister,
   apiLogout,
   apiVerifyEmail,
+  apiForgotPassword,
+  apiResetPassword,
 } from '@/api/auth';
 import { clearAllPersistence } from '@/components/tiptap/persistence';
 import { QueryKeys } from '@/lib/query-key-factory';
@@ -11,7 +13,7 @@ import type { VerifyEmailData } from '@/types/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getAuthErrorMessage } from '@/lib/error-utils';
+import { getAuthErrorMessage, getErrorMessage } from '@/lib/error-utils';
 
 export function useAuth() {
   return useQuery({
@@ -77,5 +79,33 @@ export function useVerifyEmail(data: VerifyEmailData) {
       toast.error(message);
     },
     retry: false,
+  });
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: apiForgotPassword,
+    onSuccess: () => {
+      toast.success('Reset link sent to email');
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error, 'Failed to send reset link');
+      toast.error(message);
+    },
+  });
+}
+
+export function useResetPassword() {
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: apiResetPassword,
+    onSuccess: () => {
+      toast.success('Password reset successfully');
+      navigate('/login');
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error, 'Failed to reset password');
+      toast.error(message);
+    },
   });
 }

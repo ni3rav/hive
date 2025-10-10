@@ -16,6 +16,8 @@ const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
 const LoginPage = lazyPage('/src/pages/Login.tsx');
 const Verify = lazyPage('/src/pages/Verify.tsx', 'VerifyPage');
+const ForgotPasswordPage = lazyPage('/src/pages/ForgotPassword.tsx');
+const ResetPasswordPage = lazyPage('/src/pages/ResetPassword.tsx');
 const NotFound = lazyPage<{ className?: string }>('/src/pages/NotFound.tsx');
 const DashboardPage = lazyPage('/src/pages/Dashboard.tsx', 'DashboardPage');
 const Editor = lazyPage('/src/pages/Editor.tsx');
@@ -38,6 +40,14 @@ const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
 
   { path: '*', element: <NotFound className='h-screen' /> },

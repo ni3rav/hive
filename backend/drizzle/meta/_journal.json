@@ -36,6 +36,13 @@
       "when": 1759602520285,
       "tag": "0004_public_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1759991804182,
+      "tag": "0005_uneven_iron_fist",
+      "breakpoints": true
     }
   ]
 }

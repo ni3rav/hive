@@ -15,3 +15,16 @@ export const verifyEmailSchema = z.object({
   userId: z.uuid('Invalid userId'),
   token: z.string().trim().min(1, 'Invalid token'),
 });
+
+export const generateResetLinkSchema = z.object({
+  email: z.email('Invalid email'),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.email('Invalid email'),
+  token: z.string('Invalid token').trim().min(1, 'Token cannot be empty'),
+  password: z
+    .string('Invalid password')
+    .trim()
+    .min(8, 'Password cannot be less than 8 characters'),
+});

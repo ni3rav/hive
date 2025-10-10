@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,9 +101,8 @@ export function RegisterForm({
                 </div>
                 <div className='grid gap-3'>
                   <Label htmlFor='password'>Password</Label>
-                  <Input
+                  <PasswordInput
                     id='password'
-                    type='password'
                     required
                     disabled={isPending}
                     {...register('password')}

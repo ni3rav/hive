@@ -1,14 +1,21 @@
 import { Request, Response } from 'express';
-import { hashPassword, verifyPassword } from '../utils/password';
+import {
+  createResetPasswordLink,
+  hashPassword,
+  verifyPassword,
+} from '../utils/password';
 import { db } from '../db';
 import {
+  passwordResetLinksTable,
   sessionsTable,
   usersTable,
   verificationLinksTable,
 } from '../db/schema';
 import {
+  generateResetLinkSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
   verifyEmailSchema,
 } from '../utils/validations/auth';
 import {
@@ -16,7 +23,7 @@ import {
   generateVerificationLinkToken,
   getUserIdbySession,
 } from '../utils/sessions';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gt } from 'drizzle-orm';
 import {
   validationError,
   conflict,
@@ -29,6 +36,8 @@ import {
   badRequest,
 } from '../utils/responses';
 import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
+import { getUserFromEmail } from '../utils/user';
+import { env } from '../env';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
@@ -57,7 +66,8 @@ export async function registerController(req: Request, res: Response) {
     const [hashError, hashedPassword] = await hashPassword(password);
 
     if (hashError || !hashedPassword) {
-      return serverError(res, 'Failed to hash password');
+      console.error(hashError);
+      return serverError(res, 'Internal Server Error while Registering');
     }
 
     // TODO: extract this into a separate function since we will need to use this in login as well and maybe forget password too
@@ -266,5 +276,119 @@ export async function verifyController(req: Request, res: Response) {
   } catch (error) {
     console.error('Error in verifyController:', error);
     return serverError(res, 'Failed to verify email');
+  }
+}
+
+export async function generateResetPasswordLinkController(
+  req: Request,
+  res: Response,
+) {
+  const validatedBody = generateResetLinkSchema.safeParse(req.body);
+
+  if (!validatedBody.success) {
+    return validationError(
+      res,
+      'Invalid Email Address',
+      validatedBody.error.message,
+    );
+  }
+  const userEmail = validatedBody.data.email;
+
+  const [error, user] = await getUserFromEmail(userEmail);
+
+  if (error?.message === 'No user found') {
+    return notFound(
+      res,
+      'No user found',
+      'Check if correct email address was entered or not',
+    );
+  } else if (error) {
+    console.error('Error in generateResetPasswordLinkController', error);
+    return serverError(res, 'Error while fetching user');
+  }
+
+  const { id, email } = user;
+  const [linkError, link] = await createResetPasswordLink(id, email);
+
+  if (linkError || !link) {
+    return serverError(res, 'Error while creating reset password link');
+  }
+
+  //* TODO: for now sending in response otherwise use ses here
+  const resetLink = `${env.FRONTEND_URL}/reset?email=${link.email}&token=${link.token}`;
+
+  return created(res, resetLink);
+}
+
+export async function resetPasswordController(req: Request, res: Response) {
+  const validatedBody = resetPasswordSchema.safeParse(req.body);
+
+  if (!validatedBody.success) {
+    return validationError(
+      res,
+      'Invalid request data',
+      validatedBody.error.issues,
+    );
+  }
+
+  const { email, token, password } = validatedBody.data;
+  try {
+    const link = await db.query.passwordResetLinksTable.findFirst({
+      where: and(
+        eq(passwordResetLinksTable.email, email),
+        eq(passwordResetLinksTable.token, token),
+        gt(passwordResetLinksTable.expiresAt, new Date()),
+      ),
+    });
+    if (!link) {
+      return notFound(
+        res,
+        'No link found with given email and token',
+        'Try requesting new reset password link',
+      );
+    }
+    const [hashPassowrdError, newHashedPassword] = await hashPassword(password);
+
+    if (hashPassowrdError || !newHashedPassword) {
+      console.error(hashPassowrdError);
+      return serverError(res, 'Internal server error while resetting password');
+    }
+
+    const [userError, user] = await getUserFromEmail(email);
+
+    if (userError) {
+      console.error(userError);
+      return serverError(res, 'Error while resetting password for the user');
+    }
+
+    if (!user) {
+      return notFound(res, 'Unable to find user while resetting password');
+    }
+
+    await db.transaction(async (tx) => {
+      await tx
+        .update(usersTable)
+        .set({ password: newHashedPassword })
+        .where(
+          and(eq(usersTable.email, user.email), eq(usersTable.id, user.id)),
+        );
+      await tx.delete(sessionsTable).where(eq(sessionsTable.userId, user.id));
+      await tx
+        .delete(passwordResetLinksTable)
+        .where(
+          and(
+            eq(passwordResetLinksTable.email, email),
+            eq(passwordResetLinksTable.token, token),
+            gt(passwordResetLinksTable.expiresAt, new Date()),
+          ),
+        );
+      await tx
+        .delete(verificationLinksTable)
+        .where(eq(verificationLinksTable.userId, user.id));
+    });
+    return ok(res, 'Password reset successfully');
+  } catch (error) {
+    console.error('Error in resetPasswordController \n', error);
+    return serverError(res, 'Error while resetting password');
   }
 }

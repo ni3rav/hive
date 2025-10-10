@@ -25,3 +25,13 @@ export type VerifyEmailData = {
   userId: string;
   token: string;
 };
+
+export type ForgotPasswordData = {
+  email: string;
+};
+
+export type ResetPasswordData = {
+  email: string;
+  token: string;
+  password: string;
+};

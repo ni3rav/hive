@@ -15,3 +15,13 @@ export const verifyEmailSchema = z.object({
   userId: z.uuid('Invalid userId'),
   token: z.string().trim().min(1, 'Invalid token'),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.email('Enter a valid email'),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.email('Enter a valid email'),
+  token: z.string().trim().min(1, 'Token is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});

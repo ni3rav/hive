@@ -5,6 +5,8 @@ import type {
   RegisterData,
   User,
   VerifyEmailData,
+  ForgotPasswordData,
+  ResetPasswordData,
 } from '@/types/auth';
 
 export function apiLogin(data: LoginData): Promise<void> {
@@ -29,4 +31,12 @@ export function apiEditProfile(data: EditProfileData): Promise<User> {
 
 export function apiVerifyEmail(data: VerifyEmailData): Promise<void> {
   return apiPost<void, VerifyEmailData>('/api/auth/verify', data);
+}
+
+export function apiForgotPassword(data: ForgotPasswordData): Promise<void> {
+  return apiPost<void, ForgotPasswordData>('/api/auth/password/forgot', data);
+}
+
+export function apiResetPassword(data: ResetPasswordData): Promise<void> {
+  return apiPost<void, ResetPasswordData>('/api/auth/password/reset', data);
 }
