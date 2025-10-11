@@ -3,8 +3,14 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { useState } from 'react';
 import { type PostMetadata } from '@/types/editor';
+import { Plate, usePlateEditor } from 'platejs/react';
+import {
+  Editor as PlateEditor,
+  EditorContainer,
+} from '@/components/editor/editor';
 
 export default function Editor() {
+  const editor = usePlateEditor();
   const [isExpanded, setIsExpanded] = useState(false);
   const [metadata, setMetadata] = useState<PostMetadata>({
     title: '',
@@ -42,6 +48,15 @@ export default function Editor() {
           setMetadata={setMetadata}
           onTitleChange={onTitleChange}
         />
+        <Plate editor={editor}>
+          {' '}
+          {/* Provides editor context */}
+          <EditorContainer>
+            {' '}
+            {/* Styles the editor area */}
+            <PlateEditor placeholder='Start writing..' />
+          </EditorContainer>
+        </Plate>
       </div>
     </ErrorBoundary>
   );
