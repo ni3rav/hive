@@ -10,9 +10,7 @@ import { BlockPlaceholderKit } from '@/components/editor/plugins/block-placehold
 import { CalloutKit } from '@/components/editor/plugins/callout-kit';
 import { CodeBlockKit } from '@/components/editor/plugins/code-block-kit';
 import { ColumnKit } from '@/components/editor/plugins/column-kit';
-import { CommentKit } from '@/components/editor/plugins/comment-kit';
 import { CursorOverlayKit } from '@/components/editor/plugins/cursor-overlay-kit';
-import { DiscussionKit } from '@/components/editor/plugins/discussion-kit';
 import { DndKit } from '@/components/editor/plugins/dnd-kit';
 import { EmojiKit } from '@/components/editor/plugins/emoji-kit';
 import { ExitBreakKit } from '@/components/editor/plugins/exit-break-kit';
@@ -25,7 +23,6 @@ import { ListKit } from '@/components/editor/plugins/list-kit';
 import { MarkdownKit } from '@/components/editor/plugins/markdown-kit';
 import { MentionKit } from '@/components/editor/plugins/mention-kit';
 import { SlashKit } from '@/components/editor/plugins/slash-kit';
-import { SuggestionKit } from '@/components/editor/plugins/suggestion-kit';
 import { TableKit } from '@/components/editor/plugins/table-kit';
 import { TocKit } from '@/components/editor/plugins/toc-kit';
 import { ToggleKit } from '@/components/editor/plugins/toggle-kit';
@@ -52,9 +49,6 @@ export const EditorKit = [
   ...LineHeightKit,
 
   // Collaboration
-  ...DiscussionKit,
-  ...CommentKit,
-  ...SuggestionKit,
 
   // Editing
   ...SlashKit,
