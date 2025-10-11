@@ -3,24 +3,19 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import {
-  CalendarIcon,
   ChevronRightIcon,
   Columns3Icon,
   FileCodeIcon,
-  FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
-  ImageIcon,
   Link2Icon,
   ListIcon,
   ListOrderedIcon,
   MinusIcon,
-  PenToolIcon,
   PilcrowIcon,
   PlusIcon,
   QuoteIcon,
-  RadicalIcon,
   SquareIcon,
   TableIcon,
   TableOfContentsIcon,
@@ -136,26 +131,6 @@ const groups: Group[] = [
     })),
   },
   {
-    group: 'Media',
-    items: [
-      {
-        icon: <ImageIcon />,
-        label: 'Image',
-        value: KEYS.img,
-      },
-      {
-        icon: <FilmIcon />,
-        label: 'Embed',
-        value: KEYS.mediaEmbed,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertBlock(editor, value);
-      },
-    })),
-  },
-  {
     group: 'Advanced blocks',
     items: [
       {
@@ -167,17 +142,6 @@ const groups: Group[] = [
         icon: <Columns3Icon />,
         label: '3 columns',
         value: 'action_three_columns',
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Equation',
-        value: KEYS.equation,
-      },
-      {
-        icon: <PenToolIcon />,
-        label: 'Excalidraw',
-        value: KEYS.excalidraw,
       },
     ].map((item) => ({
       ...item,
@@ -193,18 +157,6 @@ const groups: Group[] = [
         icon: <Link2Icon />,
         label: 'Link',
         value: KEYS.link,
-      },
-      {
-        focusEditor: true,
-        icon: <CalendarIcon />,
-        label: 'Date',
-        value: KEYS.date,
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Inline Equation',
-        value: KEYS.inlineEquation,
       },
     ].map((item) => ({
       ...item,

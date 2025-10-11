@@ -70,9 +70,6 @@ const editorVariants = cva(
         true: 'ring-2 ring-ring ring-offset-2',
       },
       variant: {
-        ai: 'w-full px-0 text-base md:text-sm',
-        aiChat:
-          'max-h-[min(70vh,320px)] w-full max-w-[700px] overflow-y-auto px-3 py-2 text-base md:text-sm',
         comment: cn('rounded-none border-none bg-transparent text-sm'),
         default:
           'size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]',

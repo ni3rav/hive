@@ -48,13 +48,10 @@ export interface ResolvedSuggestion extends TResolvedSuggestion {
 const BLOCK_SUGGESTION = '__block__';
 
 const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
-  [KEYS.audio]: () => 'Audio',
   [KEYS.blockquote]: () => 'Blockquote',
   [KEYS.callout]: () => 'Callout',
   [KEYS.codeBlock]: () => 'Code Block',
   [KEYS.column]: () => 'Column',
-  [KEYS.equation]: () => 'Equation',
-  [KEYS.file]: () => 'File',
   [KEYS.h1]: () => `Heading 1`,
   [KEYS.h2]: () => `Heading 2`,
   [KEYS.h3]: () => `Heading 3`,
@@ -62,8 +59,6 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.h5]: () => `Heading 5`,
   [KEYS.h6]: () => `Heading 6`,
   [KEYS.hr]: () => 'Horizontal Rule',
-  [KEYS.img]: () => 'Image',
-  [KEYS.mediaEmbed]: () => 'Media',
   [KEYS.p]: (node) => {
     if (node?.[KEYS.listType] === KEYS.listTodo) return 'Todo List';
     if (node?.[KEYS.listType] === KEYS.ol) return 'Ordered List';
@@ -74,7 +69,6 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.table]: () => 'Table',
   [KEYS.toc]: () => 'Table of Contents',
   [KEYS.toggle]: () => 'Toggle',
-  [KEYS.video]: () => 'Video',
 };
 
 export function BlockSuggestion({ element }: { element: TSuggestionElement }) {

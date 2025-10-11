@@ -2,9 +2,7 @@ import * as React from 'react';
 
 import type { PlateEditor, PlateElementProps } from 'platejs/react';
 
-import { AIChatPlugin } from '@platejs/ai/react';
 import {
-  CalendarIcon,
   ChevronRightIcon,
   Code2,
   Columns3Icon,
@@ -14,11 +12,8 @@ import {
   LightbulbIcon,
   ListIcon,
   ListOrdered,
-  PenToolIcon,
   PilcrowIcon,
   Quote,
-  RadicalIcon,
-  SparklesIcon,
   Square,
   Table,
   TableOfContentsIcon,
@@ -28,7 +23,6 @@ import { PlateElement } from 'platejs/react';
 
 import {
   insertBlock,
-  insertInlineElement,
 } from '@/components/editor/transforms';
 
 import {
@@ -55,19 +49,6 @@ type Group = {
 };
 
 const groups: Group[] = [
-  {
-    group: 'AI',
-    items: [
-      {
-        focusEditor: false,
-        icon: <SparklesIcon />,
-        value: 'AI',
-        onSelect: (editor) => {
-          editor.getApi(AIChatPlugin).aiChat.show();
-        },
-      },
-    ],
-  },
   {
     group: 'Basic blocks',
     items: [
@@ -164,45 +145,10 @@ const groups: Group[] = [
         label: '3 columns',
         value: 'action_three_columns',
       },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Equation',
-        value: KEYS.equation,
-      },
-      {
-        icon: <PenToolIcon />,
-        keywords: ['excalidraw'],
-        label: 'Excalidraw',
-        value: KEYS.excalidraw,
-      },
     ].map((item) => ({
       ...item,
       onSelect: (editor, value) => {
         insertBlock(editor, value, { upsert: true });
-      },
-    })),
-  },
-  {
-    group: 'Inline',
-    items: [
-      {
-        focusEditor: true,
-        icon: <CalendarIcon />,
-        keywords: ['time'],
-        label: 'Date',
-        value: KEYS.date,
-      },
-      {
-        focusEditor: false,
-        icon: <RadicalIcon />,
-        label: 'Inline Equation',
-        value: KEYS.inlineEquation,
-      },
-    ].map((item) => ({
-      ...item,
-      onSelect: (editor, value) => {
-        insertInlineElement(editor, value);
       },
     })),
   },

@@ -3,18 +3,14 @@ import type {
   KEYS,
   PlainText,
   TBasicMarks,
-  TCaptionProps,
   TComboboxInputElement,
   TCommentText,
   TElement,
   TFontMarks,
-  TImageElement,
   TLineHeightProps,
   TLinkElement,
   TListProps,
-  TMediaEmbedElement,
   TMentionElement,
-  TResizableProps,
   TTableElement,
   TText,
   TTextAlignProps,
@@ -81,27 +77,9 @@ export interface MyHrElement extends MyBlockElement {
   type: typeof KEYS.hr;
 }
 
-export interface MyImageElement
-  extends MyBlockElement,
-    TCaptionProps,
-    TImageElement,
-    TResizableProps {
-  children: [EmptyText];
-  type: typeof KEYS.img;
-}
-
 export interface MyLinkElement extends TLinkElement {
   children: RichText[];
   type: typeof KEYS.link;
-}
-
-export interface MyMediaEmbedElement
-  extends MyBlockElement,
-    TCaptionProps,
-    TMediaEmbedElement,
-    TResizableProps {
-  children: [EmptyText];
-  type: typeof KEYS.mediaEmbed;
 }
 
 export interface MyMentionElement extends TMentionElement {
@@ -153,8 +131,6 @@ export type MyValue = (
   | MyH5Element
   | MyH6Element
   | MyHrElement
-  | MyImageElement
-  | MyMediaEmbedElement
   | MyParagraphElement
   | MyTableElement
   | MyToggleElement

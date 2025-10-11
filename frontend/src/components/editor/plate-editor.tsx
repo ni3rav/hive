@@ -145,43 +145,6 @@ const value = normalizeNodeId([
   //   },
   //   type: 'p',
   // },
-  // AI Section
-  {
-    children: [{ text: 'AI-Powered Editing' }],
-    type: 'h2',
-  },
-  {
-    children: [
-      { text: 'Boost your productivity with integrated ' },
-      {
-        children: [{ text: 'AI SDK' }],
-        type: 'a',
-        url: '/docs/ai',
-      },
-      { text: '. Press ' },
-      { kbd: true, text: '⌘+J' },
-      { text: ' or ' },
-      { kbd: true, text: 'Space' },
-      { text: ' in an empty line to:' },
-    ],
-    type: 'p',
-  },
-  {
-    children: [
-      { text: 'Generate content (continue writing, summarize, explain)' },
-    ],
-    indent: 1,
-    listStyleType: 'disc',
-    type: 'p',
-  },
-  {
-    children: [
-      { text: 'Edit existing text (improve, fix grammar, change tone)' },
-    ],
-    indent: 1,
-    listStyleType: 'disc',
-    type: 'p',
-  },
   // Core Features Section (Combined)
   {
     children: [{ text: 'Rich Content Editing' }],
@@ -512,60 +475,6 @@ const value = normalizeNodeId([
       },
     ],
     type: 'table',
-  },
-  // Media Section
-  {
-    children: [{ text: 'Images and Media' }],
-    type: 'h3',
-  },
-  {
-    children: [
-      {
-        text: 'Embed rich media like images directly in your content. Supports ',
-      },
-      {
-        children: [{ text: 'Media uploads' }],
-        type: 'a',
-        url: '/docs/media',
-      },
-      {
-        text: ' and ',
-      },
-      {
-        children: [{ text: 'drag & drop' }],
-        type: 'a',
-        url: '/docs/dnd',
-      },
-      {
-        text: ' for a smooth experience.',
-      },
-    ],
-    type: 'p',
-  },
-  {
-    attributes: { align: 'center' },
-    caption: [
-      {
-        children: [{ text: 'Images with captions provide context.' }],
-        type: 'p',
-      },
-    ],
-    children: [{ text: '' }],
-    type: 'img',
-    url: 'https://images.unsplash.com/photo-1712688930249-98e1963af7bd?q=80&w=600&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    width: '75%',
-  },
-  {
-    children: [{ text: '' }],
-    isUpload: true,
-    name: 'sample.pdf',
-    type: 'file',
-    url: 'https://s26.q4cdn.com/900411403/files/doc_downloads/test.pdf',
-  },
-  {
-    children: [{ text: '' }],
-    type: 'audio',
-    url: 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3',
   },
   {
     children: [{ text: 'Table of Contents' }],

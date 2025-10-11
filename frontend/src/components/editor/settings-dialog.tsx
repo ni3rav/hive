@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 
-import { CopilotPlugin } from '@platejs/ai/react';
 import {
   Check,
   ChevronsUpDown,
@@ -14,7 +13,6 @@ import {
   Settings,
   Wand2Icon,
 } from 'lucide-react';
-import { useEditorRef } from 'platejs/react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,7 +38,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { aiChatPlugin } from '@/components/editor/plugins/ai-kit';
 
 interface Model {
   label: string;
@@ -57,8 +54,6 @@ export const models: Model[] = [
 ];
 
 export function SettingsDialog() {
-  const editor = useEditorRef();
-
   const [tempModel, setTempModel] = React.useState(models[0]);
   const [tempKeys, setTempKeys] = React.useState<Record<string, string>>({
     openai: '',
@@ -71,31 +66,7 @@ export function SettingsDialog() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Update AI chat options
-    const chatOptions = editor.getOptions(aiChatPlugin).chatOptions ?? {};
-
-    editor.setOption(aiChatPlugin, 'chatOptions', {
-      ...chatOptions,
-      body: {
-        ...chatOptions.body,
-        apiKey: tempKeys.openai,
-        model: tempModel.value,
-      },
-    });
-
     setOpen(false);
-
-    // Update AI complete options
-    const completeOptions =
-      editor.getOptions(CopilotPlugin).completeOptions ?? {};
-    editor.setOption(CopilotPlugin, 'completeOptions', {
-      ...completeOptions,
-      body: {
-        ...completeOptions.body,
-        apiKey: tempKeys.openai,
-        model: tempModel.value,
-      },
-    });
   };
 
   const toggleKeyVisibility = (key: string) => {
