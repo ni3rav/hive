@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+
+@plugin 'tailwind-scrollbar-hide';
 @import 'tw-animate-css';
 
 /* --- NEW THEME START --- */
@@ -58,6 +60,7 @@
   --tracking-normal: 0rem;
   --spacing: 0.25rem;
   --brand: oklch(0.623 0.214 259.815);
+  --highlight: oklch(0.852 0.199 91.936);
 }
 
 .dark {
@@ -111,6 +114,7 @@
     0px 1px 4px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.05);
   --shadow-2xl: 0px 1px 4px 0px hsl(0 0% 0% / 0.13);
   --brand: oklch(0.707 0.165 254.624);
+  --highlight: oklch(0.852 0.199 91.936);
 }
 
 @theme inline {
@@ -168,6 +172,7 @@
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   --color-brand: var(--brand);
+  --color-highlight: var(--highlight);
 }
 
 /* --- NEW THEME END --- */

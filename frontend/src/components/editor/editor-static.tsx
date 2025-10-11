@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import type { VariantProps } from 'class-variance-authority';
 
 import { cva } from 'class-variance-authority';
@@ -5,7 +7,6 @@ import { type PlateStaticProps, PlateStatic } from 'platejs';
 
 import { cn } from '@/lib/utils';
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const editorVariants = cva(
   cn(
     'group/editor',
