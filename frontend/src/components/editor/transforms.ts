@@ -1,5 +1,3 @@
-'use client';
-
 import type { PlateEditor } from 'platejs/react';
 
 import { insertCallout } from '@platejs/callout';
@@ -34,7 +32,7 @@ const insertList = (editor: PlateEditor, type: string) => {
       indent: 1,
       listStyleType: type,
     }),
-    { select: true }
+    { select: true },
   );
 };
 
@@ -83,9 +81,13 @@ type InsertBlockOptions = {
   upsert?: boolean;
 };
 
-export const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
+export const insertBlock = (
+  editor: PlateEditor,
+  type: string,
+  options: InsertBlockOptions = {},
+) => {
   const { upsert = false } = options;
-  
+
   editor.tf.withoutNormalizing(() => {
     const block = editor.api.block();
 
@@ -99,7 +101,7 @@ export const insertBlock = (editor: PlateEditor, type: string, options: InsertBl
 
     if (upsert && isCurrentBlockEmpty && isSameBlockType) {
       return;
-    } 
+    }
 
     if (type in insertBlockMap) {
       insertBlockMap[type](editor, type);
@@ -109,7 +111,7 @@ export const insertBlock = (editor: PlateEditor, type: string, options: InsertBl
         select: true,
       });
     }
-    
+
     if (!isSameBlockType) {
       editor.getApi(SuggestionPlugin).suggestion.withoutSuggestions(() => {
         editor.tf.removeNodes({ previousEmptyBlock: true });
@@ -127,7 +129,7 @@ export const insertInlineElement = (editor: PlateEditor, type: string) => {
 const setList = (
   editor: PlateEditor,
   type: string,
-  entry: NodeEntry<TElement>
+  entry: NodeEntry<TElement>,
 ) => {
   editor.tf.setNodes(
     editor.api.create.block({
@@ -136,7 +138,7 @@ const setList = (
     }),
     {
       at: entry[1],
-    }
+    },
   );
 };
 
@@ -154,7 +156,7 @@ const setBlockMap: Record<
 export const setBlockType = (
   editor: PlateEditor,
   type: string,
-  { at }: { at?: Path } = {}
+  { at }: { at?: Path } = {},
 ) => {
   editor.tf.withoutNormalizing(() => {
     const setEntry = (entry: NodeEntry<TElement>) => {

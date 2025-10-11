@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-'use client';
 
 import * as React from 'react';
 
@@ -153,7 +152,7 @@ export const useChat = () => {
               at: range,
               match: TextApi.isText,
               split: true,
-            }
+            },
           );
         });
       }
@@ -271,8 +270,8 @@ const fakeStreamText = ({
 
         controller.enqueue(
           encoder.encode(
-            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`
-          )
+            `data: {"type":"text-start","id":"${messageId}","providerMetadata":{"openai":{"itemId":"${messageId}"}}}\n\n`,
+          ),
         );
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -298,8 +297,8 @@ const fakeStreamText = ({
 
             controller.enqueue(
               encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`
-              )
+                `data: {"type":"text-delta","id":"${messageId}","delta":"${escapedText}"}\n\n`,
+              ),
             );
           }
 
@@ -307,15 +306,15 @@ const fakeStreamText = ({
           if (i < blocks.length - 1) {
             controller.enqueue(
               encoder.encode(
-                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`
-              )
+                `data: {"type":"text-delta","id":"${messageId}","delta":"\\n\\n"}\n\n`,
+              ),
             );
           }
         }
 
         // Send end events
         controller.enqueue(
-          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`)
+          encoder.encode(`data: {"type":"text-end","id":"${messageId}"}\n\n`),
         );
         await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -1447,7 +1446,7 @@ const createCommentChunks = (editor: PlateEditor) => {
 
   const isSelectingSome = editor.getOption(
     BlockSelectionPlugin,
-    'isSelectingSome'
+    'isSelectingSome',
   );
 
   const blocks =

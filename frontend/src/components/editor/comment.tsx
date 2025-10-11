@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
 
 import * as React from 'react';
 

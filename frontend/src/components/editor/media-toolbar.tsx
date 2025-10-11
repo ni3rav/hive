@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import type { WithRequiredKey } from 'platejs';
@@ -33,7 +31,7 @@ import { Separator } from '@/components/ui/separator';
 import { CaptionButton } from './caption';
 
 const inputVariants = cva(
-  'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:ring-transparent focus-visible:outline-none md:text-sm'
+  'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:ring-transparent focus-visible:outline-none md:text-sm',
 );
 
 export function MediaToolbar({
@@ -49,7 +47,7 @@ export function MediaToolbar({
   const isFocusedLast = useFocusedLast();
   const selectionCollapsed = useEditorSelector(
     (editor) => !editor.api.isExpanded(),
-    []
+    [],
   );
   const isImagePreviewOpen = useImagePreviewValue('isOpen', editor.id);
   const open =
@@ -75,38 +73,38 @@ export function MediaToolbar({
       <PopoverAnchor>{children}</PopoverAnchor>
 
       <PopoverContent
-        className="w-auto p-1"
+        className='w-auto p-1'
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         {isEditing ? (
-          <div className="flex w-[330px] flex-col">
-            <div className="flex items-center">
-              <div className="flex items-center pr-1 pl-2 text-muted-foreground">
-                <Link className="size-4" />
+          <div className='flex w-[330px] flex-col'>
+            <div className='flex items-center'>
+              <div className='flex items-center pr-1 pl-2 text-muted-foreground'>
+                <Link className='size-4' />
               </div>
 
               <FloatingMediaPrimitive.UrlInput
                 className={inputVariants()}
-                placeholder="Paste the embed link..."
+                placeholder='Paste the embed link...'
                 options={{ plugin }}
               />
             </div>
           </div>
         ) : (
-          <div className="box-content flex items-center">
+          <div className='box-content flex items-center'>
             <FloatingMediaPrimitive.EditButton
               className={buttonVariants({ size: 'sm', variant: 'ghost' })}
             >
               Edit link
             </FloatingMediaPrimitive.EditButton>
 
-            <CaptionButton size="sm" variant="ghost">
+            <CaptionButton size='sm' variant='ghost'>
               Caption
             </CaptionButton>
 
-            <Separator orientation="vertical" className="mx-1 h-6" />
+            <Separator orientation='vertical' className='mx-1 h-6' />
 
-            <Button size="sm" variant="ghost" {...buttonProps}>
+            <Button size='sm' variant='ghost' {...buttonProps}>
               <Trash2Icon />
             </Button>
           </div>

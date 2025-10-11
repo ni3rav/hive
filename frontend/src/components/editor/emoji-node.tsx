@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import type { PlateElementProps } from 'platejs/react';
@@ -35,13 +33,13 @@ export function EmojiInputElement(props: PlateElementProps) {
   }, [data, debouncedValue]);
 
   return (
-    <PlateElement as="span" {...props}>
+    <PlateElement as='span' {...props}>
       <InlineCombobox
         value={value}
         element={element}
         filter={false}
         setValue={setValue}
-        trigger=":"
+        trigger=':'
         hideWhenNoValue
       >
         <InlineComboboxInput />

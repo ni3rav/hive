@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-'use client';
 
 import * as React from 'react';
 
@@ -33,10 +32,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  getBlockType,
-  setBlockType,
-} from '@/components/editor/transforms';
+import { getBlockType, setBlockType } from '@/components/editor/transforms';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
@@ -138,16 +134,16 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
     () =>
       turnIntoItems.find((item) => item.value === (value ?? KEYS.p)) ??
       turnIntoItems[0],
-    [value]
+    [value],
   );
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton
-          className="min-w-[125px]"
+          className='min-w-[125px]'
           pressed={open}
-          tooltip="Turn into"
+          tooltip='Turn into'
           isDropdown
         >
           {selectedItem.label}
@@ -155,27 +151,27 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="ignore-click-outside/toolbar min-w-0"
+        className='ignore-click-outside/toolbar min-w-0'
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           editor.tf.focus();
         }}
-        align="start"
+        align='start'
       >
         <ToolbarMenuGroup
           value={value}
           onValueChange={(type) => {
             setBlockType(editor, type);
           }}
-          label="Turn into"
+          label='Turn into'
         >
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
             <DropdownMenuRadioItem
               key={itemValue}
-              className="min-w-[180px] pl-2 *:first:[span]:hidden"
+              className='min-w-[180px] pl-2 *:first:[span]:hidden'
               value={itemValue}
             >
-              <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+              <span className='pointer-events-none absolute right-2 flex size-3.5 items-center justify-center'>
                 <DropdownMenuItemIndicator>
                   <CheckIcon />
                 </DropdownMenuItemIndicator>

@@ -1,5 +1,3 @@
-'use client';
-
 import { withAIBatch } from '@platejs/ai';
 import {
   AIChatPlugin,
@@ -48,7 +46,7 @@ export const aiChatPlugin = AIChatPlugin.extend({
               },
               {
                 at: PathApi.next(editor.selection!.focus.path.slice(0, 1)),
-              }
+              },
             );
           });
           editor.setOption(AIChatPlugin, 'streaming', true);
@@ -67,7 +65,7 @@ export const aiChatPlugin = AIChatPlugin.extend({
                 });
               });
             },
-            { split: isFirst }
+            { split: isFirst },
           );
         }
 
@@ -79,7 +77,7 @@ export const aiChatPlugin = AIChatPlugin.extend({
             },
             {
               split: isFirst,
-            }
+            },
           );
         }
       },

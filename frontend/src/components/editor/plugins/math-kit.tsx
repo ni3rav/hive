@@ -1,5 +1,3 @@
-'use client';
-
 import { EquationPlugin, InlineEquationPlugin } from '@platejs/math/react';
 
 import {

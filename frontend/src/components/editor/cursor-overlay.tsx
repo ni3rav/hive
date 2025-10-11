@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import { AIChatPlugin } from '@platejs/ai/react';
@@ -47,7 +45,7 @@ function Cursor({
             className={cn(
               'pointer-events-none absolute z-10',
               id === 'selection' && 'bg-brand/25',
-              id === 'selection' && isCursor && 'bg-primary'
+              id === 'selection' && isCursor && 'bg-primary',
             )}
             style={{
               ...selectionStyle,
@@ -60,7 +58,7 @@ function Cursor({
         <div
           className={cn(
             'pointer-events-none absolute z-10 w-0.5',
-            id === 'drag' && 'w-px bg-brand'
+            id === 'drag' && 'w-px bg-brand',
           )}
           style={{ ...caretPosition, ...style }}
         />

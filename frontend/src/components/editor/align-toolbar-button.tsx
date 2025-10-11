@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import type { Alignment } from '@platejs/basic-styles';
@@ -58,12 +56,12 @@ export function AlignToolbarButton(props: DropdownMenuProps) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip="Align" isDropdown>
+        <ToolbarButton pressed={open} tooltip='Align' isDropdown>
           <IconValue />
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="min-w-0" align="start">
+      <DropdownMenuContent className='min-w-0' align='start'>
         <DropdownMenuRadioGroup
           value={value}
           onValueChange={(value) => {
@@ -74,7 +72,7 @@ export function AlignToolbarButton(props: DropdownMenuProps) {
           {items.map(({ icon: Icon, value: itemValue }) => (
             <DropdownMenuRadioItem
               key={itemValue}
-              className="pl-2 data-[state=checked]:bg-accent *:first:[span]:hidden"
+              className='pl-2 data-[state=checked]:bg-accent *:first:[span]:hidden'
               value={itemValue}
             >
               <Icon />

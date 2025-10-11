@@ -1,5 +1,3 @@
-'use client';
-
 import type { TElement } from 'platejs';
 
 import { faker } from '@faker-js/faker';

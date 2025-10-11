@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
 
 import * as React from 'react';
 
@@ -80,11 +79,11 @@ export function AIMenu() {
 
   const { messages, status } = chat;
   const [anchorElement, setAnchorElement] = React.useState<HTMLElement | null>(
-    null
+    null,
   );
 
   const content = useLastAssistantMessage()?.parts.find(
-    (part) => part.type === 'text'
+    (part) => part.type === 'text',
   )?.text;
 
   React.useEffect(() => {
@@ -181,7 +180,7 @@ export function AIMenu() {
       <PopoverAnchor virtualRef={{ current: anchorElement! }} />
 
       <PopoverContent
-        className="border-none bg-transparent p-0 shadow-none"
+        className='border-none bg-transparent p-0 shadow-none'
         style={{
           width: anchorElement?.offsetWidth,
         }}
@@ -190,11 +189,11 @@ export function AIMenu() {
 
           api.aiChat.hide();
         }}
-        align="center"
-        side="bottom"
+        align='center'
+        side='bottom'
       >
         <Command
-          className="w-full rounded-lg border shadow-md"
+          className='w-full rounded-lg border shadow-md'
           value={value}
           onValueChange={setValue}
         >
@@ -204,8 +203,8 @@ export function AIMenu() {
             toolName === 'generate' && <AIChatEditor content={content} />}
 
           {isLoading ? (
-            <div className="flex grow items-center gap-2 p-2 text-sm text-muted-foreground select-none">
-              <Loader2Icon className="size-4 animate-spin" />
+            <div className='flex grow items-center gap-2 p-2 text-sm text-muted-foreground select-none'>
+              <Loader2Icon className='size-4 animate-spin' />
               {messages.length > 1 ? 'Editing...' : 'Thinking...'}
             </div>
           ) : (
@@ -213,7 +212,7 @@ export function AIMenu() {
               className={cn(
                 'flex h-9 w-full min-w-0 border-input bg-transparent px-3 py-1 text-base transition-[color,box-shadow] outline-none placeholder:text-muted-foreground md:text-sm dark:bg-input/30',
                 'aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
-                'border-b focus-visible:ring-transparent'
+                'border-b focus-visible:ring-transparent',
               )}
               value={input}
               onKeyDown={(e) => {
@@ -228,7 +227,7 @@ export function AIMenu() {
                 }
               }}
               onValueChange={setInput}
-              placeholder="Ask AI anything..."
+              placeholder='Ask AI anything...'
               data-plate-focus
               autoFocus
             />
@@ -257,21 +256,21 @@ type EditorChatState =
 
 const AICommentIcon = () => (
   <svg
-    fill="none"
-    height="24"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    width="24"
-    xmlns="http://www.w3.org/2000/svg"
+    fill='none'
+    height='24'
+    stroke='currentColor'
+    strokeLinecap='round'
+    strokeLinejoin='round'
+    strokeWidth='2'
+    viewBox='0 0 24 24'
+    width='24'
+    xmlns='http://www.w3.org/2000/svg'
   >
-    <path d="M0 0h24v24H0z" fill="none" stroke="none" />
-    <path d="M8 9h8" />
-    <path d="M8 13h4.5" />
-    <path d="M10 19l-1 -1h-3a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4.5" />
-    <path d="M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z" />
+    <path d='M0 0h24v24H0z' fill='none' stroke='none' />
+    <path d='M8 9h8' />
+    <path d='M8 13h4.5' />
+    <path d='M10 19l-1 -1h-3a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4.5' />
+    <path d='M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z' />
   </svg>
 );
 
@@ -595,7 +594,7 @@ export const AIMenuItems = ({
           {group.items.map((menuItem) => (
             <CommandItem
               key={menuItem.value}
-              className="[&_svg]:text-muted-foreground"
+              className='[&_svg]:text-muted-foreground'
               value={menuItem.value}
               onSelect={() => {
                 menuItem.onSelect?.({
@@ -662,20 +661,20 @@ export function AILoadingBar() {
     return (
       <div
         className={cn(
-          'absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground shadow-md transition-all duration-300'
+          'absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground shadow-md transition-all duration-300',
         )}
       >
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+        <span className='h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent' />
         <span>{status === 'submitted' ? 'Thinking...' : 'Writing...'}</span>
         <Button
-          size="sm"
-          variant="ghost"
-          className="flex items-center gap-1 text-xs"
+          size='sm'
+          variant='ghost'
+          className='flex items-center gap-1 text-xs'
           onClick={() => api.aiChat.stop()}
         >
-          <PauseIcon className="h-4 w-4" />
+          <PauseIcon className='h-4 w-4' />
           Stop
-          <kbd className="ml-1 rounded bg-border px-1 font-mono text-[10px] text-muted-foreground shadow-sm">
+          <kbd className='ml-1 rounded bg-border px-1 font-mono text-[10px] text-muted-foreground shadow-sm'>
             Esc
           </kbd>
         </Button>
@@ -688,14 +687,14 @@ export function AILoadingBar() {
       <div
         className={cn(
           'absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-0 rounded-xl border border-border/50 bg-popover p-1 text-sm text-muted-foreground shadow-xl backdrop-blur-sm',
-          'p-3'
+          'p-3',
         )}
       >
         {/* Header with controls */}
-        <div className="flex w-full items-center justify-between gap-3">
-          <div className="flex items-center gap-5">
+        <div className='flex w-full items-center justify-between gap-3'>
+          <div className='flex items-center gap-5'>
             <Button
-              size="sm"
+              size='sm'
               disabled={isLoading}
               onClick={() => handleComments('accept')}
             >
@@ -703,7 +702,7 @@ export function AILoadingBar() {
             </Button>
 
             <Button
-              size="sm"
+              size='sm'
               disabled={isLoading}
               onClick={() => handleComments('reject')}
             >

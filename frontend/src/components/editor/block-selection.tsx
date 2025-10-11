@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-'use client';
 
 import { DndPlugin } from '@platejs/dnd';
 import { useBlockSelected } from '@platejs/selection/react';
@@ -18,7 +17,7 @@ export const blockSelectionVariants = cva(
         true: 'opacity-100',
       },
     },
-  }
+  },
 );
 
 export function BlockSelection(props: PlateElementProps) {
@@ -37,7 +36,7 @@ export function BlockSelection(props: PlateElementProps) {
       className={blockSelectionVariants({
         active: isBlockSelected && !isDragging,
       })}
-      data-slot="block-selection"
+      data-slot='block-selection'
     />
   );
 }

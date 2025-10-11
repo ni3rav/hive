@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import type { TInlineSuggestionData, TLinkElement } from 'platejs';
@@ -21,11 +19,11 @@ export function LinkElement(props: PlateElementProps<TLinkElement>) {
   return (
     <PlateElement
       {...props}
-      as="a"
+      as='a'
       className={cn(
         'font-medium text-primary underline decoration-primary underline-offset-4',
         suggestionData?.type === 'remove' && 'bg-red-100 text-red-700',
-        suggestionData?.type === 'insert' && 'bg-emerald-100 text-emerald-700'
+        suggestionData?.type === 'insert' && 'bg-emerald-100 text-emerald-700',
       )}
       attributes={{
         ...props.attributes,

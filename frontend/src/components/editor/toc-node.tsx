@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import type { PlateElementProps } from 'platejs/react';
@@ -20,7 +18,7 @@ const headingItemVariants = cva(
         3: 'pl-[50px]',
       },
     },
-  }
+  },
 );
 
 export function TocElement(props: PlateElementProps) {
@@ -29,13 +27,13 @@ export function TocElement(props: PlateElementProps) {
   const { headingList } = state;
 
   return (
-    <PlateElement {...props} className="mb-1 p-0">
+    <PlateElement {...props} className='mb-1 p-0'>
       <div contentEditable={false}>
         {headingList.length > 0 ? (
           headingList.map((item) => (
             <Button
               key={item.id}
-              variant="ghost"
+              variant='ghost'
               className={headingItemVariants({
                 depth: item.depth as 1 | 2 | 3,
               })}
@@ -46,7 +44,7 @@ export function TocElement(props: PlateElementProps) {
             </Button>
           ))
         ) : (
-          <div className="text-sm text-gray-500">
+          <div className='text-sm text-gray-500'>
             Create a heading to display the table of contents.
           </div>
         )}

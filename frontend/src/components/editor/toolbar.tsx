@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 
 import * as ToolbarPrimitive from '@radix-ui/react-toolbar';
@@ -84,12 +82,12 @@ const toolbarButtonVariants = cva(
           'border border-input bg-transparent shadow-xs hover:bg-accent hover:text-accent-foreground',
       },
     },
-  }
+  },
 );
 
 const dropdownArrowVariants = cva(
   cn(
-    'inline-flex items-center justify-center rounded-r-md text-sm font-medium text-foreground transition-colors disabled:pointer-events-none disabled:opacity-50'
+    'inline-flex items-center justify-center rounded-r-md text-sm font-medium text-foreground transition-colors disabled:pointer-events-none disabled:opacity-50',
   ),
   {
     defaultVariants: {
@@ -109,7 +107,7 @@ const dropdownArrowVariants = cva(
           'border border-l-0 border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
       },
     },
-  }
+  },
 );
 
 type ToolbarButtonProps = {
@@ -131,7 +129,7 @@ export const ToolbarButton = withTooltip(function ToolbarButton({
   ...props
 }: ToolbarButtonProps) {
   return typeof pressed === 'boolean' ? (
-    <ToolbarToggleGroup disabled={props.disabled} value="single" type="single">
+    <ToolbarToggleGroup disabled={props.disabled} value='single' type='single'>
       <ToolbarToggleItem
         className={cn(
           toolbarButtonVariants({
@@ -139,19 +137,19 @@ export const ToolbarButton = withTooltip(function ToolbarButton({
             variant,
           }),
           isDropdown && 'justify-between gap-1 pr-1',
-          className
+          className,
         )}
         value={pressed ? 'single' : ''}
         {...props}
       >
         {isDropdown ? (
           <>
-            <div className="flex flex-1 items-center gap-2 whitespace-nowrap">
+            <div className='flex flex-1 items-center gap-2 whitespace-nowrap'>
               {children}
             </div>
             <div>
               <ChevronDown
-                className="size-3.5 text-muted-foreground"
+                className='size-3.5 text-muted-foreground'
                 data-icon
               />
             </div>
@@ -169,7 +167,7 @@ export const ToolbarButton = withTooltip(function ToolbarButton({
           variant,
         }),
         isDropdown && 'pr-1',
-        className
+        className,
       )}
       {...props}
     >
@@ -212,7 +210,7 @@ export function ToolbarSplitButtonPrimary({
         }),
         'rounded-r-none',
         'group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground',
-        className
+        className,
       )}
       {...props}
     >
@@ -236,13 +234,13 @@ export function ToolbarSplitButtonSecondary({
           variant,
         }),
         'group-data-[pressed=true]:bg-accent group-data-[pressed=true]:text-accent-foreground',
-        className
+        className,
       )}
       onClick={(e) => e.stopPropagation()}
-      role="button"
+      role='button'
       {...props}
     >
-      <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
+      <ChevronDown className='size-3.5 text-muted-foreground' data-icon />
     </span>
   );
 }
@@ -271,13 +269,13 @@ export function ToolbarGroup({
       className={cn(
         'group/toolbar-group',
         'relative hidden has-[button]:flex',
-        className
+        className,
       )}
     >
-      <div className="flex items-center">{children}</div>
+      <div className='flex items-center'>{children}</div>
 
-      <div className="mx-1.5 py-0.5 group-last/toolbar-group:hidden!">
-        <Separator orientation="vertical" />
+      <div className='mx-1.5 py-0.5 group-last/toolbar-group:hidden!'>
+        <Separator orientation='vertical' />
       </div>
     </div>
   );
@@ -340,9 +338,9 @@ function TooltipContent({
       <TooltipPrimitive.Content
         className={cn(
           'z-50 w-fit origin-(--radix-tooltip-content-transform-origin) rounded-md bg-primary px-3 py-1.5 text-xs text-balance text-primary-foreground',
-          className
+          className,
         )}
-        data-slot="tooltip-content"
+        data-slot='tooltip-content'
         sideOffset={sideOffset}
         {...props}
       >
@@ -365,7 +363,7 @@ export function ToolbarMenuGroup({
       <DropdownMenuSeparator
         className={cn(
           'hidden',
-          'mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block'
+          'mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block',
         )}
       />
 
@@ -374,11 +372,11 @@ export function ToolbarMenuGroup({
         className={cn(
           'hidden',
           'peer/menu-group group/menu-group my-1.5 has-[[role=menuitem]]:block has-[[role=menuitemradio]]:block has-[[role=option]]:block',
-          className
+          className,
         )}
       >
         {label && (
-          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground select-none">
+          <DropdownMenuLabel className='text-xs font-semibold text-muted-foreground select-none'>
             {label}
           </DropdownMenuLabel>
         )}

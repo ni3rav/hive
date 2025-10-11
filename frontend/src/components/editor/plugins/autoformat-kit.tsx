@@ -1,5 +1,3 @@
-'use client';
-
 import type { AutoformatRule } from '@platejs/autoformat';
 
 import {
@@ -229,7 +227,7 @@ export const AutoformatKit = [
             !editor.api.some({
               match: { type: editor.getType(KEYS.codeBlock) },
             }),
-        })
+        }),
       ),
     },
   }),

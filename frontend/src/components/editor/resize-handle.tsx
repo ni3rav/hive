@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-'use client';
 
 import * as React from 'react';
 
@@ -18,7 +17,7 @@ import { cn } from '@/lib/utils';
 export const mediaResizeHandleVariants = cva(
   cn(
     'top-0 flex w-6 flex-col justify-center select-none',
-    "after:flex after:h-16 after:w-[3px] after:rounded-[6px] after:bg-ring after:opacity-0 after:content-['_'] group-hover:after:opacity-100"
+    "after:flex after:h-16 after:w-[3px] after:rounded-[6px] after:bg-ring after:opacity-0 after:content-['_'] group-hover:after:opacity-100",
   ),
   {
     variants: {
@@ -27,7 +26,7 @@ export const mediaResizeHandleVariants = cva(
         right: '-right-3 -mr-3 items-end pr-3',
       },
     },
-  }
+  },
 );
 
 const resizeHandleVariants = cva('absolute z-40', {
@@ -56,7 +55,7 @@ export function ResizeHandle({
     <div
       className={cn(
         resizeHandleVariants({ direction: options?.direction }),
-        className
+        className,
       )}
       data-resizing={state.isResizing}
       {...resizeHandle.props}
