@@ -1,5 +1,4 @@
-'use client';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   type BaseSuggestionConfig,
   BaseSuggestionPlugin,
@@ -13,7 +12,7 @@ import {
 } from 'platejs';
 import { toTPlatePlugin } from 'platejs/react';
 
-import { BlockSuggestion } from '@/components/ui/block-suggestion';
+import { BlockSuggestion } from '@/components/editor/block-suggestion';
 import {
   SuggestionLeaf,
   SuggestionLineBreak,

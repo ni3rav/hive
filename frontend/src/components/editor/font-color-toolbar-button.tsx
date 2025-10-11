@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 'use client';
 
 import React from 'react';
@@ -8,7 +9,6 @@ import type {
 } from '@radix-ui/react-dropdown-menu';
 
 import { useComposedRef } from '@udecode/cn';
-import debounce from 'lodash/debounce.js';
 import { EraserIcon, PlusIcon } from 'lucide-react';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
 
@@ -230,11 +230,17 @@ function ColorCustom({
     [customColor, customColors],
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateCustomColorDebounced = React.useCallback(
-    debounce(updateCustomColor, 100),
+    (color: string) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        updateCustomColor(color);
+      }, 100);
+    },
     [updateCustomColor],
   );
+
+  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   return (
     <div className={cn('relative flex flex-col gap-4', className)} {...props}>

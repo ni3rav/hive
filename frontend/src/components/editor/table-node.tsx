@@ -188,7 +188,7 @@ function TableFloatingToolbar({
             {canMerge && (
               <ToolbarButton
                 onClick={() => tf.table.merge()}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Merge cells'
               >
                 <CombineIcon />
@@ -197,7 +197,7 @@ function TableFloatingToolbar({
             {canSplit && (
               <ToolbarButton
                 onClick={() => tf.table.split()}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Split cell'
               >
                 <SquareSplitHorizontalIcon />
@@ -231,7 +231,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.insert.tableRow({ before: true });
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Insert row before'
               >
                 <ArrowUp />
@@ -240,7 +240,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.insert.tableRow();
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Insert row after'
               >
                 <ArrowDown />
@@ -249,7 +249,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.remove.tableRow();
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Delete row'
               >
                 <XIcon />
@@ -263,7 +263,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.insert.tableColumn({ before: true });
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Insert column before'
               >
                 <ArrowLeft />
@@ -272,7 +272,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.insert.tableColumn();
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Insert column after'
               >
                 <ArrowRight />
@@ -281,7 +281,7 @@ function TableFloatingToolbar({
                 onClick={() => {
                   tf.remove.tableColumn();
                 }}
-                onMouseDown={(e) => e.preventDefault()}
+                onMouseDown={(e: { preventDefault: () => any; }) => e.preventDefault()}
                 tooltip='Delete column'
               >
                 <XIcon />
