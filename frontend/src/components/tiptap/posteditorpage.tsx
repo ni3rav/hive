@@ -36,9 +36,11 @@ export function PostEditorPage({ className = '' }: { className?: string }) {
   };
 
   return (
-    <div className={cn('h-full min-h-0 flex flex-col', className)}>
+    <div
+      className={cn('h-full min-h-0 flex flex-col overflow-hidden', className)}
+    >
       {/* Optional metadata/header row; keep it non-growing */}
-      <div className='border-b border-border/40'>
+      <div className='border-b border-border/40 shrink-0'>
         <MetadataForm
           isExpanded={isMetadataExpanded}
           setIsExpanded={setIsMetadataExpanded}

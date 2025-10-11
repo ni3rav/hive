@@ -68,10 +68,10 @@ export function RichTextEditorDemo({ className }: { className?: string }) {
   if (!editor) return null;
 
   return (
-    <div className='relative'>
+    <div className='relative h-full flex flex-col'>
       <ScrollArea
         className={cn(
-          'relative max-h[calc(100dvh-6rem)] w-full border bg-card pb-0 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-thumb]]:bg-primary/50',
+          'relative h-full w-full border bg-card pb-0 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-thumb]]:bg-primary/50',
           className,
         )}
       >

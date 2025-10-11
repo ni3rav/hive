@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,25 +13,32 @@ const nav = [
 ];
 
 export function HeroHeader() {
-  const [scrolled, setScrolled] = React.useState(false);
+  const [scrollY, setScrollY] = React.useState(0);
   const navigate = useNavigate();
   const { data: user, isLoading } = useAuth(); // Get user auth state
 
   React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', onScroll);
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Calculate scroll progress (0 to 1)
+  const scrollProgress = Math.min(scrollY / 100, 1); // Start animating after 100px scroll
+  const scrolled = scrollY > 20;
+
   return (
     <header className='fixed inset-x-0 top-0 z-50'>
-      <div
+      <motion.div
         className={`mx-auto px-6 transition-all duration-300 ${
           scrolled
-            ? 'mt-4 max-w-max rounded-full bg-background/70 backdrop-blur-lg shadow-lg shadow-black/30'
-            : 'max-w-6xl bg-transparent'
+            ? 'mt-4 rounded-full bg-background/70 backdrop-blur-lg shadow-lg shadow-black/30'
+            : 'bg-transparent'
         }`}
+        style={{
+          maxWidth: `calc(72rem - ${scrollProgress * 20}rem)`, // Gradually reduce from 72rem to 52rem
+        }}
       >
         <div
           className={`flex items-center justify-between gap-8 transition-[height] duration-300 ${
@@ -86,7 +94,7 @@ export function HeroHeader() {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     </header>
   );
 }
