@@ -10,7 +10,7 @@ import {
 } from '@platejs/basic-nodes';
 import { BaseParagraphPlugin } from 'platejs';
 
-import { BlockquoteElementStatic } from '@/components/ui/blockquote-node-static';
+import { BlockquoteElementStatic } from '@/components/editor/blockquote-node-static';
 import {
   H1ElementStatic,
   H2ElementStatic,

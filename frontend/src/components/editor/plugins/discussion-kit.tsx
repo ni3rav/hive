@@ -2,7 +2,7 @@ import type { TComment } from '@/components/editor/comment';
 
 import { createPlatePlugin } from 'platejs/react';
 
-import { BlockDiscussion } from '@/components/ui/block-discussion';
+import { BlockDiscussion } from '@/components/editor/block-discussion';
 
 export interface TDiscussion {
   id: string;

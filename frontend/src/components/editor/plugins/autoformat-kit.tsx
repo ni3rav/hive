@@ -4,7 +4,6 @@ import {
   autoformatArrow,
   autoformatLegal,
   autoformatLegalHtml,
-  autoformatMath,
   AutoformatPlugin,
   autoformatPunctuation,
   autoformatSmartQuotes,
@@ -218,7 +217,6 @@ export const AutoformatKit = [
         ...autoformatLegal,
         ...autoformatLegalHtml,
         ...autoformatArrow,
-        ...autoformatMath,
         ...autoformatLists,
       ].map(
         (rule): AutoformatRule => ({
