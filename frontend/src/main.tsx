@@ -8,7 +8,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
-import { lazyPage } from '@/lib/lazy';
+import { lazyPage } from '@/components/editor/lazy';
 import { Suspense } from 'react';
 import { Spinner } from './components/ui/spinner';
 
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
     element: <ForgotPasswordPage />,
   },
   {
-    path: '/reset-password',
+    path: '/reset',
     element: <ResetPasswordPage />,
   },
 
