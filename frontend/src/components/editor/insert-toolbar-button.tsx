@@ -175,7 +175,7 @@ export function InsertToolbarButton(props: DropdownMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className='flex max-h-[500px] min-w-0 flex-col'
+        className='flex h-[400px] min-w-0 flex-col'
         align='start'
       >
         <ScrollArea className='h-full'>

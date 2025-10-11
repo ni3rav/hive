@@ -7,8 +7,7 @@ import type {
   DropdownMenuProps,
 } from '@radix-ui/react-dropdown-menu';
 
-import { useComposedRef } from '@udecode/cn';
-import { EraserIcon, PlusIcon } from 'lucide-react';
+import { EraserIcon } from 'lucide-react';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
 
 import { buttonVariants } from '@/components/ui/button';
@@ -113,12 +112,17 @@ export function FontColorToolbarButton({
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align='center' side='bottom'>
+      <DropdownMenuContent
+        align='start'
+        side='bottom'
+        sideOffset={5}
+        className='w-auto p-4 h-[430px] overflow-y-auto'
+      >
         <ColorPicker
           color={selectedColor || color}
           clearColor={clearColor}
           colors={DEFAULT_COLORS}
-          customColors={DEFAULT_CUSTOM_COLORS}
+          customColors={[]}
           updateColor={updateColorAndClose}
           updateCustomColor={updateColor}
         />
@@ -132,9 +136,7 @@ function PureColorPicker({
   clearColor,
   color,
   colors,
-  customColors,
   updateColor,
-  updateCustomColor,
   ...props
 }: React.ComponentProps<'div'> & {
   colors: TColor[];
@@ -145,18 +147,8 @@ function PureColorPicker({
   color?: string;
 }) {
   return (
-    <div className={cn('flex flex-col', className)} {...props}>
-      <ToolbarMenuGroup label='Custom Colors'>
-        <ColorCustom
-          color={color}
-          className='px-2'
-          colors={colors}
-          customColors={customColors}
-          updateColor={updateColor}
-          updateCustomColor={updateCustomColor}
-        />
-      </ToolbarMenuGroup>
-      <ToolbarMenuGroup label='Default Colors'>
+    <div className={cn('flex flex-col gap-2', className)} {...props}>
+      <ToolbarMenuGroup label='Colors'>
         <ColorDropdownMenuItems
           color={color}
           className='px-2'
@@ -183,131 +175,6 @@ const ColorPicker = React.memo(
     prev.colors === next.colors &&
     prev.customColors === next.customColors,
 );
-
-function ColorCustom({
-  className,
-  color,
-  colors,
-  customColors,
-  updateColor,
-  updateCustomColor,
-  ...props
-}: {
-  colors: TColor[];
-  customColors: TColor[];
-  updateColor: (color: string) => void;
-  updateCustomColor: (color: string) => void;
-  color?: string;
-} & React.ComponentPropsWithoutRef<'div'>) {
-  const [customColor, setCustomColor] = React.useState<string>();
-  const [value, setValue] = React.useState<string>(color || '#000000');
-
-  React.useEffect(() => {
-    if (
-      !color ||
-      customColors.some((c) => c.value === color) ||
-      colors.some((c) => c.value === color)
-    ) {
-      return;
-    }
-
-    setCustomColor(color);
-  }, [color, colors, customColors]);
-
-  const computedColors = React.useMemo(
-    () =>
-      customColor
-        ? [
-            ...customColors,
-            {
-              isBrightColor: false,
-              name: '',
-              value: customColor,
-            },
-          ]
-        : customColors,
-    [customColor, customColors],
-  );
-
-  const updateCustomColorDebounced = React.useCallback(
-    (color: string) => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        updateCustomColor(color);
-      }, 100);
-    },
-    [updateCustomColor],
-  );
-
-  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
-
-  return (
-    <div className={cn('relative flex flex-col gap-4', className)} {...props}>
-      <ColorDropdownMenuItems
-        color={color}
-        colors={computedColors}
-        updateColor={updateColor}
-      >
-        <ColorInput
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            updateCustomColorDebounced(e.target.value);
-          }}
-        >
-          <DropdownMenuItem
-            className={cn(
-              buttonVariants({
-                size: 'icon',
-                variant: 'outline',
-              }),
-              'absolute top-1 right-2 bottom-2 flex size-8 items-center justify-center rounded-full',
-            )}
-            onSelect={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <span className='sr-only'>Custom</span>
-            <PlusIcon />
-          </DropdownMenuItem>
-        </ColorInput>
-      </ColorDropdownMenuItems>
-    </div>
-  );
-}
-
-function ColorInput({
-  children,
-  className,
-  value = '#000000',
-  ...props
-}: React.ComponentProps<'input'>) {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-  return (
-    <div className='flex flex-col items-center'>
-      {React.Children.map(children, (child) => {
-        if (!child) return child;
-
-        return React.cloneElement(
-          child as React.ReactElement<{
-            onClick: () => void;
-          }>,
-          {
-            onClick: () => inputRef.current?.click(),
-          },
-        );
-      })}
-      <input
-        {...props}
-        ref={useComposedRef(props.ref, inputRef)}
-        className={cn('size-0 overflow-hidden border-0 p-0', className)}
-        value={value}
-        type='color'
-      />
-    </div>
-  );
-}
 
 type TColor = {
   isBrightColor: boolean;
@@ -375,7 +242,7 @@ export function ColorDropdownMenuItems({
   return (
     <div
       className={cn(
-        'grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1',
+        'grid grid-cols-[repeat(8,1fr)] place-items-center gap-x-1 gap-y-1',
         className,
       )}
       {...props}
@@ -798,34 +665,6 @@ export const DEFAULT_COLORS = [
     isBrightColor: false,
     name: 'dark purple 3',
     value: '#1F124D',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark magenta 3',
-    value: '#4C1130',
-  },
-];
-
-const DEFAULT_CUSTOM_COLORS = [
-  {
-    isBrightColor: false,
-    name: 'dark orange 3',
-    value: '#783F04',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark grey 3',
-    value: '#666666',
-  },
-  {
-    isBrightColor: false,
-    name: 'dark grey 2',
-    value: '#999999',
-  },
-  {
-    isBrightColor: false,
-    name: 'light cornflower blue 1',
-    value: '#6C9EEB',
   },
   {
     isBrightColor: false,
