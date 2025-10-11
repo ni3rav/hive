@@ -3,9 +3,6 @@ import { cn } from '@/lib/utils';
 import { MetadataForm } from './metadata-form';
 import { RichTextEditorDemo } from './rich-text-editor';
 import { type PostMetadata } from '@/types/editor';
-import { useEditor, type Extension } from '@tiptap/react';
-import { createPersistenceHandlers } from './persistence';
-import { extensions } from './extensions-config';
 
 const initialMetadata: PostMetadata = {
   title: '',
@@ -20,17 +17,6 @@ const initialMetadata: PostMetadata = {
 export function PostEditorPage({ className = '' }: { className?: string }) {
   const [metadata, setMetadata] = useState<PostMetadata>(initialMetadata);
   const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
-
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: extensions as Extension[],
-    editorProps: {
-      attributes: {
-        class: 'max-w-full focus:outline-none',
-      },
-    },
-    ...createPersistenceHandlers(),
-  });
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
@@ -61,7 +47,6 @@ export function PostEditorPage({ className = '' }: { className?: string }) {
           metadata={metadata}
           setMetadata={setMetadata}
           onTitleChange={handleTitleChange}
-          editor={editor}
         />
       </div>
       {/* Editor must be the only grow item */}
@@ -70,7 +55,7 @@ export function PostEditorPage({ className = '' }: { className?: string }) {
           className='flex-grow w-full h-full'
           onFocusCapture={() => setIsMetadataExpanded(false)}
         >
-          <RichTextEditorDemo className='h-full' editor={editor} />
+          <RichTextEditorDemo className='h-full' />
         </div>
       </div>
     </div>
