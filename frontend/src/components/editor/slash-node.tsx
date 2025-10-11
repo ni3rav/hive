@@ -14,16 +14,13 @@ import {
   ListOrdered,
   PilcrowIcon,
   Quote,
-  Square,
   Table,
   TableOfContentsIcon,
 } from 'lucide-react';
 import { type TComboboxInputElement, KEYS } from 'platejs';
 import { PlateElement } from 'platejs/react';
 
-import {
-  insertBlock,
-} from '@/components/editor/transforms';
+import { insertBlock } from '@/components/editor/transforms';
 
 import {
   InlineCombobox,
@@ -87,12 +84,6 @@ const groups: Group[] = [
         keywords: ['ordered', 'ol', '1'],
         label: 'Numbered list',
         value: KEYS.ol,
-      },
-      {
-        icon: <Square />,
-        keywords: ['checklist', 'task', 'checkbox', '[]'],
-        label: 'To-do list',
-        value: KEYS.listTodo,
       },
       {
         icon: <ChevronRightIcon />,

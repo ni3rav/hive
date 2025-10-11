@@ -60,7 +60,6 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.h6]: () => `Heading 6`,
   [KEYS.hr]: () => 'Horizontal Rule',
   [KEYS.p]: (node) => {
-    if (node?.[KEYS.listType] === KEYS.listTodo) return 'Todo List';
     if (node?.[KEYS.listType] === KEYS.ol) return 'Ordered List';
     if (node?.[KEYS.listType] === KEYS.ul) return 'List';
 

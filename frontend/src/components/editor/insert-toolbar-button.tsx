@@ -16,7 +16,6 @@ import {
   PilcrowIcon,
   PlusIcon,
   QuoteIcon,
-  SquareIcon,
   TableIcon,
   TableOfContentsIcon,
 } from 'lucide-react';
@@ -29,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   insertBlock,
   insertInlineElement,
@@ -114,11 +114,6 @@ const groups: Group[] = [
         value: KEYS.ol,
       },
       {
-        icon: <SquareIcon />,
-        label: 'To-do list',
-        value: KEYS.listTodo,
-      },
-      {
         icon: <ChevronRightIcon />,
         label: 'Toggle list',
         value: KEYS.toggle,
@@ -180,26 +175,28 @@ export function InsertToolbarButton(props: DropdownMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className='flex max-h-[500px] min-w-0 flex-col overflow-y-auto'
+        className='flex max-h-[500px] min-w-0 flex-col'
         align='start'
       >
-        {groups.map(({ group, items: nestedItems }) => (
-          <ToolbarMenuGroup key={group} label={group}>
-            {nestedItems.map(({ icon, label, value, onSelect }) => (
-              <DropdownMenuItem
-                key={value}
-                className='min-w-[180px]'
-                onSelect={() => {
-                  onSelect(editor, value);
-                  editor.tf.focus();
-                }}
-              >
-                {icon}
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </ToolbarMenuGroup>
-        ))}
+        <ScrollArea className='h-full'>
+          {groups.map(({ group, items: nestedItems }) => (
+            <ToolbarMenuGroup key={group} label={group}>
+              {nestedItems.map(({ icon, label, value, onSelect }) => (
+                <DropdownMenuItem
+                  key={value}
+                  className='min-w-[180px]'
+                  onSelect={() => {
+                    onSelect(editor, value);
+                    editor.tf.focus();
+                  }}
+                >
+                  {icon}
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </ToolbarMenuGroup>
+          ))}
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -25,6 +25,7 @@ import { cva } from 'class-variance-authority';
 import { useComposedRef, useEditorRef } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string },
@@ -259,11 +260,13 @@ const InlineComboboxContent: typeof ComboboxPopover = ({
     <Portal>
       <ComboboxPopover
         className={cn(
-          'z-500 max-h-[288px] w-[300px] overflow-y-auto rounded-md bg-popover shadow-md',
+          'z-500 max-h-[288px] w-[300px] rounded-md bg-popover shadow-md',
           className,
         )}
         {...props}
-      />
+      >
+        <ScrollArea className='h-full'>{props.children}</ScrollArea>
+      </ComboboxPopover>
     </Portal>
   );
 };

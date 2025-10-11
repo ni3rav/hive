@@ -31,7 +31,6 @@ const insertBlockMap: Record<
   string,
   (editor: PlateEditor, type: string) => void
 > = {
-  [KEYS.listTodo]: insertList,
   [KEYS.ol]: insertList,
   [KEYS.ul]: insertList,
   [ACTION_THREE_COLUMNS]: (editor) =>
@@ -119,7 +118,6 @@ const setBlockMap: Record<
   string,
   (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
 > = {
-  [KEYS.listTodo]: setList,
   [KEYS.ol]: setList,
   [KEYS.ul]: setList,
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
@@ -166,8 +164,6 @@ export const getBlockType = (block: TElement) => {
   if (block[KEYS.listType]) {
     if (block[KEYS.listType] === KEYS.ol) {
       return KEYS.ol;
-    } else if (block[KEYS.listType] === KEYS.listTodo) {
-      return KEYS.listTodo;
     } else {
       return KEYS.ul;
     }

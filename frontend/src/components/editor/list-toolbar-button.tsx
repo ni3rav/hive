@@ -1,11 +1,7 @@
 import * as React from 'react';
 
 import { ListStyleType, someList, toggleList } from '@platejs/list';
-import {
-  useIndentTodoToolBarButton,
-  useIndentTodoToolBarButtonState,
-} from '@platejs/list/react';
-import { List, ListOrdered, ListTodoIcon } from 'lucide-react';
+import { List, ListOrdered } from 'lucide-react';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
 
 import {
@@ -17,7 +13,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import {
-  ToolbarButton,
   ToolbarSplitButton,
   ToolbarSplitButtonPrimary,
   ToolbarSplitButtonSecondary,
@@ -187,18 +182,5 @@ export function NumberedListToolbarButton() {
         </DropdownMenuContent>
       </DropdownMenu>
     </ToolbarSplitButton>
-  );
-}
-
-export function TodoListToolbarButton(
-  props: React.ComponentProps<typeof ToolbarButton>,
-) {
-  const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
-  const { props: buttonProps } = useIndentTodoToolBarButton(state);
-
-  return (
-    <ToolbarButton {...props} {...buttonProps} tooltip='Todo'>
-      <ListTodoIcon />
-    </ToolbarButton>
   );
 }

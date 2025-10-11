@@ -1,7 +1,6 @@
 import { Plate, usePlateEditor } from 'platejs/react';
 
 import { EditorKit } from '@/components/editor/editor-kit';
-import { SettingsDialog } from '@/components/editor/settings-dialog';
 import { Editor, EditorContainer } from '@/components/editor/editor';
 
 export function PlateEditor() {
@@ -14,8 +13,6 @@ export function PlateEditor() {
       <EditorContainer>
         <Editor variant='fullWidth' />
       </EditorContainer>
-
-      <SettingsDialog />
     </Plate>
   );
 }
