@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { createWorkspaceSchema } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
-import { getUserIdbySession } from '../utils/sessions';
 import { getUserWorkspaces } from '../utils/workspace';
 import { validationError, created, serverError, ok } from '../utils/responses';
 
@@ -17,9 +16,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
     );
   }
   const { name, slug } = validatedBody.data;
-  const sessionId: string = req.cookies['session_id'];
-
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   try {
     //* wrapping operations in transaction

@@ -10,7 +10,6 @@ import {
   deleteAuthorSchema,
   updateAuthorSchema,
 } from '../utils/validations/author';
-import { getUserIdbySession } from '../utils/sessions';
 import {
   toAuthorListResponseDto,
   toAuthorResponseDto,
@@ -24,8 +23,7 @@ import {
 } from '../utils/responses';
 
 export async function listUserAuthorsController(req: Request, res: Response) {
-  const sessionId: string = req.cookies['session_id'];
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   const [error, authors] = await getAuthorsByUserId(userId!);
 
@@ -53,9 +51,7 @@ export async function createAuthorController(req: Request, res: Response) {
   }
 
   const { name, email, about, socialLinks } = validatedBody.data;
-  const sessionId: string = req.cookies['session_id'];
-
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   const [error, author] = await createAuthor(userId!, {
     name,
@@ -81,8 +77,7 @@ export async function deleteAuthorController(req: Request, res: Response) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const sessionId: string = req.cookies['session_id'];
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   const [error] = await deleteAuthor(validate.data.authorId, userId!);
 
@@ -111,8 +106,7 @@ export async function updateAuthorController(req: Request, res: Response) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const sessionId: string = req.cookies['session_id'];
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   const [error, authors] = await updateAuthor(
     validate.data.authorId,
