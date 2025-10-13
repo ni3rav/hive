@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 import { getUserIdbySession } from '../utils/sessions';
 import { unauthorized } from '../utils/responses';
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    userId?: string;
+  }
+}
+
 export async function authMiddleware(
   req: Request,
   res: Response,
@@ -22,6 +28,8 @@ export async function authMiddleware(
   if (!userId) {
     return unauthorized(res, 'Invalid or expired session');
   }
+
+  req.userId = userId;
 
   next();
 }

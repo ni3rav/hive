@@ -3,7 +3,8 @@ import { createWorkspaceSchema } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
 import { getUserIdbySession } from '../utils/sessions';
-import { validationError, created, serverError } from '../utils/responses';
+import { getUserWorkspaces } from '../utils/workspace';
+import { validationError, created, serverError, ok } from '../utils/responses';
 
 export async function createWorkspaceController(req: Request, res: Response) {
   const validatedBody = createWorkspaceSchema.safeParse(req.body);
@@ -50,4 +51,16 @@ export async function createWorkspaceController(req: Request, res: Response) {
     console.error('Error creating workspace:', error);
     return serverError(res, 'Failed to create workspace');
   }
+}
+
+export async function getUserWorkspacesController(req: Request, res: Response) {
+  const userId = req.userId!;
+
+  const [userWorkspacesError, userWorkspaces] = await getUserWorkspaces(userId);
+
+  if (userWorkspacesError || !userWorkspaces) {
+    return serverError(res, 'Error while fetching user workspaces');
+  }
+
+  return ok(res, 'User workspaces fetched successfully', userWorkspaces);
 }

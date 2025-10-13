@@ -6,6 +6,7 @@ import {
   primaryKey,
 } from 'drizzle-orm/pg-core';
 import { usersTable } from './auth';
+import { relations } from 'drizzle-orm';
 
 export const workspacesTable = pgTable('workspaces', {
   id: uuid().defaultRandom().primaryKey(),
@@ -32,4 +33,22 @@ export const workspaceUsersTable = pgTable(
       columns: [t.workspaceId, t.userId],
     }),
   ],
+);
+
+export const workspacesRelations = relations(workspacesTable, ({ many }) => ({
+  workspaceUsers: many(workspaceUsersTable),
+}));
+
+export const workspaceUsersRelations = relations(
+  workspaceUsersTable,
+  ({ one }) => ({
+    workspace: one(workspacesTable, {
+      fields: [workspaceUsersTable.workspaceId],
+      references: [workspacesTable.id],
+    }),
+    user: one(usersTable, {
+      fields: [workspaceUsersTable.userId],
+      references: [usersTable.id],
+    }),
+  }),
 );
