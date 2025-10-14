@@ -6,7 +6,11 @@ import { getUserWorkspaces } from '../utils/workspace';
 import { validationError, created, serverError, ok } from '../utils/responses';
 
 export async function createWorkspaceController(req: Request, res: Response) {
-  const validatedBody = createWorkspaceSchema.safeParse(req.body);
+  const { workspaceName, workspaceSlug } = req.body;
+  const validatedBody = createWorkspaceSchema.safeParse({
+    name: workspaceName,
+    slug: workspaceSlug,
+  });
 
   if (!validatedBody.success) {
     return validationError(

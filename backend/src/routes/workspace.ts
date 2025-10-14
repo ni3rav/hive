@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { createWorkspaceController } from '../controllers/workspace';
-import { getUserWorkspaces } from '../utils/workspace';
+import { createWorkspaceController, getUserWorkspacesController } from '../controllers/workspace';
 
 export const router = Router();
 
 router.post('/', createWorkspaceController);
-router.get('/', getUserWorkspaces);
+router.get('/', getUserWorkspacesController);
