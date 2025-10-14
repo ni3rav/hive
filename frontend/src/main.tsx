@@ -22,6 +22,7 @@ const NotFound = lazyPage<{ className?: string }>('/src/pages/NotFound.tsx');
 const DashboardPage = lazyPage('/src/pages/Dashboard.tsx', 'DashboardPage');
 const Editor = lazyPage('/src/pages/Editor.tsx');
 const AuthorsPage = lazyPage('/src/pages/Author.tsx');
+const CategoriesPage = lazyPage('/src/pages/Categories.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
           {
             path: 'editor',
             element: <Editor />,
+          },
+          {
+            path: 'categories',         
+            element: <CategoriesPage />,
           },
           {
             path: 'authors',
