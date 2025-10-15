@@ -11,6 +11,7 @@ import { DashboardLayout } from './components/DashboardLayout';
 import { lazyPage } from '@/components/editor/lazy';
 import { Suspense } from 'react';
 import { Spinner } from './components/ui/spinner';
+import CategoriesManager from './components/Category/CategoryManager';
 
 const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
           {
             path: 'authors',
             element: <AuthorsPage />,
+          },
+          {
+            path: 'categories', 
+            element: <CategoriesManager />,
           },
           { path: '*', element: <NotFound /> },
         ],

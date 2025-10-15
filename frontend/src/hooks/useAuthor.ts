@@ -101,36 +101,26 @@ export function useUpdateAuthor() {
 export function useDeleteAuthor() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (authorId: string) => {
-      if (!import.meta.env.PROD) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        throw new Error('Simulated delete failure');
-      }
-      return apiDeleteAuthor(authorId);
-    },
+    mutationFn: (authorId: string) => apiDeleteAuthor(authorId),
+
     onMutate: async (authorId) => {
-      await queryClient.cancelQueries({
-        queryKey: QueryKeys.authorKeys().base,
-      });
-      const previous = queryClient.getQueryData<Author[]>(
-        QueryKeys.authorKeys().base,
-      );
+      await queryClient.cancelQueries({ queryKey: QueryKeys.authorKeys().base });
+      const previous = queryClient.getQueryData<Author[]>(QueryKeys.authorKeys().base);
       queryClient.setQueryData(
         QueryKeys.authorKeys().base,
-        (old: Author[] | undefined) =>
-          (old || []).filter((a) => a.id !== authorId),
+        (old: Author[] | undefined) => (old || []).filter((a) => a.id !== authorId),
       );
       return { previous };
     },
     onSuccess: () => {
       toast.success('Author deleted');
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
     },
-    onError: (error) => {
+    onError: (error, _authorId, ctx) => {
       const message = getErrorMessage(error, 'Failed to delete author');
       toast.error(message);
-      console.error('Error deleting author:', error);
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      if (ctx?.previous) {
+        queryClient.setQueryData(QueryKeys.authorKeys().base, ctx.previous);
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
