@@ -317,6 +317,10 @@
   @apply size-8 text-primary fill-background flex items-center justify-center;
 }
 
+html, body, #root { height: 100%; }
+body { overflow: hidden; }          
+#root { display: flex; }
+
 body {
   --sb-track-color: #ffffff00;
   --sb-thumb-color: var(--muted-foreground);
