@@ -1,7 +1,7 @@
 import {
   apiCreateAuthor,
   apiDeleteAuthor,
-  apiGetUserAuthors,
+  apiGetWorkspaceAuthors,
   apiUpdateAuthor,
 } from '@/api/author';
 import type { Author, CreateAuthorData } from '@/types/author';
@@ -10,10 +10,10 @@ import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
 import { QueryKeys } from '@/lib/query-key-factory';
 
-export function useUserAuthors() {
+export function useWorkspaceAuthors() {
   return useQuery({
     queryKey: QueryKeys.authorKeys().base,
-    queryFn: apiGetUserAuthors,
+    queryFn: apiGetWorkspaceAuthors,
     retry: false,
   });
 }

@@ -6,20 +6,28 @@ import {
   jsonb,
   index,
 } from 'drizzle-orm/pg-core';
-import { usersTable } from './auth';
+import { workspacesTable } from './workspace';
+import { relations } from 'drizzle-orm';
 
 export const authorTable = pgTable(
   'authors',
   {
     id: uuid().defaultRandom().primaryKey(),
-    userId: uuid('user_id')
+    workspaceId: uuid('workspace_id')
       .notNull()
-      .references(() => usersTable.id, { onDelete: 'cascade' }),
+      .references(() => workspacesTable.id, { onDelete: 'cascade' }),
     name: varchar('name').notNull(),
     email: varchar('email').notNull(),
     about: varchar('about').default(''),
     socialLinks: jsonb('social_links').default({}),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
-  (t) => [index('idx_authors_user_id').on(t.userId)],
+  (t) => [index('idx_authors_workspace_id').on(t.workspaceId)],
 );
+
+export const authorRelations = relations(authorTable, ({ one }) => ({
+  workspace: one(workspacesTable, {
+    fields: [authorTable.workspaceId],
+    references: [workspacesTable.id],
+  }),
+}));

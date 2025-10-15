@@ -15,7 +15,7 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
-import { useUserAuthors } from '@/hooks/useAuthor';
+import { useWorkspaceAuthors } from '@/hooks/useAuthor';
 import type { Author } from '@/types/author';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,7 +34,7 @@ export default function AuthorSelect({
   allowCreate = true,
 }: AuthorSelectProps) {
   const navigate = useNavigate();
-  const { data: authors = [], isLoading } = useUserAuthors() as {
+  const { data: authors = [], isLoading } = useWorkspaceAuthors() as {
     data: Author[];
     isLoading: boolean;
   };

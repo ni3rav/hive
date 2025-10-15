@@ -12,7 +12,7 @@ import {
   useDeleteAuthor,
   useCreateAuthor,
   useUpdateAuthor,
-  useUserAuthors,
+  useWorkspaceAuthors,
 } from '@/hooks/useAuthor';
 import type { Author, CreateAuthorData } from '@/types/author';
 import AuthorList from './AuthorList';
@@ -30,7 +30,7 @@ export default function AuthorsManager() {
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
 
-  const { data: authors, isLoading, isError } = useUserAuthors();
+  const { data: authors, isLoading, isError } = useWorkspaceAuthors();
 
   const createAuthorMutation = useCreateAuthor();
   const updateAuthorMutation = useUpdateAuthor();

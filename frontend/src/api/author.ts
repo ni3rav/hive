@@ -1,7 +1,7 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/lib/api-client';
 import type { Author, CreateAuthorData } from '@/types/author';
 
-export async function apiGetUserAuthors(): Promise<Author[]> {
+export async function apiGetWorkspaceAuthors(): Promise<Author[]> {
   return apiGet<Author[]>('/api/author/');
 }
 
