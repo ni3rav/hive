@@ -14,14 +14,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/accordion-animated';
-import { Calendar as CalendarIcon, Settings, Tag } from 'lucide-react';
+import { Calendar as CalendarIcon, Settings, Folder, Tag } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
 import AuthorSelect from '@/components/Author/AuthorSelect';
-import CategorySelect from '@/components/Category/CategorySelect';
 
 interface MetadataFormProps {
   isExpanded: boolean;
@@ -178,17 +177,14 @@ export function MetadataForm({
                 }
               />
 
-              <div className='grid gap-2'>
-                <label className='text-sm font-medium'>Category</label>
-                <CategorySelect
-                  value={metadata.category?.[0] ?? null}
-                  onChange={(categoryId) =>
-                    setMetadata((prev) => ({
-                      ...prev,
-                      category: categoryId ? [categoryId] : [],
-                    }))
-                  }
-                  placeholder='Select category...'
+              <label className='text-muted-foreground font-medium'>
+                Category
+              </label>
+              <div className='relative flex items-center'>
+                <Folder className='absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none' />
+                <Input
+                  className={cn('h-9 w-full pl-10', formFieldClasses)}
+                  placeholder='Select a category'
                 />
               </div>
 
