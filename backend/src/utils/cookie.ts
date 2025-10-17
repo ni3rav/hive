@@ -1,7 +1,8 @@
 import { Response } from 'express';
 import { env } from '../env';
 
-export const COOKIE_NAME = 'session_id';
+export const SESSION_COOKIE_NAME = 'session_id';
+export const WORKSPACE_COOKIE_NAME = 'workspace_id';
 
 export interface CookieOptions {
   httpOnly: boolean;
@@ -24,11 +25,44 @@ export function setSessionCookie(
   sessionId: string,
   expiresAt: Date,
 ): void {
-  res.cookie(COOKIE_NAME, sessionId, getSessionCookieOptions(expiresAt));
+  res.cookie(
+    SESSION_COOKIE_NAME,
+    sessionId,
+    getSessionCookieOptions(expiresAt),
+  );
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(COOKIE_NAME, {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: env.isProduction,
+  });
+}
+function getWorkspaceCookieOptions(expiresAt?: Date): CookieOptions {
+  const expires = expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  return {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: env.isProduction,
+    expires,
+  };
+}
+
+export function setWorkspaceCookie(
+  res: Response,
+  workspaceId: string,
+  expiresAt?: Date,
+): void {
+  res.cookie(
+    WORKSPACE_COOKIE_NAME,
+    workspaceId,
+    getWorkspaceCookieOptions(expiresAt),
+  );
+}
+
+export function clearWorkspaceCookie(res: Response): void {
+  res.clearCookie(WORKSPACE_COOKIE_NAME, {
     httpOnly: true,
     sameSite: 'lax',
     secure: env.isProduction,

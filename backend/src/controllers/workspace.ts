@@ -4,6 +4,7 @@ import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
 import { getUserWorkspaces } from '../utils/workspace';
 import { validationError, created, serverError, ok } from '../utils/responses';
+import { setWorkspaceCookie } from '../utils/cookie';
 
 export async function createWorkspaceController(req: Request, res: Response) {
   const { workspaceName, workspaceSlug } = req.body;
@@ -42,6 +43,8 @@ export async function createWorkspaceController(req: Request, res: Response) {
 
       return workspace;
     });
+
+    setWorkspaceCookie(res, workspace.id);
 
     return created(res, 'Workspace created successfully', {
       id: workspace.id,
