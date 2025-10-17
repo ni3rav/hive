@@ -2,11 +2,16 @@ import { Request, Response } from 'express';
 import { createWorkspaceSchema } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
-import { getUserIdbySession } from '../utils/sessions';
-import { validationError, created, serverError } from '../utils/responses';
+import { getUserWorkspaces } from '../utils/workspace';
+import { validationError, created, serverError, ok } from '../utils/responses';
+import { setWorkspaceCookie } from '../utils/cookie';
 
 export async function createWorkspaceController(req: Request, res: Response) {
-  const validatedBody = createWorkspaceSchema.safeParse(req.body);
+  const { workspaceName, workspaceSlug } = req.body;
+  const validatedBody = createWorkspaceSchema.safeParse({
+    name: workspaceName,
+    slug: workspaceSlug,
+  });
 
   if (!validatedBody.success) {
     return validationError(
@@ -16,9 +21,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
     );
   }
   const { name, slug } = validatedBody.data;
-  const sessionId: string = req.cookies['session_id'];
-
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   try {
     //* wrapping operations in transaction
@@ -41,6 +44,8 @@ export async function createWorkspaceController(req: Request, res: Response) {
       return workspace;
     });
 
+    setWorkspaceCookie(res, workspace.id);
+
     return created(res, 'Workspace created successfully', {
       id: workspace.id,
       name: workspace.name,
@@ -50,4 +55,16 @@ export async function createWorkspaceController(req: Request, res: Response) {
     console.error('Error creating workspace:', error);
     return serverError(res, 'Failed to create workspace');
   }
+}
+
+export async function getUserWorkspacesController(req: Request, res: Response) {
+  const userId = req.userId!;
+
+  const [userWorkspacesError, userWorkspaces] = await getUserWorkspaces(userId);
+
+  if (userWorkspacesError || !userWorkspaces) {
+    return serverError(res, 'Error while fetching user workspaces');
+  }
+
+  return ok(res, 'User workspaces fetched successfully', userWorkspaces);
 }

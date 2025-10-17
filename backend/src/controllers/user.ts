@@ -3,7 +3,6 @@ import { editProfileSchema } from '../utils/validations/user';
 import { usersTable } from '../db/schema';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
-import { getUserIdbySession } from '../utils/sessions';
 import {
   validationError,
   notFound,
@@ -24,9 +23,7 @@ export async function editProfileController(req: Request, res: Response) {
   }
 
   const { name, email } = validatedBody.data;
-  const sessionId: string = req.cookies['session_id'];
-
-  const [, userId] = await getUserIdbySession(sessionId);
+  const userId = req.userId!;
 
   try {
     const user = await db.query.usersTable.findFirst({

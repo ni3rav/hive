@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, Settings } from 'lucide-react'; // Changed Plus to Settings
+import { Check, ChevronsUpDown, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -15,34 +15,32 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
-import { useWorkspaceAuthors } from '@/hooks/useAuthor';
-import type { Author } from '@/types/author';
+import { useUserCategories } from '@/hooks/useCategory';
+import type { Category } from '@/types/category';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface AuthorSelectProps {
+interface CategorySelectProps {
   value: string | null;
-  onChange: (authorId: string | null, author?: Author | null) => void;
+  onChange: (categoryId: string | null, category?: Category | null) => void;
   placeholder?: string;
   allowCreate?: boolean;
 }
 
-export default function AuthorSelect({
+export default function CategorySelect({
   value,
   onChange,
-  placeholder = 'Select author...',
+  placeholder = 'Select category...',
   allowCreate = true,
-}: AuthorSelectProps) {
+}: CategorySelectProps) {
   const navigate = useNavigate();
-  const { data: authors = [], isLoading } = useWorkspaceAuthors() as {
-    data: Author[];
+  const { data: categories = [], isLoading } = useUserCategories() as {
+    data: Category[];
     isLoading: boolean;
   };
   const [open, setOpen] = React.useState(false);
-
   const selected = React.useMemo(
-    () => authors.find((a) => a.id === value) ?? null,
-    [authors, value],
+    () => categories.find((c) => c.id === value) ?? null,
+    [categories, value],
   );
 
   return (
@@ -71,59 +69,51 @@ export default function AuthorSelect({
         align='start'
       >
         <Command>
-          <CommandInput placeholder='Search authors...' />
+          <CommandInput placeholder='Search categories...' />
           <CommandList>
             {isLoading ? (
               <div className='space-y-2 p-3'>
                 <Skeleton className='h-5 w-full' />
                 <Skeleton className='h-5 w-[90%]' />
-                <Skeleton className='h-5 w-[80%]' />
               </div>
             ) : (
-              <CommandEmpty>No authors found.</CommandEmpty>
+              <CommandEmpty>No categories found.</CommandEmpty>
             )}
-            <CommandGroup heading='Authors'>
-              {isLoading ? (
-                <div className='space-y-2 p-3'>
-                  <Skeleton className='h-5 w-full' />
-                  <Skeleton className='h-5 w-[95%]' />
-                  <Skeleton className='h-5 w-[90%]' />
-                </div>
-              ) : (
-                (authors as Author[]).map((author) => (
-                  <CommandItem
-                    key={author.id}
-                    value={author.name}
-                    onSelect={() => {
-                      onChange(author.id!, author);
-                      setOpen(false);
-                    }}
-                    className='cursor-pointer'
-                  >
-                    <Check
-                      className={cn(
-                        'mr-2 h-4 w-4',
-                        value === author.id ? 'opacity-100' : 'opacity-0',
-                      )}
-                    />
-                    <div className='truncate'>{author.name}</div>
-                  </CommandItem>
-                ))
-              )}
+            <CommandGroup heading='Categories'>
+              {isLoading
+                ? null
+                :
+                  (categories as Category[]).map((category) => (
+                    <CommandItem
+                      key={category.id}
+                      value={category.name} 
+                      onSelect={() => {
+                        onChange(category.id!, category);
+                        setOpen(false);
+                      }}
+                      className='cursor-pointer'
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          value === category.id ? 'opacity-100' : 'opacity-0',
+                        )}
+                      />
+                      <div className='truncate'>{category.name}</div>
+                    </CommandItem>
+                  ))}
             </CommandGroup>
             {allowCreate && (
               <CommandGroup>
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    // --- CHANGE: Navigate to the authors management page ---
-                    navigate('/dashboard/authors');
+                    navigate('/dashboard/categories');
                   }}
                   className='cursor-pointer text-primary'
                 >
-                  {/* --- CHANGE: Updated icon and text --- */}
                   <Settings className='mr-2 h-4 w-4' />
-                  Manage authors
+                  Manage categories
                 </CommandItem>
               </CommandGroup>
             )}

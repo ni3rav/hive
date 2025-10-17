@@ -35,7 +35,11 @@ import {
   ok,
   badRequest,
 } from '../utils/responses';
-import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
+import {
+  setSessionCookie,
+  clearSessionCookie,
+  clearWorkspaceCookie,
+} from '../utils/cookie';
 import { getUserFromEmail } from '../utils/user';
 import { env } from '../env';
 
@@ -182,6 +186,7 @@ export async function logoutController(req: Request, res: Response) {
     await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
 
     clearSessionCookie(res);
+    clearWorkspaceCookie(res);
 
     return ok(res, 'Logged out successfully');
   } catch (error) {
