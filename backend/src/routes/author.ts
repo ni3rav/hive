@@ -1,28 +1,17 @@
-/*
 import { Router } from 'express';
 import {
-  listUserAuthorsController,
+  listWorkspaceAuthorsController,
   createAuthorController,
   deleteAuthorController,
   updateAuthorController,
 } from '../controllers/author';
+import { verifyWorkspaceMembership } from '../middleware/workspace';
 
 export const router = Router();
 
-router.get('/', listUserAuthorsController);
-router.post('/', createAuthorController);
-router.delete('/:authorId', deleteAuthorController);
-router.patch('/:authorId', updateAuthorController);
-*/
+router.use('/:workspaceSlug', verifyWorkspaceMembership);
 
-import { Router } from 'express';
-
-export const router = Router();
-
-router.use((_req, res) => {
-  return res.status(503).json({
-    success: false,
-    message: 'Author API temporarily disabled',
-    code: 'SERVICE_UNAVAILABLE',
-  });
-});
+router.get('/:workspaceSlug', listWorkspaceAuthorsController);
+router.post('/:workspaceSlug', createAuthorController);
+router.delete('/:workspaceSlug/:authorId', deleteAuthorController);
+router.patch('/:workspaceSlug/:authorId', updateAuthorController);

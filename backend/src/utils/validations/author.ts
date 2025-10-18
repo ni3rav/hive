@@ -3,7 +3,6 @@ import { sessionIdSchema } from './common';
 
 export const getAuthorByIdSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
-  userId: z.uuid('Invalid userId'),
 });
 
 export { sessionIdSchema };

@@ -1,12 +1,24 @@
-/*
 import { db } from '../db';
-import { authorTable } from '../db/schema';
+import { authorTable, workspacesTable } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 
-export async function getAuthorsByUserId(userId: string) {
+async function getWorkspaceBySlug(workspaceSlug: string) {
+  const workspace = await db.query.workspacesTable.findFirst({
+    where: eq(workspacesTable.slug, workspaceSlug),
+  });
+
+  if (!workspace) {
+    throw new Error('workspace not found');
+  }
+
+  return workspace;
+}
+
+export async function getAuthorsByWorkspaceSlug(workspaceSlug: string) {
   try {
+    const workspace = await getWorkspaceBySlug(workspaceSlug);
     const result = await db.query.authorTable.findMany({
-      where: eq(authorTable.userId, userId),
+      where: eq(authorTable.workspaceId, workspace.id),
     });
     return [null, result] as const;
   } catch (error) {
@@ -15,7 +27,7 @@ export async function getAuthorsByUserId(userId: string) {
 }
 
 export async function createAuthor(
-  userId: string,
+  workspaceSlug: string,
   data: {
     name: string;
     email: string;
@@ -24,10 +36,11 @@ export async function createAuthor(
   },
 ) {
   try {
+    const workspace = await getWorkspaceBySlug(workspaceSlug);
     const [author] = await db
       .insert(authorTable)
       .values({
-        userId,
+        workspaceId: workspace.id,
         ...data,
       })
       .returning();
@@ -40,7 +53,7 @@ export async function createAuthor(
 
 export async function updateAuthor(
   authorId: string,
-  userId: string,
+  workspaceSlug: string,
   data: {
     name?: string;
     email?: string;
@@ -49,10 +62,16 @@ export async function updateAuthor(
   },
 ) {
   try {
+    const workspace = await getWorkspaceBySlug(workspaceSlug);
     const result = await db
       .update(authorTable)
       .set(data)
-      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)))
+      .where(
+        and(
+          eq(authorTable.id, authorId),
+          eq(authorTable.workspaceId, workspace.id),
+        ),
+      )
       .returning();
     return [null, result] as const;
   } catch (error) {
@@ -60,11 +79,17 @@ export async function updateAuthor(
   }
 }
 
-export async function deleteAuthor(authorId: string, userId: string) {
+export async function deleteAuthor(authorId: string, workspaceSlug: string) {
   try {
+    const workspace = await getWorkspaceBySlug(workspaceSlug);
     const result = await db
       .delete(authorTable)
-      .where(and(eq(authorTable.id, authorId), eq(authorTable.userId, userId)));
+      .where(
+        and(
+          eq(authorTable.id, authorId),
+          eq(authorTable.workspaceId, workspace.id),
+        ),
+      );
 
     if (result.rowCount === 0) {
       return [new Error('author not found or already deleted'), null] as const;
@@ -73,50 +98,4 @@ export async function deleteAuthor(authorId: string, userId: string) {
   } catch (error) {
     return [error, null] as const;
   }
-}
-*/
-
-function disabledError() {
-  return new Error('author utilities temporarily disabled');
-}
-
-export async function getAuthorsByUserId(_userId: string) {
-  void _userId;
-  return [disabledError(), null] as const;
-}
-
-export async function createAuthor(
-  _userId: string,
-  _data: {
-    name: string;
-    email: string;
-    about?: string;
-    socialLinks?: Record<string, string>;
-  },
-) {
-  void _userId;
-  void _data;
-  return [disabledError(), null] as const;
-}
-
-export async function updateAuthor(
-  _authorId: string,
-  _userId: string,
-  _data: {
-    name?: string;
-    email?: string;
-    about?: string;
-    socialLinks?: Record<string, string>;
-  },
-) {
-  void _authorId;
-  void _userId;
-  void _data;
-  return [disabledError(), null] as const;
-}
-
-export async function deleteAuthor(_authorId: string, _userId: string) {
-  void _authorId;
-  void _userId;
-  return [disabledError(), null] as const;
 }
