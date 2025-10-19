@@ -10,31 +10,35 @@ import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
 import { QueryKeys } from '@/lib/query-key-factory';
 
-export function useWorkspaceAuthors() {
+const authorsKey = (workspaceSlug: string) =>
+  [...QueryKeys.authorKeys().base, workspaceSlug] as const;
+
+export function useWorkspaceAuthors(workspaceSlug: string) {
   return useQuery({
-    queryKey: QueryKeys.authorKeys().base,
-    queryFn: apiGetWorkspaceAuthors,
+    queryKey: authorsKey(workspaceSlug),
+    queryFn: () => apiGetWorkspaceAuthors(workspaceSlug),
     retry: false,
   });
 }
 
-export function useCreateAuthor() {
+export function useCreateAuthor(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateAuthorData) => apiCreateAuthor(data),
+    mutationFn: (data: CreateAuthorData) =>
+      apiCreateAuthor(workspaceSlug, data),
     onMutate: async (newAuthor) => {
       await queryClient.cancelQueries({
-        queryKey: QueryKeys.authorKeys().base,
+        queryKey: authorsKey(workspaceSlug),
       });
       const previous = queryClient.getQueryData<Author[]>(
-        QueryKeys.authorKeys().base,
+        authorsKey(workspaceSlug),
       );
       const optimistic: Author = {
         id: `optimistic-${Date.now()}`,
         ...newAuthor,
       } as Author;
       queryClient.setQueryData(
-        QueryKeys.authorKeys().base,
+        authorsKey(workspaceSlug),
         (old: Author[] | undefined) =>
           old ? [optimistic, ...old] : [optimistic],
       );
@@ -42,21 +46,21 @@ export function useCreateAuthor() {
     },
     onSuccess: () => {
       toast.success('Author created');
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
-    onError: (error) => {
+    onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to create author');
       toast.error(message);
-      console.error('Error creating author:', error);
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      if (ctx?.previous)
+        queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
 
-export function useUpdateAuthor() {
+export function useUpdateAuthor(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -65,16 +69,16 @@ export function useUpdateAuthor() {
     }: {
       authorId: string;
       data: Partial<CreateAuthorData>;
-    }) => apiUpdateAuthor(authorId, data),
+    }) => apiUpdateAuthor(workspaceSlug, authorId, data),
     onMutate: async ({ authorId, data }) => {
       await queryClient.cancelQueries({
-        queryKey: QueryKeys.authorKeys().base,
+        queryKey: authorsKey(workspaceSlug),
       });
       const previous = queryClient.getQueryData<Author[]>(
-        QueryKeys.authorKeys().base,
+        authorsKey(workspaceSlug),
       );
       queryClient.setQueryData(
-        QueryKeys.authorKeys().base,
+        authorsKey(workspaceSlug),
         (old: Author[] | undefined) =>
           (old || []).map((a) =>
             a.id === authorId ? ({ ...a, ...data } as Author) : a,
@@ -84,31 +88,34 @@ export function useUpdateAuthor() {
     },
     onSuccess: () => {
       toast.success('Author updated');
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
-    onError: (error) => {
+    onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to update author');
       toast.error(message);
-      console.error('Error updating author:', error);
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      if (ctx?.previous)
+        queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
 
-export function useDeleteAuthor() {
+export function useDeleteAuthor(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (authorId: string) => apiDeleteAuthor(authorId),
+    mutationFn: (authorId: string) => apiDeleteAuthor(workspaceSlug, authorId),
 
     onMutate: async (authorId) => {
-      await queryClient.cancelQueries({ queryKey: QueryKeys.authorKeys().base });
-      const previous = queryClient.getQueryData<Author[]>(QueryKeys.authorKeys().base);
+      await queryClient.cancelQueries({ queryKey: authorsKey(workspaceSlug) });
+      const previous = queryClient.getQueryData<Author[]>(
+        authorsKey(workspaceSlug),
+      );
       queryClient.setQueryData(
-        QueryKeys.authorKeys().base,
-        (old: Author[] | undefined) => (old || []).filter((a) => a.id !== authorId),
+        authorsKey(workspaceSlug),
+        (old: Author[] | undefined) =>
+          (old || []).filter((a) => a.id !== authorId),
       );
       return { previous };
     },
@@ -119,11 +126,11 @@ export function useDeleteAuthor() {
       const message = getErrorMessage(error, 'Failed to delete author');
       toast.error(message);
       if (ctx?.previous) {
-        queryClient.setQueryData(QueryKeys.authorKeys().base, ctx.previous);
+        queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.authorKeys().base });
+      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
