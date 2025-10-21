@@ -6,9 +6,9 @@ import { unauthorized, notFound } from '../utils/responses';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    userId?: string;
     workspaceId?: string;
     workspaceSlug?: string;
+    workspaceRole?: string;
   }
 }
 
@@ -54,7 +54,7 @@ export async function verifyWorkspaceMembership(
 
     req.workspaceId = workspace.id;
     req.workspaceSlug = workspace.slug;
-
+    req.workspaceRole = membership.role;
     next();
   } catch (error) {
     console.error('Error verifying workspace membership:', error);
