@@ -112,6 +112,10 @@ export class QueryKeys {
       return [...this.base, workspaceSlug];
     },
 
+    verify(workspaceSlug: string) {
+      return [...this.base, 'verify', workspaceSlug];
+    },
+
     settings() {
       return [...this.base, 'settings'];
     },
