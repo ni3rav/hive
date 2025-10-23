@@ -31,6 +31,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
         .values({
           name: name,
           slug: slug,
+          ownerId: userId,
         })
         .returning();
 
