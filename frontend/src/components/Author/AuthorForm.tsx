@@ -34,7 +34,7 @@ export default function AuthorForm({
     () =>
       z.object({
         name: z.string().min(1, 'Name is required'),
-        email: z.string().email('Enter a valid email'),
+        email: z.email('Enter a valid email'),
         about: z.string().optional().default(''),
       }),
     [],

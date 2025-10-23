@@ -33,10 +33,7 @@ export function EditProfileForm({
     () =>
       z.object({
         name: z.string().optional(),
-        email: z
-          .string()
-          .email('Please enter a valid email address')
-          .optional(),
+        email: z.email('Please enter a valid email address').optional(),
       }),
     [],
   );
