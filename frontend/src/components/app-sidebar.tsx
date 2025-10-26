@@ -14,12 +14,12 @@ import {
   BookOpen,
   SquareTerminal,
   Settings2,
-  Hexagon,
   Users,
   FileText,
   Layers,
   Tag,
 } from 'lucide-react';
+import { WorkspaceSwitcher } from '@/components/Workspace/workspaceSwitcher';
 
 const navData = {
   navMain: [
@@ -67,15 +67,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <a
-          href='/dashboard'
-          className='flex h-14 items-center justify-center group-data-[state=expanded]:justify-start group-data-[state=expanded]:px-3'
-        >
-          <Hexagon className='size-8 text-primary fill-background flex items-center justify-center' />
-          <span className='ml-2 text-lg font-semibold group-data-[state=collapsed]:hidden'>
-            Hive
-          </span>
-        </a>
+        <div className='flex h-14 items-center px-4'>
+          <WorkspaceSwitcher />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navData.navMain} />
