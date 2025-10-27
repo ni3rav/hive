@@ -68,8 +68,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMainItems = navItems.map((item) => ({
     ...item,
     url: workspaceSlug
-      ? `/dashboard/${workspaceSlug}/${item.url}`
-      : `/dashboard/${item.url}`,
+      ? item.url
+        ? `/dashboard/${workspaceSlug}/${item.url}`
+        : `/dashboard/${workspaceSlug}`
+      : item.url
+        ? `/dashboard/${item.url}`
+        : '/dashboard',
   }));
 
   return (
