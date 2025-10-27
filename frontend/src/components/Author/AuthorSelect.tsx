@@ -120,12 +120,10 @@ export default function AuthorSelect({
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    // --- CHANGE: Navigate to the authors management page ---
-                    navigate('/dashboard/authors');
+                    navigate(`/dashboard/${workspaceSlug}/authors`);
                   }}
                   className='cursor-pointer text-primary'
                 >
-                  {/* --- CHANGE: Updated icon and text --- */}
                   <Settings className='mr-2 h-4 w-4' />
                   Manage authors
                 </CommandItem>
