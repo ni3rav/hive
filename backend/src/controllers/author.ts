@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import {
   createAuthor,
   deleteAuthor,
-  getAuthorsByUserId,
+  getAuthorsByWorkspaceSlug,
   updateAuthor,
 } from '../utils/author';
 import {
@@ -22,10 +22,13 @@ import {
   serverError,
 } from '../utils/responses';
 
-export async function listUserAuthorsController(req: Request, res: Response) {
-  const userId = req.userId!;
+export async function listWorkspaceAuthorsController(
+  req: Request,
+  res: Response,
+) {
+  const workspaceSlug = req.workspaceSlug!;
 
-  const [error, authors] = await getAuthorsByUserId(userId!);
+  const [error, authors] = await getAuthorsByWorkspaceSlug(workspaceSlug);
 
   if (error) {
     console.error('Error fetching authors:', error);
@@ -51,9 +54,9 @@ export async function createAuthorController(req: Request, res: Response) {
   }
 
   const { name, email, about, socialLinks } = validatedBody.data;
-  const userId = req.userId!;
+  const workspaceSlug = req.workspaceSlug!;
 
-  const [error, author] = await createAuthor(userId!, {
+  const [error, author] = await createAuthor(workspaceSlug, {
     name,
     email,
     about,
@@ -77,13 +80,15 @@ export async function deleteAuthorController(req: Request, res: Response) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const userId = req.userId!;
+  const workspaceSlug = req.workspaceSlug!;
 
-  const [error] = await deleteAuthor(validate.data.authorId, userId!);
+  const [error] = await deleteAuthor(validate.data.authorId, workspaceSlug);
 
   if (error) {
-    if ((error as Error).message === 'author not found') {
+    if ((error as Error).message === 'author not found or already deleted') {
       return notFound(res, 'Author not found');
+    } else if ((error as Error).message === 'workspace not found') {
+      return notFound(res, 'Workspace not found');
     } else {
       console.error('Error deleting author:', error);
       return serverError(res, 'Failed to delete author');
@@ -106,17 +111,21 @@ export async function updateAuthorController(req: Request, res: Response) {
     return validationError(res, 'Invalid request data', validate.error.issues);
   }
 
-  const userId = req.userId!;
+  const workspaceSlug = req.workspaceSlug!;
 
   const [error, authors] = await updateAuthor(
     validate.data.authorId,
-    userId!,
+    workspaceSlug,
     validate.data.data,
   );
 
   if (error) {
-    console.error('Error updating author:', error);
-    return serverError(res, 'Failed to update author');
+    if ((error as Error).message === 'workspace not found') {
+      return notFound(res, 'Workspace not found');
+    } else {
+      console.error('Error updating author:', error);
+      return serverError(res, 'Failed to update author');
+    }
   }
 
   const author = authors && authors.length > 0 ? authors[0] : null;

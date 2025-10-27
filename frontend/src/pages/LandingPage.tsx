@@ -9,7 +9,7 @@ export default function LandingPage() {
     <div className='flex flex-col min-h-screen bg-background'>
       <PageReveal />
       <HeroHeader />
-      <main className='flex flex-col flex-1'>
+      <main className='flex flex-col flex-1 min-w-screen'>
         <HeroSection />
         <Features />
       </main>

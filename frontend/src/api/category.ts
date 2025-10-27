@@ -1,5 +1,5 @@
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/lib/api-client';
-import type { Category, CreateCategoryData } from '@/types/author';
+import type { Category, CreateCategoryData } from '@/types/category';
 
 export async function apiGetUserCategories(): Promise<Category[]> {
   return apiGet<Category[]>('/api/category/');

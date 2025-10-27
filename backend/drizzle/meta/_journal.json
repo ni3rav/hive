@@ -50,6 +50,13 @@
       "when": 1760533873591,
       "tag": "0006_green_lifeguard",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1761243780905,
+      "tag": "0007_glossy_vapor",
+      "breakpoints": true
     }
   ]
 }

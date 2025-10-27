@@ -100,6 +100,10 @@ export class QueryKeys {
   private static workspace = {
     base: ['workspace'] as const,
 
+    list() {
+      return [...this.base, 'list'];
+    },
+
     info() {
       return [...this.base, 'info'];
     },
@@ -110,6 +114,10 @@ export class QueryKeys {
 
     workspace(workspaceSlug: string) {
       return [...this.base, workspaceSlug];
+    },
+
+    verify(workspaceSlug: string) {
+      return [...this.base, 'verify', workspaceSlug];
     },
 
     settings() {

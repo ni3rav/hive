@@ -19,6 +19,7 @@ import { useWorkspaceAuthors } from '@/hooks/useAuthor';
 import type { Author } from '@/types/author';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 
 interface AuthorSelectProps {
   value: string | null;
@@ -34,7 +35,10 @@ export default function AuthorSelect({
   allowCreate = true,
 }: AuthorSelectProps) {
   const navigate = useNavigate();
-  const { data: authors = [], isLoading } = useWorkspaceAuthors() as {
+  const workspaceSlug = useWorkspaceSlug();
+  const { data: authors = [], isLoading } = useWorkspaceAuthors(
+    workspaceSlug!,
+  ) as {
     data: Author[];
     isLoading: boolean;
   };
@@ -116,12 +120,10 @@ export default function AuthorSelect({
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    // --- CHANGE: Navigate to the authors management page ---
-                    navigate('/dashboard/authors');
+                    navigate(`/dashboard/${workspaceSlug}/authors`);
                   }}
                   className='cursor-pointer text-primary'
                 >
-                  {/* --- CHANGE: Updated icon and text --- */}
                   <Settings className='mr-2 h-4 w-4' />
                   Manage authors
                 </CommandItem>
