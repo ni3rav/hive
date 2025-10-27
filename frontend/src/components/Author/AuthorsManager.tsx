@@ -25,16 +25,22 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 
 export default function AuthorsManager() {
+  const workspaceSlug = useWorkspaceSlug();
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
 
-  const { data: authors, isLoading, isError } = useWorkspaceAuthors();
+  const {
+    data: authors,
+    isLoading,
+    isError,
+  } = useWorkspaceAuthors(workspaceSlug!);
 
-  const createAuthorMutation = useCreateAuthor();
-  const updateAuthorMutation = useUpdateAuthor();
-  const deleteAuthorMutation = useDeleteAuthor();
+  const createAuthorMutation = useCreateAuthor(workspaceSlug!);
+  const updateAuthorMutation = useUpdateAuthor(workspaceSlug!);
+  const deleteAuthorMutation = useDeleteAuthor(workspaceSlug!);
 
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);

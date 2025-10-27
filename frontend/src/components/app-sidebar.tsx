@@ -20,59 +20,65 @@ import {
   Tag,
 } from 'lucide-react';
 import { WorkspaceSwitcher } from '@/components/Workspace/workspaceSwitcher';
+import { useParams } from 'react-router-dom';
 
-const navData = {
-  navMain: [
-    {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: SquareTerminal,
-    },
-    {
-      title: 'Posts',
-      url: '/dashboard/posts',
-      icon: FileText,
-    },
-    {
-      title: 'Authors',
-      url: '/dashboard/authors',
-      icon: Users,
-    },
-    {
-      title: 'Categories',
-      url: '/dashboard/categories',
-      icon: Layers,
-    },
-    {
-      title: 'Tags',
-      url: '/dashboard/tags',
-      icon: Tag,
-    },
-    {
-      title: 'Editor',
-      url: '/dashboard/editor',
-      icon: BookOpen,
-    },
-    {
-      title: 'Settings',
-      url: '/dashboard/settings',
-      icon: Settings2,
-    },
-  ],
-};
+const navItems = [
+  {
+    title: 'Dashboard',
+    url: '',
+    icon: SquareTerminal,
+  },
+  {
+    title: 'Posts',
+    url: 'posts',
+    icon: FileText,
+  },
+  {
+    title: 'Authors',
+    url: 'authors',
+    icon: Users,
+  },
+  {
+    title: 'Categories',
+    url: 'categories',
+    icon: Layers,
+  },
+  {
+    title: 'Tags',
+    url: 'tags',
+    icon: Tag,
+  },
+  {
+    title: 'Editor',
+    url: 'editor',
+    icon: BookOpen,
+  },
+  {
+    title: 'Settings',
+    url: 'settings',
+    icon: Settings2,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: user, isLoading } = useAuth();
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+
+  // Build workspace-aware URLs
+  const navMainItems = navItems.map((item) => ({
+    ...item,
+    url: workspaceSlug
+      ? `/dashboard/${workspaceSlug}/${item.url}`
+      : `/dashboard/${item.url}`,
+  }));
 
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <div className='flex h-14 items-center px-4'>
-          <WorkspaceSwitcher />
-        </div>
+        <WorkspaceSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navData.navMain} />
+        <NavMain items={navMainItems} />
       </SidebarContent>
       <SidebarFooter>
         {isLoading ? (

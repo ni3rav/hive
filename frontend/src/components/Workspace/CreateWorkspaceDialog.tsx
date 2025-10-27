@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCreateWorkspace } from '@/hooks/useWorkspace';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,8 +23,8 @@ function generateSlug(name: string): string {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '') // Remove special chars
-    .replace(/\s+/g, '-')     // Replace spaces with hyphens
-    .replace(/-+/g, '-');     // Replace multiple hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-'); // Replace multiple hyphens
 
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomSuffix = '';
@@ -35,35 +34,36 @@ function generateSlug(name: string): string {
   const finalSlug = `${baseSlug}-${randomSuffix}`;
   return finalSlug.length > 5 ? finalSlug : `workspace-${randomSuffix}`;
 }
-export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDialogProps) {
+export function CreateWorkspaceDialog({
+  open,
+  onOpenChange,
+}: CreateWorkspaceDialogProps) {
   const [name, setName] = useState('');
-  const navigate = useNavigate();
   const createWorkspace = useCreateWorkspace();
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedName = name.trim();
-    
+
     if (!trimmedName) return;
 
     try {
       const workspaceData = {
         workspaceName: trimmedName, // Changed back to workspaceName
-        workspaceSlug: generateSlug(trimmedName) // Changed back to workspaceSlug
+        workspaceSlug: generateSlug(trimmedName), // Changed back to workspaceSlug
       };
 
       const response = await createWorkspace.mutateAsync(workspaceData);
 
       if (response?.slug) {
-        navigate(`/dashboard/${response.slug}`);
         onOpenChange(false);
         setName('');
-        toast.success('Workspace created successfully');
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error('Workspace creation error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to create workspace';
+      const errorMessage =
+        error.response?.data?.message || 'Failed to create workspace';
       toast.error(errorMessage);
     }
   };
@@ -77,26 +77,26 @@ export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDia
             Create a workspace to organize your content.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleCreateWorkspace} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Workspace Name</Label>
+        <form onSubmit={handleCreateWorkspace} className='space-y-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='name'>Workspace Name</Label>
             <Input
-              id="name"
-              name="name"
+              id='name'
+              name='name'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter workspace name"
-              className="w-full"
-              autoComplete="off"
+              placeholder='Enter workspace name'
+              className='w-full'
+              autoComplete='off'
               required
               minLength={1}
               maxLength={50}
             />
           </div>
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type='button'
+              variant='outline'
               onClick={() => {
                 onOpenChange(false);
                 setName('');
@@ -104,8 +104,8 @@ export function CreateWorkspaceDialog({ open, onOpenChange }: CreateWorkspaceDia
             >
               Cancel
             </Button>
-            <Button 
-              type="submit"
+            <Button
+              type='submit'
               disabled={!name.trim() || createWorkspace.isPending}
             >
               {createWorkspace.isPending ? 'Creating...' : 'Create'}

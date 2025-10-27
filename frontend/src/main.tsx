@@ -2,7 +2,11 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query-client.ts';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ErrorFallback';
@@ -21,8 +25,12 @@ const ForgotPasswordPage = lazyPage('/src/pages/ForgotPassword.tsx');
 const ResetPasswordPage = lazyPage('/src/pages/ResetPassword.tsx');
 const NotFound = lazyPage<{ className?: string }>('/src/pages/NotFound.tsx');
 const DashboardPage = lazyPage('/src/pages/Dashboard.tsx', 'DashboardPage');
+const WorkspaceManagementPage = lazyPage(
+  '/src/pages/WorkspaceManagement.tsx',
+  'WorkspaceManagementPage',
+);
 const Editor = lazyPage('/src/pages/Editor.tsx');
-// const AuthorsPage = lazyPage('/src/pages/Author.tsx');
+const AuthorsPage = lazyPage('/src/pages/Author.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -57,7 +65,19 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
+        path: '/workspaces',
+        element: (
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <WorkspaceManagementPage />
+          </ErrorBoundary>
+        ),
+      },
+      {
         path: '/dashboard',
+        element: <Navigate to='/workspaces' replace />,
+      },
+      {
+        path: '/dashboard/:workspaceSlug',
         element: <DashboardLayout />,
         children: [
           {
@@ -68,10 +88,10 @@ const router = createBrowserRouter([
             path: 'editor',
             element: <Editor />,
           },
-          // {
-          //   path: 'authors',
-          //   element: <AuthorsPage />,
-          // },
+          {
+            path: 'authors',
+            element: <AuthorsPage />,
+          },
           {
             path: 'categories',
             element: <CategoriesManager />,

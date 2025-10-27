@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import {
   apiCreateWorkspace,
   apiGetUserWorkspaces,
@@ -9,20 +10,36 @@ import type { CreateWorkspaceData, UserWorkspace } from '@/types/workspace';
 import { toast } from 'sonner';
 
 export function useWorkspaceVerification(workspaceSlug?: string) {
-  return useQuery({
+  const query = useQuery({
     queryKey: QueryKeys.workspaceKeys().verify(workspaceSlug!),
     queryFn: () => apiVerifyWorkspace(workspaceSlug!),
     enabled: !!workspaceSlug,
     retry: false,
   });
+
+  useEffect(() => {
+    if (query.isError && query.error) {
+      toast.error('Failed to verify workspace access');
+    }
+  }, [query.isError, query.error]);
+
+  return query;
 }
 
 export function useUserWorkspaces() {
-  return useQuery({
+  const query = useQuery({
     queryKey: QueryKeys.workspaceKeys().list(),
     queryFn: () => apiGetUserWorkspaces(),
     retry: false,
   });
+
+  useEffect(() => {
+    if (query.isError && query.error) {
+      toast.error('Failed to load workspaces');
+    }
+  }, [query.isError, query.error]);
+
+  return query;
 }
 
 export function useCreateWorkspace() {
