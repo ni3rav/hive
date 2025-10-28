@@ -43,7 +43,7 @@
   --font-sans: 'Geist Mono', ui-monospace, monospace;
   --font-serif: serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --radius: 0.75rem;
+  --radius: 0.40rem;
   --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-sm:
@@ -99,7 +99,6 @@
   --font-sans: 'Geist Mono', ui-monospace, monospace;
   --font-serif: serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --radius: 0.75rem;
   --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-sm:

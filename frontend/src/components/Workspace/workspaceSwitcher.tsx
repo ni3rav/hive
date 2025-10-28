@@ -15,6 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { getLastWorkspaceSlugs, updateLastWorkspaceCookie } from '@/lib/utils';
 
 function RoleBadge({ role }: { role: string }) {
   return (
@@ -29,6 +31,7 @@ export function WorkspaceSwitcher() {
   const navigate = useNavigate();
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
+  const { previous: lastUsedSlug } = getLastWorkspaceSlugs();
 
   const currentWorkspace = useMemo(() => {
     if (!workspaceSlug) return null;
@@ -115,6 +118,11 @@ export function WorkspaceSwitcher() {
                       {workspace.name}
                     </span>
                     <RoleBadge role={workspace.role} />
+                    {workspace.slug === lastUsedSlug && (
+                      <Badge className='h-4 text-[10px] px-1.5'>
+                        Last used
+                      </Badge>
+                    )}
                   </div>
                   <span className='truncate text-xs text-muted-foreground'>
                     {workspace.slug}
@@ -197,6 +205,7 @@ export function WorkspaceSwitcher() {
                   onClick={() => {
                     if (!isActive) {
                       setOpen(false);
+                      updateLastWorkspaceCookie(workspace.slug);
                       navigate(`/dashboard/${workspace.slug}`);
                     }
                   }}
@@ -216,6 +225,11 @@ export function WorkspaceSwitcher() {
                         {workspace.name}
                       </span>
                       <RoleBadge role={workspace.role} />
+                      {workspace.slug === lastUsedSlug && (
+                        <Badge className='h-4 text-[10px] px-1.5'>
+                          Last used
+                        </Badge>
+                      )}
                     </div>
                     <span className='truncate text-xs text-muted-foreground'>
                       {workspace.slug}

@@ -15,7 +15,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import {
+  cn,
+  getLastWorkspaceSlugs,
+  updateLastWorkspaceCookie,
+} from '@/lib/utils';
 
 export function WorkspaceManagementPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -27,8 +31,10 @@ export function WorkspaceManagementPage() {
   } | null>(null);
   const navigate = useNavigate();
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
+  const { current: lastUsedSlug } = getLastWorkspaceSlugs();
 
   const handleNavigateToWorkspace = (slug: string) => {
+    updateLastWorkspaceCookie(slug);
     navigate(`/dashboard/${slug}`);
   };
 
@@ -123,6 +129,11 @@ export function WorkspaceManagementPage() {
                       'flex items-center justify-center mb-4 transition-transform group-hover:scale-105 shadow-lg group-hover:shadow-2xl hover:shadow-2xl',
                     )}
                   >
+                    {workspace.slug === lastUsedSlug && (
+                      <Badge className='absolute top-2 left-2 h-5 text-[10px] px-1.5 pointer-events-none bg-accent-foreground'>
+                        Last used
+                      </Badge>
+                    )}
                     <span className='text-6xl font-bold text-background'>
                       {initials}
                     </span>
