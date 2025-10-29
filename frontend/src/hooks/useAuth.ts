@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getAuthErrorMessage, getErrorMessage } from '@/lib/error-utils';
+import { deleteCookie, LAST_WORKSPACE_COOKIE } from '@/lib/utils';
 
 export function useAuth() {
   return useQuery({
@@ -52,6 +53,7 @@ export function useLogout() {
     mutationFn: apiLogout,
     onSuccess: () => {
       clearAllWorkspaceData();
+      deleteCookie(LAST_WORKSPACE_COOKIE);
       queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().base });
     },
   });

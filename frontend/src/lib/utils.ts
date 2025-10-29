@@ -47,7 +47,7 @@ export function deleteCookie(name: string, options?: { path?: string }) {
   }
 }
 
-const LAST_WORKSPACE_COOKIE = 'lastWorkspaceSlug';
+export const LAST_WORKSPACE_COOKIE = 'lastWorkspaceSlug';
 
 export function getLastWorkspaceSlugs(): {
   current?: string;
