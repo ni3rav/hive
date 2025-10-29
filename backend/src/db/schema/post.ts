@@ -7,12 +7,16 @@ import {
   text,
 } from 'drizzle-orm/pg-core';
 import { authorTable } from './author';
+import { workspacesTable } from './workspace';
 
 export const postsTable = pgTable('posts', {
   id: uuid().defaultRandom().primaryKey(),
-  authorId: uuid('author_id')
+  workspaceId: uuid('workspace_id')
     .notNull()
-    .references(() => authorTable.id, { onDelete: 'cascade' }),
+    .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+  authorId: uuid('author_id').references(() => authorTable.id, {
+    onDelete: 'set null',
+  }),
   title: varchar('title').notNull(),
   slug: varchar('slug').notNull().unique(),
   excerpt: varchar('excerpt').default('').notNull(),

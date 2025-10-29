@@ -57,6 +57,13 @@
       "when": 1761243780905,
       "tag": "0007_glossy_vapor",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761754080412,
+      "tag": "0008_tearful_dragon_lord",
+      "breakpoints": true
     }
   ]
 }
