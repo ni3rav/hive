@@ -4,6 +4,7 @@ import type { Value } from 'platejs';
 import { EditorKit } from '@/components/editor/editor-kit';
 import { Editor, EditorContainer } from '@/components/editor/editor';
 import { loadContent, saveContent } from '@/components/editor/persistence';
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 
 const initialValue: Value = [
   {
@@ -13,10 +14,12 @@ const initialValue: Value = [
 ];
 
 export function PlateEditor() {
+  const workspaceSlug = useWorkspaceSlug();
+
   const editor = usePlateEditor({
     plugins: EditorKit,
     value: () => {
-      const savedContent = loadContent();
+      const savedContent = loadContent(workspaceSlug);
       return savedContent || initialValue;
     },
   });
@@ -25,7 +28,7 @@ export function PlateEditor() {
     <Plate
       editor={editor}
       onChange={({ value }) => {
-        saveContent(value);
+        saveContent(value, workspaceSlug);
       }}
     >
       <EditorContainer>

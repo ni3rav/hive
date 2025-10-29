@@ -7,7 +7,7 @@ import {
   apiForgotPassword,
   apiResetPassword,
 } from '@/api/auth';
-import { clearAllPersistence } from '@/components/editor/persistence';
+import { clearAllWorkspaceData } from '@/components/editor/persistence';
 import { QueryKeys } from '@/lib/query-key-factory';
 import type { VerifyEmailData } from '@/types/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -51,7 +51,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: apiLogout,
     onSuccess: () => {
-      clearAllPersistence();
+      clearAllWorkspaceData();
       queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().base });
     },
   });
