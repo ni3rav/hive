@@ -17,13 +17,13 @@ export const categoryTable = pgTable(
       .notNull()
       .references(() => workspacesTable.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 30 }).notNull(),
-    slug: varchar('slug', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 50 }).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (t) => [
     index('idx_categories_workspace_id').on(t.workspaceId),
     primaryKey({
-      name: 'id',
+      name: 'categories_pk',
       columns: [t.slug, t.workspaceId],
     }),
   ],

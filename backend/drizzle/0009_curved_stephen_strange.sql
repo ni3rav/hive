@@ -1,2 +1,0 @@
-ALTER TABLE "posts" RENAME COLUMN "category" TO "category_slug";--> statement-breakpoint
-ALTER TABLE "posts" ADD CONSTRAINT "fk_post_category" FOREIGN KEY ("category_slug","workspace_id") REFERENCES "public"."categories"("slug","workspace_id") ON DELETE set null ON UPDATE no action;
