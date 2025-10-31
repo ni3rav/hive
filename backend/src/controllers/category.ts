@@ -73,7 +73,11 @@ export async function createCategoryController(req: Request, res: Response) {
     return serverError(res, 'Failed to create category');
   }
 
-  return created(res, 'Category created successfully', category);
+  return created(
+    res,
+    'Category created successfully',
+    toCategoryResponseDto(category!),
+  );
 }
 
 export async function deleteCategoryController(req: Request, res: Response) {
@@ -130,6 +134,8 @@ export async function updateCategoryController(req: Request, res: Response) {
   if (error) {
     if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
+    } else if ((error as Error).message === 'category not found') {
+      return notFound(res, 'Category not found');
     } else if (
       (error as Error).message ===
       'category slug already exists in this workspace'

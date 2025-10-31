@@ -10,7 +10,7 @@ export const createCategorySchema = z.object({
     .string()
     .trim()
     .min(1, 'Slug is required')
-    .max(255, 'Slug must be at most 255 characters'),
+    .max(50, 'Slug must be at most 50 characters'),
 });
 
 export const updateCategorySchema = z.object({
@@ -27,7 +27,7 @@ export const updateCategorySchema = z.object({
         .string()
         .trim()
         .min(1, 'Slug is required')
-        .max(255, 'Slug must be at most 255 characters')
+        .max(50, 'Slug must be at most 50 characters')
         .optional(),
     })
     .refine(
@@ -37,9 +37,5 @@ export const updateCategorySchema = z.object({
 });
 
 export const deleteCategorySchema = z.object({
-  categorySlug: z.string().trim().min(1, 'Category slug is required'),
-});
-
-export const getCategoryBySlugSchema = z.object({
   categorySlug: z.string().trim().min(1, 'Category slug is required'),
 });

@@ -74,16 +74,28 @@ export async function updateCategory(
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
 
-    // check uniquness of slug when upated
+    // check if category exists
+    const existingCategory = await db.query.categoryTable.findFirst({
+      where: and(
+        eq(categoryTable.slug, categorySlug),
+        eq(categoryTable.workspaceId, workspace.id),
+      ),
+    });
+
+    if (!existingCategory) {
+      throw new Error('category not found');
+    }
+
+    // check uniqueness of slug when updated
     if (data.slug && data.slug !== categorySlug) {
-      const existingCategory = await db.query.categoryTable.findFirst({
+      const duplicateCategory = await db.query.categoryTable.findFirst({
         where: and(
           eq(categoryTable.slug, data.slug),
           eq(categoryTable.workspaceId, workspace.id),
         ),
       });
 
-      if (existingCategory) {
+      if (duplicateCategory) {
         throw new Error('category slug already exists in this workspace');
       }
 
