@@ -34,3 +34,18 @@ export const createWorkspaceSchema = z
       });
     }
   });
+
+export const updateWorkspaceSchema = z.object({
+  workspaceSlug: z.string().trim().min(1, 'Workspace slug is required'),
+  data: z.object({
+    name: z
+      .string()
+      .trim()
+      .min(3, 'Name must be at least 3 characters')
+      .max(30, 'Name must be at most 30 characters'),
+  }),
+});
+
+export const deleteWorkspaceSchema = z.object({
+  workspaceSlug: z.string().trim().min(1, 'Workspace slug is required'),
+});

@@ -1,5 +1,7 @@
 import { db } from '../db';
 import { UserWorkspace } from '../types/workspaces';
+import { workspacesTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function getUserWorkspaces(
   userId: string,
@@ -18,5 +20,61 @@ export async function getUserWorkspaces(
   } catch (error) {
     console.error('Error in getUserWorkspace util', error);
     return [new Error('ERROR WHILE GETTING USER WORKSPACE'), null];
+  }
+}
+
+export async function updateWorkspace(
+  workspaceSlug: string,
+  data: { name: string },
+) {
+  try {
+    const workspace = await db.query.workspacesTable.findFirst({
+      where: eq(workspacesTable.slug, workspaceSlug),
+    });
+
+    if (!workspace) {
+      throw new Error('workspace not found');
+    }
+
+    const [updatedWorkspace] = await db
+      .update(workspacesTable)
+      .set({ name: data.name })
+      .where(eq(workspacesTable.slug, workspaceSlug))
+      .returning();
+
+    return [null, updatedWorkspace] as const;
+  } catch (error) {
+    return [error, null] as const;
+  }
+}
+
+export async function deleteWorkspace(workspaceSlug: string, userId: string) {
+  try {
+    const workspace = await db.query.workspacesTable.findFirst({
+      where: eq(workspacesTable.slug, workspaceSlug),
+    });
+
+    if (!workspace) {
+      throw new Error('workspace not found');
+    }
+
+    if (workspace.ownerId !== userId) {
+      throw new Error('only owner can delete workspace');
+    }
+
+    const result = await db
+      .delete(workspacesTable)
+      .where(eq(workspacesTable.slug, workspaceSlug));
+
+    if (result.rowCount === 0) {
+      return [
+        new Error('workspace not found or already deleted'),
+        null,
+      ] as const;
+    }
+
+    return [null, result] as const;
+  } catch (error) {
+    return [error, null] as const;
   }
 }
