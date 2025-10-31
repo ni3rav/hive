@@ -3,6 +3,7 @@ import { router as authRouter } from './routes/auth';
 import { router as userRouter } from './routes/user';
 import { router as authorRouter } from './routes/author';
 import { router as categoryRouter } from './routes/category';
+import { router as tagRouter } from './routes/tag';
 import { router as workspaceRouter } from './routes/workspace';
 import cookieParser from 'cookie-parser';
 import { env } from './env';
@@ -32,6 +33,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', authMiddleware, userRouter);
 app.use('/api/author', authMiddleware, authorRouter);
 app.use('/api/category', authMiddleware, categoryRouter);
+app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 
 type BodyParserSyntaxError = SyntaxError & { type?: string; status?: number };
