@@ -1,23 +1,51 @@
 import type { Value } from 'platejs';
 
-export const DEFAULT_METADATA_STORAGE_KEY = 'hive-editor-metadata';
-export const DEFAULT_CONTENT_STORAGE_KEY = 'hive-editor-content';
+export const DEFAULT_METADATA_STORAGE_PREFIX = 'hive-editor-metadata';
+export const DEFAULT_CONTENT_STORAGE_PREFIX = 'hive-editor-content';
 
+/**
+ * Generates a workspace-specific storage key
+ */
+export const getWorkspaceStorageKey = (
+  prefix: string,
+  workspaceSlug?: string,
+): string => {
+  if (!workspaceSlug) {
+    // Fallback to legacy key for backward compatibility
+    return prefix;
+  }
+  return `${prefix}-${workspaceSlug}`;
+};
+
+/**
+ * Saves metadata for a specific workspace
+ */
 export const saveMetadata = (
-  metadata: Record<string, unknown>,
-  storageKey: string = DEFAULT_METADATA_STORAGE_KEY,
+  metadata: Record<string, unknown> | unknown,
+  workspaceSlug?: string,
 ) => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_METADATA_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     localStorage.setItem(storageKey, JSON.stringify(metadata));
   } catch (error) {
     console.error('Failed to persist editor metadata', error);
   }
 };
 
+/**
+ * Loads metadata for a specific workspace
+ */
 export const loadMetadata = (
-  storageKey: string = DEFAULT_METADATA_STORAGE_KEY,
-) => {
+  workspaceSlug?: string,
+): Record<string, unknown> | null => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_METADATA_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
     return JSON.parse(raw);
@@ -27,31 +55,45 @@ export const loadMetadata = (
   }
 };
 
-export const clearMetadata = (
-  storageKey: string = DEFAULT_METADATA_STORAGE_KEY,
-) => {
+/**
+ * Clears metadata for a specific workspace
+ */
+export const clearMetadata = (workspaceSlug?: string) => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_METADATA_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     localStorage.removeItem(storageKey);
   } catch (error) {
     console.error('Failed to clear editor metadata', error);
   }
 };
 
-export const saveContent = (
-  content: Value,
-  storageKey: string = DEFAULT_CONTENT_STORAGE_KEY,
-) => {
+/**
+ * Saves content for a specific workspace
+ */
+export const saveContent = (content: Value, workspaceSlug?: string) => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_CONTENT_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     localStorage.setItem(storageKey, JSON.stringify(content));
   } catch (error) {
     console.error('Failed to persist editor content', error);
   }
 };
 
-export const loadContent = (
-  storageKey: string = DEFAULT_CONTENT_STORAGE_KEY,
-): Value | null => {
+/**
+ * Loads content for a specific workspace
+ */
+export const loadContent = (workspaceSlug?: string): Value | null => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_CONTENT_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
     return JSON.parse(raw);
@@ -61,17 +103,88 @@ export const loadContent = (
   }
 };
 
-export const clearContent = (
-  storageKey: string = DEFAULT_CONTENT_STORAGE_KEY,
-) => {
+/**
+ * Clears content for a specific workspace
+ */
+export const clearContent = (workspaceSlug?: string) => {
   try {
+    const storageKey = getWorkspaceStorageKey(
+      DEFAULT_CONTENT_STORAGE_PREFIX,
+      workspaceSlug,
+    );
     localStorage.removeItem(storageKey);
   } catch (error) {
     console.error('Failed to clear editor content', error);
   }
 };
 
-export const clearAllPersistence = () => {
-  clearMetadata();
-  clearContent();
+/**
+ * Clears all persistence data for a specific workspace
+ */
+export const clearWorkspacePersistence = (workspaceSlug?: string) => {
+  clearMetadata(workspaceSlug);
+  clearContent(workspaceSlug);
+};
+
+/**
+ * Gets all workspace slugs that have persisted editor data
+ */
+export const getAllWorkspacesWithData = (): {
+  slug: string;
+  hasContent: boolean;
+  hasMetadata: boolean;
+}[] => {
+  const workspaces = new Map<
+    string,
+    { hasContent: boolean; hasMetadata: boolean }
+  >();
+
+  try {
+    // Scan localStorage for all workspace-specific keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      // Check for content keys
+      if (key.startsWith(`${DEFAULT_CONTENT_STORAGE_PREFIX}-`)) {
+        const slug = key.replace(`${DEFAULT_CONTENT_STORAGE_PREFIX}-`, '');
+        const existing = workspaces.get(slug) || {
+          hasContent: false,
+          hasMetadata: false,
+        };
+        existing.hasContent = true;
+        workspaces.set(slug, existing);
+      }
+
+      // Check for metadata keys
+      if (key.startsWith(`${DEFAULT_METADATA_STORAGE_PREFIX}-`)) {
+        const slug = key.replace(`${DEFAULT_METADATA_STORAGE_PREFIX}-`, '');
+        const existing = workspaces.get(slug) || {
+          hasContent: false,
+          hasMetadata: false,
+        };
+        existing.hasMetadata = true;
+        workspaces.set(slug, existing);
+      }
+    }
+
+    return Array.from(workspaces.entries()).map(([slug, data]) => ({
+      slug,
+      ...data,
+    }));
+  } catch (error) {
+    console.error('Failed to scan workspaces with data', error);
+    return [];
+  }
+};
+
+/**
+ * Clears all workspace-specific persistence data
+ * Useful for cleanup or testing
+ */
+export const clearAllWorkspaceData = () => {
+  const workspaces = getAllWorkspacesWithData();
+  workspaces.forEach((workspace) => {
+    clearWorkspacePersistence(workspace.slug);
+  });
 };

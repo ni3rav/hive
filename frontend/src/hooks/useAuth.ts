@@ -7,13 +7,14 @@ import {
   apiForgotPassword,
   apiResetPassword,
 } from '@/api/auth';
-import { clearAllPersistence } from '@/components/editor/persistence';
+import { clearAllWorkspaceData } from '@/components/editor/persistence';
 import { QueryKeys } from '@/lib/query-key-factory';
 import type { VerifyEmailData } from '@/types/auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getAuthErrorMessage, getErrorMessage } from '@/lib/error-utils';
+import { deleteCookie, LAST_WORKSPACE_COOKIE } from '@/lib/utils';
 
 export function useAuth() {
   return useQuery({
@@ -51,7 +52,8 @@ export function useLogout() {
   return useMutation({
     mutationFn: apiLogout,
     onSuccess: () => {
-      clearAllPersistence();
+      clearAllWorkspaceData();
+      deleteCookie(LAST_WORKSPACE_COOKIE);
       queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().base });
     },
   });

@@ -19,7 +19,6 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
-import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
 import AuthorSelect from '@/components/Author/AuthorSelect';
 
 interface MetadataFormProps {
@@ -41,22 +40,8 @@ export function MetadataForm({
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
-  React.useEffect(() => {
-    const persisted = loadMetadata();
-    if (persisted) {
-      setMetadata(persisted);
-    }
-  }, [setMetadata]);
-
-  React.useEffect(() => {
-    const serializableMetadata = {
-      ...metadata,
-      publishedAt: metadata.publishedAt
-        ? new Date(metadata.publishedAt).toISOString()
-        : null,
-    };
-    saveMetadata(serializableMetadata);
-  }, [metadata]);
+  // Note: Metadata persistence is now handled by the parent Editor component
+  // with workspace-specific storage. No need for local persistence here.
 
   return (
     <Accordion

@@ -5,24 +5,40 @@ import {
   boolean,
   timestamp,
   text,
+  foreignKey,
 } from 'drizzle-orm/pg-core';
 import { authorTable } from './author';
+import { workspacesTable } from './workspace';
+import { categoryTable } from './category';
 
-export const postsTable = pgTable('posts', {
-  id: uuid().defaultRandom().primaryKey(),
-  authorId: uuid('author_id')
-    .notNull()
-    .references(() => authorTable.id, { onDelete: 'cascade' }),
-  title: varchar('title').notNull(),
-  slug: varchar('slug').notNull().unique(),
-  excerpt: varchar('excerpt').default('').notNull(),
-  tags: varchar('tags', { length: 255 }).array().default([]).notNull(),
-  category: varchar('category', { length: 255 }).default('').notNull(),
-  visible: boolean('visible').notNull().default(false),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  publishedAt: timestamp('published_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+export const postsTable = pgTable(
+  'posts',
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspacesTable.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id').references(() => authorTable.id, {
+      onDelete: 'set null',
+    }),
+    title: varchar('title').notNull(),
+    slug: varchar('slug').notNull().unique(),
+    excerpt: varchar('excerpt').default('').notNull(),
+    tags: varchar('tags', { length: 255 }).array().default([]).notNull(),
+    categorySlug: varchar('category_slug', { length: 255 }),
+    visible: boolean('visible').notNull().default(false),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    publishedAt: timestamp('published_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.categorySlug, t.workspaceId],
+      foreignColumns: [categoryTable.slug, categoryTable.workspaceId],
+      name: 'fk_post_category',
+    }).onDelete('set null'),
+  ],
+);
 
 export const postContentTable = pgTable('post_content', {
   id: uuid().defaultRandom().primaryKey(),
