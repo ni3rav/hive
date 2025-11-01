@@ -31,7 +31,9 @@ export default function CategoryForm({
   isSubmitting,
 }: CategoryFormProps) {
   const isEditing = !!initialData;
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const slugInputRef = useRef<HTMLInputElement>(null);
+  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
 
   const formSchema = useMemo(
     () =>
@@ -65,6 +67,30 @@ export default function CategoryForm({
     },
   });
 
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.name && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.slug && slugInputRef.current) {
+        slugInputRef.current.focus();
+        slugInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.description && descriptionInputRef.current) {
+        descriptionInputRef.current.focus();
+        descriptionInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
+
   const nameValue = watch('name');
   const slugValue = watch('slug');
   const isValid = isEditing
@@ -74,43 +100,47 @@ export default function CategoryForm({
       slugValue &&
       slugValue.trim().length > 0;
 
-  const onSubmit = handleSubmit(async (data) => {
-    if (!data.name || !data.name.trim() || !data.slug || !data.slug.trim()) {
-      return;
-    }
-    try {
-      await onSave(data);
-    } catch (error: unknown) {
-      const apiError = error as {
-        response?: {
-          status?: number;
-          data?: { message?: string };
-        };
-      };
-
-      if (apiError.response?.status === 409) {
-        const message =
-          apiError.response.data?.message ||
-          'Category slug already exists in this workspace';
-        setError('slug', {
-          type: 'server',
-          message,
-        });
-        // Focus the slug field and scroll to it
-        setTimeout(() => {
-          slugInputRef.current?.focus();
-          slugInputRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-        }, 100);
-        // Don't re-throw 409 errors - let user fix the slug
+  const onSubmit = handleSubmit(
+    async (data) => {
+      if (!data.name || !data.name.trim() || !data.slug || !data.slug.trim()) {
+        focusFirstError();
         return;
       }
-      // Re-throw other errors
-      throw error;
-    }
-  });
+      try {
+        await onSave(data);
+      } catch (error: unknown) {
+        const apiError = error as {
+          response?: {
+            status?: number;
+            data?: { message?: string };
+          };
+        };
+
+        if (apiError.response?.status === 409) {
+          const message =
+            apiError.response.data?.message ||
+            'Category slug already exists in this workspace';
+          setError('slug', {
+            type: 'server',
+            message,
+          });
+          setTimeout(() => {
+            slugInputRef.current?.focus();
+            slugInputRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            });
+          }, 100);
+          return;
+        }
+        throw error;
+      }
+    },
+    () => {
+      // On validation error, focus first field with error
+      focusFirstError();
+    },
+  );
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
@@ -131,11 +161,22 @@ export default function CategoryForm({
             <Input
               id='name'
               {...register('name')}
+              ref={(e) => {
+                register('name').ref(e);
+                nameInputRef.current = e;
+              }}
               placeholder="Category name (e.g., 'Technology')"
               required
+              className={
+                errors.name
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.name?.message && (
-              <p className='text-sm text-destructive'>{errors.name.message}</p>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.name.message}
+              </p>
             )}
           </div>
           <div className='space-y-2'>
@@ -169,10 +210,19 @@ export default function CategoryForm({
             <Textarea
               id='description'
               {...register('description')}
+              ref={(e) => {
+                register('description').ref(e);
+                descriptionInputRef.current = e;
+              }}
               placeholder='Share a brief description of this category.'
+              className={
+                errors.description
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.description?.message && (
-              <p className='text-sm text-destructive'>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                 {errors.description.message}
               </p>
             )}

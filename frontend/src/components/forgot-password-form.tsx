@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,8 @@ export function ForgotPasswordForm({
   onBackToLogin: () => void;
   isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -34,6 +37,18 @@ export function ForgotPasswordForm({
     defaultValues: { email: '' },
     mode: 'onChange',
   });
+
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.email && emailInputRef.current) {
+        emailInputRef.current.focus();
+        emailInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -45,7 +60,12 @@ export function ForgotPasswordForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit((v) => onFormSubmit(v.email))}>
+          <form
+            onSubmit={handleSubmit(
+              (v) => onFormSubmit(v.email),
+              () => focusFirstError(),
+            )}
+          >
             <div className='grid gap-6'>
               <div className='grid gap-6'>
                 <div className='grid gap-3'>
@@ -57,9 +77,18 @@ export function ForgotPasswordForm({
                     required
                     disabled={isPending}
                     {...register('email')}
+                    ref={(e) => {
+                      register('email').ref(e);
+                      emailInputRef.current = e;
+                    }}
+                    className={
+                      errors.email
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.email?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.email.message}
                     </p>
                   )}

@@ -1,5 +1,5 @@
 import type { Author, CreateAuthorData } from '@/types/author';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +30,10 @@ export default function AuthorForm({
   isSubmitting,
 }: AuthorFormProps) {
   const isEditing = !!initialData;
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const aboutInputRef = useRef<HTMLTextAreaElement>(null);
+
   const formSchema = useMemo(
     () =>
       z.object({
@@ -60,6 +64,30 @@ export default function AuthorForm({
   const [socialLinks, setSocialLinks] = useState<Author['socialLinks']>(
     (initialData?.socialLinks as Author['socialLinks']) || undefined,
   );
+
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.name && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.email && emailInputRef.current) {
+        emailInputRef.current.focus();
+        emailInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.about && aboutInputRef.current) {
+        aboutInputRef.current.focus();
+        aboutInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
 
   const handleSocialLinksChange = useCallback(
     (value: Author['socialLinks']) => {
@@ -151,17 +179,31 @@ export default function AuthorForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+        <form
+          onSubmit={handleSubmit(onSubmit, () => focusFirstError())}
+          className='space-y-6'
+        >
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
               id='name'
               {...register('name')}
+              ref={(e) => {
+                register('name').ref(e);
+                nameInputRef.current = e;
+              }}
               placeholder="Author's full name"
               required
+              className={
+                errors.name
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.name?.message && (
-              <p className='text-sm text-destructive'>{errors.name.message}</p>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.name.message}
+              </p>
             )}
           </div>
           <div className='space-y-2'>
@@ -170,11 +212,22 @@ export default function AuthorForm({
               id='email'
               type='email'
               {...register('email')}
+              ref={(e) => {
+                register('email').ref(e);
+                emailInputRef.current = e;
+              }}
               placeholder='author@example.com'
               required
+              className={
+                errors.email
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.email?.message && (
-              <p className='text-sm text-destructive'>{errors.email.message}</p>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.email.message}
+              </p>
             )}
           </div>
           <div className='space-y-2'>
@@ -182,8 +235,22 @@ export default function AuthorForm({
             <Textarea
               id='about'
               {...register('about')}
+              ref={(e) => {
+                register('about').ref(e);
+                aboutInputRef.current = e;
+              }}
               placeholder='Share a brief biography of the author.'
+              className={
+                errors.about
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
+            {errors.about?.message && (
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.about.message}
+              </p>
+            )}
           </div>
           <div className='space-y-2'>
             <SocialLinksInput

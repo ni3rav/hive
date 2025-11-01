@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +29,9 @@ export function LoginForm({
   isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const navigate = useNavigate();
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -37,6 +41,24 @@ export function LoginForm({
     defaultValues: { email: '', password: '' },
     mode: 'onChange',
   });
+
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.email && emailInputRef.current) {
+        emailInputRef.current.focus();
+        emailInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.password && passwordInputRef.current) {
+        passwordInputRef.current.focus();
+        passwordInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -49,7 +71,10 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleSubmit((v) => onFormSubmit(v.email, v.password))}
+            onSubmit={handleSubmit(
+              (v) => onFormSubmit(v.email, v.password),
+              () => focusFirstError(),
+            )}
           >
             <div className='grid gap-6'>
               <div className='grid gap-6'>
@@ -62,9 +87,18 @@ export function LoginForm({
                     required
                     disabled={isPending}
                     {...register('email')}
+                    ref={(e) => {
+                      register('email').ref(e);
+                      emailInputRef.current = e;
+                    }}
+                    className={
+                      errors.email
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.email?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.email.message}
                     </p>
                   )}
@@ -88,9 +122,18 @@ export function LoginForm({
                     required
                     disabled={isPending}
                     {...register('password')}
+                    ref={(e) => {
+                      register('password').ref(e);
+                      passwordInputRef.current = e;
+                    }}
+                    className={
+                      errors.password
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.password?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.password.message}
                     </p>
                   )}
