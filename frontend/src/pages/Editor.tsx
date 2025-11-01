@@ -1,11 +1,17 @@
 import { MetadataForm } from '@/components/editor/metadata-form';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { type PostMetadata } from '@/types/editor';
-import { PlateEditor } from '@/components/editor/plate-editor';
+import { lazyComponent } from '@/components/editor/lazy';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
+import { Spinner } from '@/components/ui/spinner';
+
+const PlateEditor = lazyComponent(
+  '/src/components/editor/plate-editor.tsx',
+  'PlateEditor',
+);
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
@@ -70,7 +76,15 @@ export default function Editor() {
           setMetadata={setMetadata}
           onTitleChange={onTitleChange}
         />
-        <PlateEditor />
+        <Suspense
+          fallback={
+            <div className='flex justify-center p-8'>
+              <Spinner />
+            </div>
+          }
+        >
+          <PlateEditor />
+        </Suspense>
       </div>
     </ErrorBoundary>
   );
