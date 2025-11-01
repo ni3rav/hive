@@ -31,6 +31,11 @@ const pages: Record<string, () => Promise<unknown>> = import.meta.glob(
   '/src/pages/**/*.tsx',
 );
 
+// Vite glob map for components
+const components: Record<string, () => Promise<unknown>> = import.meta.glob(
+  '/src/components/**/*.tsx',
+);
+
 // Lazy from a known page path with optional named export
 export function lazyPage<TProps = unknown>(
   path: keyof typeof pages,
@@ -38,6 +43,28 @@ export function lazyPage<TProps = unknown>(
 ): React.LazyExoticComponent<React.ComponentType<TProps>> {
   const loader = pages[path];
   if (!loader) throw new Error(`Page not found: ${String(path)}`);
+  return React.lazy(async () => {
+    const mod = (await loader()) as Record<string, unknown> & {
+      default?: React.ComponentType<TProps>;
+    };
+    const pick =
+      exportName === 'default' ? mod.default : (mod[exportName] as unknown);
+    if (!pick || typeof pick !== 'function') {
+      throw new Error(
+        `Export "${exportName}" not found or not a component in ${String(path)}`,
+      );
+    }
+    return { default: pick as React.ComponentType<TProps> };
+  });
+}
+
+// Lazy from a known component path with optional named export
+export function lazyComponent<TProps = unknown>(
+  path: keyof typeof components,
+  exportName: 'default' | string = 'default',
+): React.LazyExoticComponent<React.ComponentType<TProps>> {
+  const loader = components[path];
+  if (!loader) throw new Error(`Component not found: ${String(path)}`);
   return React.lazy(async () => {
     const mod = (await loader()) as Record<string, unknown> & {
       default?: React.ComponentType<TProps>;

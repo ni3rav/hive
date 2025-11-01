@@ -15,6 +15,10 @@ export interface CreateWorkspaceData {
   workspaceSlug: string;
 }
 
+export interface UpdateWorkspaceData {
+  name: string;
+}
+
 export interface VerifiedWorkspace extends Workspace {
   role?: string;
 }

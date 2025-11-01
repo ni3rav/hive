@@ -7,9 +7,11 @@ import {
   text,
   foreignKey,
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { authorTable } from './author';
 import { workspacesTable } from './workspace';
 import { categoryTable } from './category';
+import { postTagsTable } from './tag';
 
 export const postsTable = pgTable(
   'posts',
@@ -47,3 +49,7 @@ export const postContentTable = pgTable('post_content', {
     .references(() => postsTable.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
 });
+
+export const postsRelations = relations(postsTable, ({ many }) => ({
+  postTags: many(postTagsTable),
+}));

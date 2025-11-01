@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,6 +29,9 @@ export function EditProfileForm({
   onCancel,
   onSuccess,
 }: EditProfileFormProps) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
   const schema = useMemo(
     () =>
       z.object({
@@ -80,6 +83,24 @@ export function EditProfileForm({
     (watch('name') || '').trim() !== user.name ||
     (watch('email') || '').trim() !== user.email;
 
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.name && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.email && emailInputRef.current) {
+        emailInputRef.current.focus();
+        emailInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
+
   return (
     <Card className='w-full max-w-xl'>
       <CardHeader>
@@ -87,18 +108,31 @@ export function EditProfileForm({
         <CardDescription>Update your name and email address</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+        <form
+          onSubmit={handleSubmit(onSubmit, () => focusFirstError())}
+          className='space-y-4'
+        >
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
               id='name'
               type='text'
               placeholder='Enter your name'
-              className={errors.name ? 'border-destructive' : ''}
               {...register('name')}
+              ref={(e) => {
+                register('name').ref(e);
+                nameInputRef.current = e;
+              }}
+              className={
+                errors.name
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.name?.message && (
-              <p className='text-sm text-destructive'>{errors.name.message}</p>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.name.message}
+              </p>
             )}
           </div>
 
@@ -108,11 +142,21 @@ export function EditProfileForm({
               id='email'
               type='email'
               placeholder='Enter your email'
-              className={errors.email ? 'border-destructive' : ''}
               {...register('email')}
+              ref={(e) => {
+                register('email').ref(e);
+                emailInputRef.current = e;
+              }}
+              className={
+                errors.email
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
             />
             {errors.email?.message && (
-              <p className='text-sm text-destructive'>{errors.email.message}</p>
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.email.message}
+              </p>
             )}
           </div>
 

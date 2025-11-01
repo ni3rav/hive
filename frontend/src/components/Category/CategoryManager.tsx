@@ -25,19 +25,23 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-type CategoryFormData = Partial<Omit<CreateCategoryData, 'slug'>>;
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 
 export default function CategoriesManager() {
+  const workspaceSlug = useWorkspaceSlug();
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const { data: categories, isLoading, isError } = useUserCategories();
 
-  const createCategoryMutation = useCreateCategory();
-  const updateCategoryMutation = useUpdateCategory();
-  const deleteCategoryMutation = useDeleteCategory();
-
+  const { data: categories, isLoading, isError } = useUserCategories(
+    workspaceSlug!,
+  );
+  const createCategoryMutation = useCreateCategory(workspaceSlug!);
+  const updateCategoryMutation = useUpdateCategory(workspaceSlug!);
+  const deleteCategoryMutation = useDeleteCategory(workspaceSlug!);
+  
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const handleAddCategory = () => {
     setSelectedCategory(null);
     setView('create');
@@ -48,8 +52,8 @@ export default function CategoriesManager() {
     setView('edit');
   };
 
-  const onDeleteCategory = (categoryId: string) => {
-    setPendingDeleteId(categoryId);
+  const onDeleteCategory = (categorySlug: string) => {
+    setPendingDeleteId(categorySlug); 
     setIsDeleteOpen(true);
   };
 
@@ -68,23 +72,19 @@ export default function CategoriesManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveCategory = (categoryData: CategoryFormData) => {
+  const handleSaveCategory = async (categoryData: CreateCategoryData) => {
+    if (!workspaceSlug) return;
+
     if (view === 'create') {
-      createCategoryMutation.mutate(categoryData as Omit<CreateCategoryData, 'slug'>, {
-        onSuccess: () => {
-          setView('list');
-        },
+      await createCategoryMutation.mutateAsync(categoryData);
+      setView('list');
+    } else if (view === 'edit' && selectedCategory) {
+      await updateCategoryMutation.mutateAsync({
+        categorySlug: selectedCategory.slug,
+        data: categoryData
       });
-    } else if (view === 'edit' && selectedCategory?.id) {
-      updateCategoryMutation.mutate(
-        { categoryId: selectedCategory.id, data: categoryData },
-        {
-          onSuccess: () => {
-            setView('list');
-            setSelectedCategory(null);
-          },
-        },
-      );
+      setSelectedCategory(null);
+      setView('list');
     }
   };
 
@@ -93,7 +93,7 @@ export default function CategoriesManager() {
     setSelectedCategory(null);
   };
 
-  if (isLoading) {
+  if (isLoading || !workspaceSlug) {
     return (
       <div className='p-6'>
         <Card>
@@ -117,6 +117,7 @@ export default function CategoriesManager() {
       </div>
     );
   }
+
   if (isError) {
     if (view === 'create') {
       return (
@@ -172,10 +173,18 @@ export default function CategoriesManager() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant='outline' onClick={cancelDelete} disabled={deleteCategoryMutation.isPending}>
+            <Button
+              variant='outline'
+              onClick={cancelDelete}
+              disabled={deleteCategoryMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant='destructive' onClick={confirmDelete} disabled={deleteCategoryMutation.isPending}>
+            <Button
+              variant='destructive'
+              onClick={confirmDelete}
+              disabled={deleteCategoryMutation.isPending}
+            >
               {deleteCategoryMutation.isPending ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogFooter>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +31,10 @@ export function RegisterForm({
   onLoginClick: () => void;
   isPending?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
   const schema = useMemo(
     () =>
       z.object({
@@ -50,6 +54,30 @@ export function RegisterForm({
     mode: 'onChange',
   });
 
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.name && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.email && emailInputRef.current) {
+        emailInputRef.current.focus();
+        emailInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (errors.password && passwordInputRef.current) {
+        passwordInputRef.current.focus();
+        passwordInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -61,8 +89,9 @@ export function RegisterForm({
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleSubmit((v) =>
-              onRegSubmit(v.name, v.email, v.password),
+            onSubmit={handleSubmit(
+              (v) => onRegSubmit(v.name, v.email, v.password),
+              () => focusFirstError(),
             )}
           >
             <div className='grid gap-6'>
@@ -76,9 +105,18 @@ export function RegisterForm({
                     required
                     disabled={isPending}
                     {...register('name')}
+                    ref={(e) => {
+                      register('name').ref(e);
+                      nameInputRef.current = e;
+                    }}
+                    className={
+                      errors.name
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.name?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.name.message}
                     </p>
                   )}
@@ -92,9 +130,18 @@ export function RegisterForm({
                     required
                     disabled={isPending}
                     {...register('email')}
+                    ref={(e) => {
+                      register('email').ref(e);
+                      emailInputRef.current = e;
+                    }}
+                    className={
+                      errors.email
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.email?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.email.message}
                     </p>
                   )}
@@ -106,9 +153,18 @@ export function RegisterForm({
                     required
                     disabled={isPending}
                     {...register('password')}
+                    ref={(e) => {
+                      register('password').ref(e);
+                      passwordInputRef.current = e;
+                    }}
+                    className={
+                      errors.password
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.password?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.password.message}
                     </p>
                   )}

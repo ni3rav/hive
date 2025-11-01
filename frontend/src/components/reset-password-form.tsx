@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +34,8 @@ export function ResetPasswordForm({
   email?: string;
   token?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -43,6 +46,18 @@ export function ResetPasswordForm({
     mode: 'onChange',
   });
 
+  const focusFirstError = () => {
+    setTimeout(() => {
+      if (errors.password && passwordInputRef.current) {
+        passwordInputRef.current.focus();
+        passwordInputRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+  };
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -52,8 +67,9 @@ export function ResetPasswordForm({
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleSubmit((v) =>
-              onFormSubmit(email, token, v.password),
+            onSubmit={handleSubmit(
+              (v) => onFormSubmit(email, token, v.password),
+              () => focusFirstError(),
             )}
           >
             <div className='grid gap-6'>
@@ -66,9 +82,18 @@ export function ResetPasswordForm({
                     required
                     disabled={isPending}
                     {...register('password')}
+                    ref={(e) => {
+                      register('password').ref(e);
+                      passwordInputRef.current = e;
+                    }}
+                    className={
+                      errors.password
+                        ? 'border-destructive focus-visible:ring-destructive'
+                        : ''
+                    }
                   />
                   {errors.password?.message && (
-                    <p className='text-sm text-destructive'>
+                    <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
                       {errors.password.message}
                     </p>
                   )}

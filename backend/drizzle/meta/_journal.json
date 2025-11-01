@@ -71,6 +71,13 @@
       "when": 1761848619490,
       "tag": "0009_hesitant_felicia_hardy",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1761928643170,
+      "tag": "0010_unknown_hercules",
+      "breakpoints": true
     }
   ]
 }

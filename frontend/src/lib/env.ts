@@ -1,14 +1,25 @@
-import z from 'zod';
+import { z } from 'zod';
 
 const envSchema = z.object({
-  VITE_HIVE_API_BASE_URL: z.url(),
-  MODE: z.enum(['development', 'production', 'test']).default('development'),
+VITE_HIVE_API_BASE_URL: z.string().url('VITE_HIVE_API_BASE_URL must be a valid URL'),
+MODE: z.enum(['development', 'production', 'test']).default('development'),
 });
 
-export const env = envSchema.parse({
-  VITE_HIVE_API_BASE_URL: import.meta.env.VITE_HIVE_API_BASE_URL,
-  MODE: import.meta.env.MODE,
+type EnvType = z.infer<typeof envSchema>;
+
+const parsedEnv = envSchema.safeParse({
+VITE_HIVE_API_BASE_URL: import.meta.env.VITE_HIVE_API_BASE_URL,
+MODE: import.meta.env.MODE,
 });
 
-export const isDev = import.meta.env.DEV;
-export const isProd = import.meta.env.PROD;
+if (!parsedEnv.success) {
+  console.error(
+  'Invalid environment variables:',
+  parsedEnv.error.flatten().fieldErrors,
+  );
+    throw new Error('Invalid environment variables.');
+}
+
+export const env = parsedEnv.data as EnvType;
+export const isDev = env.MODE === 'development';
+export const isProd = env.MODE === 'production';

@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from '@/lib/api-client';
+import { apiDelete, apiGet, apiPatch, apiPost } from '@/lib/api-client';
 import type {
   Workspace,
   UserWorkspace,
@@ -20,4 +20,18 @@ export async function apiCreateWorkspace(
   data: CreateWorkspaceData,
 ): Promise<Workspace> {
   return apiPost<Workspace, CreateWorkspaceData>(`/api/workspace`, data);
+}
+
+export async function apiUpdateWorkspace(
+  workspaceSlug: string,
+  data: { name: string },
+): Promise<Workspace> {
+  return apiPatch<Workspace, { name: string }>(
+    `/api/workspace/${workspaceSlug}`,
+    data,
+  );
+}
+
+export async function apiDeleteWorkspace(workspaceSlug: string): Promise<void> {
+  return apiDelete<void>(`/api/workspace/${workspaceSlug}`);
 }
