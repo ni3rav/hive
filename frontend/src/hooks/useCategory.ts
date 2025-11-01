@@ -106,7 +106,11 @@ export function useUpdateCategory(workspaceSlug: string) {
       if (!categorySlug || !workspaceSlug) {
         throw new Error('Missing required parameters');
       }
-      return apiUpdateCategory(workspaceSlug, categorySlug, data);
+      const newSlug = generateSlug(data.name);
+      return apiUpdateCategory(workspaceSlug, categorySlug, {
+        ...data,
+        slug: newSlug
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
