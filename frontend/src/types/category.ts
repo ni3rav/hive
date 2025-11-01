@@ -5,4 +5,11 @@ export interface Category {
   slug: string;
 }
 
-export type CreateCategoryData = Omit<Category, 'id'>;
+export interface CategoryFormData {
+  name: string;
+  description?: string;
+}
+
+export interface CreateCategoryData extends CategoryFormData {
+  slug: string;
+}

@@ -4,7 +4,7 @@ import {
   apiGetUserCategories,
   apiUpdateCategory,
 } from '@/api/category';
-import type { Category, CreateCategoryData } from '@/types/category';
+import type { Category, CreateCategoryData, CategoryFormData } from '@/types/category';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
@@ -34,35 +34,35 @@ function generateSlug(name: string): string {
   return `${baseSlug}-${randomSuffix}`;
 }
 
-export function useUserCategories() {
+export function useUserCategories(workspaceSlug: string) {
   return useQuery({
-    queryKey: QueryKeys.categoryKeys().base,
-    queryFn: apiGetUserCategories,
+    queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
+    queryFn: () => apiGetUserCategories(workspaceSlug),
     retry: false,
+    enabled: !!workspaceSlug,
   });
 }
-export function useCreateCategory() {
+export function useCreateCategory(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Omit<CreateCategoryData, 'slug'>) => {
       const slug = generateSlug(data.name);
       const completeData: CreateCategoryData = { ...data, slug };
-      return apiCreateCategory(completeData);
+      return apiCreateCategory(workspaceSlug, completeData);
     },
     onMutate: async (newCategoryData) => {
-      await queryClient.cancelQueries({
-        queryKey: QueryKeys.categoryKeys().base,
-      });
-      const previous = queryClient.getQueryData<Category[]>(
-        QueryKeys.categoryKeys().base,
-      );
+      const queryKey = QueryKeys.categoryKeys().list(workspaceSlug);
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Category[]>(queryKey);
+      
       const optimistic: Category = {
         id: `optimistic-${Date.now()}`,
         slug: generateSlug(newCategoryData.name),
         ...newCategoryData,
       } as Category;
+      
       queryClient.setQueryData(
-        QueryKeys.categoryKeys().base,
+        queryKey,
         (old: Category[] | undefined) =>
           old ? [optimistic, ...old] : [optimistic],
       );
@@ -70,91 +70,71 @@ export function useCreateCategory() {
     },
     onSuccess: () => {
       toast.success('new category created!!');
-      queryClient.invalidateQueries({ queryKey: QueryKeys.categoryKeys().base });
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
+      });
     },
     onError: (error, _variables, context) => {
       const message = getErrorMessage(error, 'Failed to create category');
       toast.error(message);
       if (context?.previous) {
-        queryClient.setQueryData(QueryKeys.categoryKeys().base, context.previous);
+        queryClient.setQueryData(
+          QueryKeys.categoryKeys().list(workspaceSlug),
+          context.previous,
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.categoryKeys().base });
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
+      });
     },
   });
 }
 
-export function useUpdateCategory() {
+export function useUpdateCategory(workspaceSlug: string) {
   const queryClient = useQueryClient();
+  
   return useMutation({
-    mutationFn: ({
-      categoryId,
+    mutationFn: async ({
+      categorySlug,
       data,
     }: {
-      categoryId: string;
-      data: Partial<Omit<CreateCategoryData, 'slug'>>;
+      categorySlug: string;
+      data: CategoryFormData;
     }) => {
-      const completeData: Partial<CreateCategoryData> = { ...data };
-      if (data.name) {
-        completeData.slug = generateSlug(data.name);
+      if (!categorySlug || !workspaceSlug) {
+        throw new Error('Missing required parameters');
       }
-      return apiUpdateCategory(categoryId, completeData);
-    },
-    onMutate: async ({ categoryId, data }) => {
-      await queryClient.cancelQueries({
-        queryKey: QueryKeys.categoryKeys().base,
-      });
-      const previous = queryClient.getQueryData<Category[]>(
-        QueryKeys.categoryKeys().base,
-      );
-      queryClient.setQueryData(
-        QueryKeys.categoryKeys().base,
-        (old: Category[] | undefined) =>
-          (old || []).map((c) => {
-            if (c.id === categoryId) {
-              const updatedData = { ...c, ...data };
-              if (data.name) {
-                updatedData.slug = generateSlug(data.name);
-              }
-              return updatedData as Category;
-            }
-            return c;
-          }),
-      );
-      return { previous };
+      return apiUpdateCategory(workspaceSlug, categorySlug, data);
     },
     onSuccess: () => {
-      toast.success('Category updated');
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
+      });
+      toast.success('Category updated successfully');
     },
-    onError: (error, _variables, context) => {
-      const message = getErrorMessage(error, 'Failed to update category');
-      toast.error(message);
-      if (context?.previous) {
-        queryClient.setQueryData(QueryKeys.categoryKeys().base, context.previous);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.categoryKeys().base });
+    onError: (error) => {
+      console.error('Update error:', error);
+      toast.error(getErrorMessage(error, 'Failed to update category'));
     },
   });
 }
 
-export function useDeleteCategory() {
+export function useDeleteCategory(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (categoryId: string) => apiDeleteCategory(categoryId),
-    onMutate: async (categoryId) => {
-      await queryClient.cancelQueries({
-        queryKey: QueryKeys.categoryKeys().base,
-      });
-      const previous = queryClient.getQueryData<Category[]>(
-        QueryKeys.categoryKeys().base,
-      );
+    mutationFn: (categorySlug: string) =>
+      apiDeleteCategory(workspaceSlug, categorySlug),
+    onMutate: async (categorySlug) => {
+      const queryKey = QueryKeys.categoryKeys().list(workspaceSlug);
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<Category[]>(queryKey);
+
       queryClient.setQueryData(
-        QueryKeys.categoryKeys().base,
+        queryKey,
         (old: Category[] | undefined) =>
-          (old || []).filter((c) => c.id !== categoryId),
+          (old || []).filter((c) => c.slug !== categorySlug),
       );
       return { previous };
     },
@@ -165,11 +145,16 @@ export function useDeleteCategory() {
       const message = getErrorMessage(error, 'Failed to delete category');
       toast.error(message);
       if (context?.previous) {
-        queryClient.setQueryData(QueryKeys.categoryKeys().base, context.previous);
+        queryClient.setQueryData(
+          QueryKeys.categoryKeys().list(workspaceSlug),
+          context.previous,
+        );
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.categoryKeys().base });
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
+      });
     },
   });
 }

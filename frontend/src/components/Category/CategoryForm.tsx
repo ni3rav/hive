@@ -17,8 +17,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 type CategoryFormData = Partial<Omit<CreateCategoryData, 'slug'>>;
 
 interface CategoryFormProps {
-  initialData?: Category | null;
-  onSave: (data: CategoryFormData) => void;
+  initialData: Category | null;
+  onSave: (data: CategoryFormData) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -34,7 +34,7 @@ export default function CategoryForm({
   const formSchema = useMemo(
     () =>
       z.object({
-        name: z.string().min(1, 'Name is required'),
+        name: z.string().min(1, 'Name is required').optional(),
         description: z.string().optional().default(''),
       }),
     [],
@@ -43,48 +43,18 @@ export default function CategoryForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<Pick<CreateCategoryData, 'name' | 'description'>>({
+    formState: { errors, isDirty },
+  } = useForm<CategoryFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
     },
-    mode: 'onChange',
   });
 
-  const onSubmit = (
-    values: Pick<CreateCategoryData, 'name' | 'description'>,
-  ) => {
-    if (!isEditing) {
-      onSave({
-        name: values.name,
-        description: values.description,
-      });
-      return;
-    }
-    const changedFields: CategoryFormData = {};
-
-    if (values.name !== initialData?.name) {
-      changedFields.name = values.name;
-    }
-    if (values.description !== initialData?.description) {
-      changedFields.description = values.description;
-    }
-    if (Object.keys(changedFields).length > 0) {
-      onSave(changedFields);
-    }
-  };
-
-  const hasChanges = useMemo(() => {
-    if (!isEditing) return true;
-    const currentValues = watch();
-    return (
-      currentValues.name !== initialData?.name ||
-      (currentValues.description || '') !== (initialData?.description || '')
-    );
-  }, [isEditing, initialData, watch]);
+  const onSubmit = handleSubmit(async (data: CategoryFormData) => {
+    await onSave(data);
+  });
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
@@ -97,7 +67,7 @@ export default function CategoryForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+        <form onSubmit={onSubmit} className='space-y-6'>
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
@@ -133,7 +103,8 @@ export default function CategoryForm({
             </Button>
             <Button
               type='submit'
-              disabled={isSubmitting || (isEditing && !hasChanges)}
+              // FIX: This is the correct logic
+              disabled={isSubmitting || !isDirty}
             >
               {isSubmitting ? 'Saving...' : 'Save Category'}
             </Button>

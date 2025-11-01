@@ -28,7 +28,8 @@ import {
 type Props = {
   categories: Category[];
   onEditCategory: (c: Category) => void;
-  onDeleteCategory: (categoryId: string) => void;
+  // FIX: This prop should expect the category SLUG
+  onDeleteCategory: (categorySlug: string) => void;
   onAddCategory?: () => void;
 };
 
@@ -50,8 +51,9 @@ export default function CategoryList({
     );
   }, [categories, search]);
 
-  const handleDeleteClick = (id: string) => {
-    onDeleteCategory(id);
+  // FIX: This handler now correctly receives a slug
+  const handleDeleteClick = (slug: string) => {
+    onDeleteCategory(slug);
   };
 
   return (
@@ -77,6 +79,7 @@ export default function CategoryList({
       <CardContent>
         {filtered.length === 0 ? (
           <Empty className='border-dashed animate-in fade-in-50'>
+            {/* ... (empty state) ... */}
             <EmptyHeader>
               <EmptyMedia variant='icon'>
                 <Tag />
@@ -104,6 +107,7 @@ export default function CategoryList({
                 style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
               >
                 <div className='flex min-w-0 items-center gap-3'>
+                  {/* ... (category info) ... */}
                   <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
                     <Tag className='h-5 w-5' />
                   </div>
@@ -128,7 +132,8 @@ export default function CategoryList({
                     <Button
                       variant='destructive'
                       size='sm'
-                      onClick={() => handleDeleteClick(category.id!)}
+                      // FIX: Pass category.slug, NOT category.id
+                      onClick={() => handleDeleteClick(category.slug!)}
                       className='whitespace-nowrap'
                     >
                       <Trash2 size={16} className='mr-1' />
@@ -155,7 +160,8 @@ export default function CategoryList({
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteClick(category.id!)}
+                          // FIX: Pass category.slug, NOT category.id
+                          onClick={() => handleDeleteClick(category.slug!)}
                           className='text-red-600 focus:text-red-600 focus:bg-red-50 data-[highlighted]:bg-red-50'
                         >
                           Delete

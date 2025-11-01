@@ -19,9 +19,11 @@ import { useUserCategories } from '@/hooks/useCategory';
 import type { Category } from '@/types/category';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug'; // FIX: Import hook
+
 interface CategorySelectProps {
-  value: string | null;
-  onChange: (categoryId: string | null, category?: Category | null) => void;
+  value: string | null; // This value should be the category SLUG
+  onChange: (categorySlug: string | null, category?: Category | null) => void;
   placeholder?: string;
   allowCreate?: boolean;
 }
@@ -33,13 +35,17 @@ export default function CategorySelect({
   allowCreate = true,
 }: CategorySelectProps) {
   const navigate = useNavigate();
-  const { data: categories = [], isLoading } = useUserCategories() as {
+  const workspaceSlug = useWorkspaceSlug(); // FIX: Get current workspace slug
+  const { data: categories = [], isLoading } = useUserCategories(
+    workspaceSlug!,
+  ) as {
     data: Category[];
     isLoading: boolean;
   };
   const [open, setOpen] = React.useState(false);
   const selected = React.useMemo(
-    () => categories.find((c) => c.id === value) ?? null,
+    // FIX: Compare value against category.slug
+    () => categories.find((c) => c.slug === value) ?? null,
     [categories, value],
   );
 
@@ -82,13 +88,13 @@ export default function CategorySelect({
             <CommandGroup heading='Categories'>
               {isLoading
                 ? null
-                :
-                  (categories as Category[]).map((category) => (
+                : (categories as Category[]).map((category) => (
                     <CommandItem
                       key={category.id}
-                      value={category.name} 
+                      value={category.name}
                       onSelect={() => {
-                        onChange(category.id!, category);
+                        // FIX: Pass category.slug to onChange
+                        onChange(category.slug!, category);
                         setOpen(false);
                       }}
                       className='cursor-pointer'
@@ -96,7 +102,10 @@ export default function CategorySelect({
                       <Check
                         className={cn(
                           'mr-2 h-4 w-4',
-                          value === category.id ? 'opacity-100' : 'opacity-0',
+                          // FIX: Compare value against category.slug
+                          value === category.slug
+                            ? 'opacity-100'
+                            : 'opacity-0',
                         )}
                       />
                       <div className='truncate'>{category.name}</div>
@@ -108,7 +117,8 @@ export default function CategorySelect({
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    navigate('/dashboard/categories');
+                    // FIX: Navigate to workspace-specific category page
+                    navigate(`/dashboard/${workspaceSlug}/categories`);
                   }}
                   className='cursor-pointer text-primary'
                 >

@@ -24,76 +24,85 @@ export class QueryKeys {
   private static authors = {
     base: ['authors'] as const,
 
-    author(authorId: string) {
-      return [...this.base, authorId];
+    list(workspaceSlug: string) {
+      return [...this.base, 'list', workspaceSlug];
     },
 
-    search(query?: string) {
-      return query ? [...this.base, 'search', query] : [...this.base, 'search'];
+    author(authorId: string) {
+      return [...this.base, 'detail', authorId];
+    },
+
+    search(workspaceSlug: string, query?: string) {
+      return query
+        ? [...this.base, 'search', workspaceSlug, query]
+        : [...this.base, 'search', workspaceSlug];
     },
   };
 
   private static posts = {
     base: ['posts'] as const,
 
-    all() {
-      return [...this.base, 'all'];
+    all(workspaceSlug: string) {
+      return [...this.base, 'all', workspaceSlug];
     },
 
-    userPosts(userId?: string) {
-      return userId ? [...this.base, 'user', userId] : [...this.base, 'user'];
+    userPosts(workspaceSlug: string, userId?: string) {
+      return userId
+        ? [...this.base, 'user', workspaceSlug, userId]
+        : [...this.base, 'user', workspaceSlug];
     },
 
-    post(postId: string) {
-      return [...this.base, postId];
+    post(workspaceSlug: string, postId: string) {
+      return [...this.base, 'detail', workspaceSlug, postId];
     },
 
-    byAuthor(authorId: string) {
-      return [...this.base, 'author', authorId];
+    byAuthor(workspaceSlug: string, authorId: string) {
+      return [...this.base, 'author', workspaceSlug, authorId];
     },
 
-    byCategory(categoryId: string) {
-      return [...this.base, 'category', categoryId];
+    byCategory(workspaceSlug: string, categorySlug: string) {
+      return [...this.base, 'category', workspaceSlug, categorySlug];
     },
 
-    byTag(tagId: string) {
-      return [...this.base, 'tag', tagId];
+    byTag(workspaceSlug: string, tagId: string) {
+      return [...this.base, 'tag', workspaceSlug, tagId];
     },
 
-    drafts() {
-      return [...this.base, 'drafts'];
+    drafts(workspaceSlug: string) {
+      return [...this.base, 'drafts', workspaceSlug];
     },
 
-    published() {
-      return [...this.base, 'published'];
+    published(workspaceSlug: string) {
+      return [...this.base, 'published', workspaceSlug];
     },
 
-    search(query?: string) {
-      return query ? [...this.base, 'search', query] : [...this.base, 'search'];
+    search(workspaceSlug: string, query?: string) {
+      return query
+        ? [...this.base, 'search', workspaceSlug, query]
+        : [...this.base, 'search', workspaceSlug];
     },
   };
 
   private static categories = {
     base: ['categories'] as const,
 
-    all() {
-      return [...this.base, 'all'];
+    list(workspaceSlug: string) {
+      return [...this.base, 'list', workspaceSlug];
     },
 
-    category(categorySlug: string) {
-      return [...this.base, categorySlug];
+    category(workspaceSlug: string, categorySlug: string) {
+      return [...this.base, 'detail', workspaceSlug, categorySlug];
     },
   };
 
   private static tags = {
     base: ['tags'] as const,
-
-    all() {
-      return [...this.base, 'all'];
+    list(workspaceSlug: string) {
+      return [...this.base, 'list', workspaceSlug];
     },
 
-    tag(tagSlug: string) {
-      return [...this.base, tagSlug];
+    tag(workspaceSlug: string, tagSlug: string) {
+      return [...this.base, 'detail', workspaceSlug, tagSlug];
     },
   };
 
