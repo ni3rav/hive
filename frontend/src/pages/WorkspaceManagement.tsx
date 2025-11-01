@@ -188,7 +188,14 @@ export function WorkspaceManagementPage() {
 
       {/* Back Button */}
       <Button
-        onClick={() => navigate('/workspaces')}
+        onClick={() => {
+          // go back in the navigation stack if possible, otherwise fallback
+          if (window.history.length > 1) {
+        navigate(-1);
+          } else {
+        navigate('/');
+          }
+        }}
         variant='outline'
         className='border-border text-foreground hover:bg-muted hover:border-border'
       >
