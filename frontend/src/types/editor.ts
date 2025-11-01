@@ -4,6 +4,6 @@ export interface PostMetadata {
   authors: string[];
   publishedAt: Date;
   excerpt: string;
-  category: string[];
+  category: string[] | null;
   tags: string[];
 }

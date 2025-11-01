@@ -1,4 +1,4 @@
-import type { Category, CreateCategoryData } from '@/types/category';
+import type { Category, CategoryFormData } from '@/types/category';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,11 +14,10 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-type CategoryFormData = Partial<Omit<CreateCategoryData, 'slug'>>;
 
 interface CategoryFormProps {
-  initialData?: Category | null;
-  onSave: (data: CategoryFormData) => void;
+  initialData: Category | null;
+  onSave: (data: CategoryFormData) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -43,48 +42,25 @@ export default function CategoryForm({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     watch,
-  } = useForm<Pick<CreateCategoryData, 'name' | 'description'>>({
+  } = useForm<CategoryFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
     },
-    mode: 'onChange',
   });
 
-  const onSubmit = (
-    values: Pick<CreateCategoryData, 'name' | 'description'>,
-  ) => {
-    if (!isEditing) {
-      onSave({
-        name: values.name,
-        description: values.description,
-      });
+  const nameValue = watch('name');
+  const isValid = isEditing ? isDirty : nameValue && nameValue.trim().length > 0;
+
+  const onSubmit = handleSubmit(async (data: CategoryFormData) => {
+    if (!data.name || !data.name.trim()) {
       return;
     }
-    const changedFields: CategoryFormData = {};
-
-    if (values.name !== initialData?.name) {
-      changedFields.name = values.name;
-    }
-    if (values.description !== initialData?.description) {
-      changedFields.description = values.description;
-    }
-    if (Object.keys(changedFields).length > 0) {
-      onSave(changedFields);
-    }
-  };
-
-  const hasChanges = useMemo(() => {
-    if (!isEditing) return true;
-    const currentValues = watch();
-    return (
-      currentValues.name !== initialData?.name ||
-      (currentValues.description || '') !== (initialData?.description || '')
-    );
-  }, [isEditing, initialData, watch]);
+    await onSave(data);
+  });
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
@@ -97,7 +73,7 @@ export default function CategoryForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+        <form onSubmit={onSubmit} className='space-y-6'>
           <div className='space-y-2'>
             <Label htmlFor='name'>Name</Label>
             <Input
@@ -133,7 +109,7 @@ export default function CategoryForm({
             </Button>
             <Button
               type='submit'
-              disabled={isSubmitting || (isEditing && !hasChanges)}
+              disabled={isSubmitting || !isValid}
             >
               {isSubmitting ? 'Saving...' : 'Save Category'}
             </Button>

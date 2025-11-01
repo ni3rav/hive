@@ -16,7 +16,7 @@ import {
 } from '@/hooks/useCategory';
 import type { Category, CreateCategoryData } from '@/types/category';
 import CategoryList from './CategoryList';
-import CategoryForm from './CategoryForm';
+import CategoryForm from './CategoryForm'; // <-- FIX: Correct default import
 import {
   Card,
   CardContent,
@@ -25,19 +25,25 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-type CategoryFormData = Partial<Omit<CreateCategoryData, 'slug'>>;
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
+
+type CategoryFormData = Omit<CreateCategoryData, 'slug'>;
 
 export default function CategoriesManager() {
+  const workspaceSlug = useWorkspaceSlug();
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const { data: categories, isLoading, isError } = useUserCategories();
 
-  const createCategoryMutation = useCreateCategory();
-  const updateCategoryMutation = useUpdateCategory();
-  const deleteCategoryMutation = useDeleteCategory();
-
+  const { data: categories, isLoading, isError } = useUserCategories(
+    workspaceSlug!,
+  );
+  const createCategoryMutation = useCreateCategory(workspaceSlug!);
+  const updateCategoryMutation = useUpdateCategory(workspaceSlug!);
+  const deleteCategoryMutation = useDeleteCategory(workspaceSlug!);
+  
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const handleAddCategory = () => {
     setSelectedCategory(null);
     setView('create');
@@ -48,8 +54,8 @@ export default function CategoriesManager() {
     setView('edit');
   };
 
-  const onDeleteCategory = (categoryId: string) => {
-    setPendingDeleteId(categoryId);
+  const onDeleteCategory = (categorySlug: string) => {
+    setPendingDeleteId(categorySlug); 
     setIsDeleteOpen(true);
   };
 
@@ -68,23 +74,23 @@ export default function CategoriesManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveCategory = (categoryData: CategoryFormData) => {
-    if (view === 'create') {
-      createCategoryMutation.mutate(categoryData as Omit<CreateCategoryData, 'slug'>, {
-        onSuccess: () => {
-          setView('list');
-        },
-      });
-    } else if (view === 'edit' && selectedCategory?.id) {
-      updateCategoryMutation.mutate(
-        { categoryId: selectedCategory.id, data: categoryData },
-        {
-          onSuccess: () => {
-            setView('list');
-            setSelectedCategory(null);
-          },
-        },
-      );
+  const handleSaveCategory = async (categoryData: CategoryFormData) => {
+    if (!workspaceSlug) return;
+
+    try {
+      if (view === 'create') {
+        await createCategoryMutation.mutateAsync(categoryData);
+        setView('list');
+      } else if (view === 'edit' && selectedCategory) {
+        await updateCategoryMutation.mutateAsync({
+          categorySlug: selectedCategory.slug,
+          data: categoryData
+        });
+        setSelectedCategory(null);
+        setView('list');
+      }
+    } catch (error) {
+      console.error('Failed to save category:', error);
     }
   };
 
@@ -93,7 +99,7 @@ export default function CategoriesManager() {
     setSelectedCategory(null);
   };
 
-  if (isLoading) {
+  if (isLoading || !workspaceSlug) {
     return (
       <div className='p-6'>
         <Card>
@@ -117,6 +123,7 @@ export default function CategoriesManager() {
       </div>
     );
   }
+
   if (isError) {
     if (view === 'create') {
       return (
@@ -172,10 +179,18 @@ export default function CategoriesManager() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant='outline' onClick={cancelDelete} disabled={deleteCategoryMutation.isPending}>
+            <Button
+              variant='outline'
+              onClick={cancelDelete}
+              disabled={deleteCategoryMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant='destructive' onClick={confirmDelete} disabled={deleteCategoryMutation.isPending}>
+            <Button
+              variant='destructive'
+              onClick={confirmDelete}
+              disabled={deleteCategoryMutation.isPending}
+            >
               {deleteCategoryMutation.isPending ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogFooter>
