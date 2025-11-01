@@ -166,15 +166,15 @@ export function WorkspaceManagementPage() {
                       </>
                     )}
                   </div>
-                  <span className='text-muted-foreground text-lg group-hover:text-foreground transition-colors'>
+                  <span className='text-muted-foreground text-lg group-hover:text-foreground transition-colors max-w-48 text-ellipsis text-center'>
                     {workspace.name}
                   </span>
-                  <div className='flex items-center gap-2 mt-2'>
-                    <Badge variant='secondary' className='text-xs'>
-                      {workspace.role}
-                    </Badge>
+                  <div className='flex flex-col items-center gap-2 mt-2'>
                     <Badge variant='outline' className='text-xs'>
                       {workspace.slug}
+                    </Badge>
+                    <Badge variant='secondary' className='text-xs'>
+                      {workspace.role}
                     </Badge>
                   </div>
                 </div>
