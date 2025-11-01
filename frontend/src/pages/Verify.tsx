@@ -136,3 +136,31 @@ export function VerifyPage() {
     </div>
   );
 }
+export default function Verify() {
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get('email');
+
+  return (
+    <div className="container flex items-center justify-center min-h-screen">
+      <Card className="w-[400px]">
+        <CardHeader>
+          <h2 className="text-2xl font-bold text-center">Verify Your Email</h2>
+        </CardHeader>
+        <CardContent>
+          {email ? (
+            <p className="text-center">
+              A verification link has been sent to <strong>{email}</strong>. Please
+              check your inbox and click the link to verify your account.
+            </p>
+          ) : (
+            <p className="text-center">
+              Please check your email for the verification link.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+

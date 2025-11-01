@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserWorkspaces } from '@/hooks/useWorkspace';
 import { CreateWorkspaceDialog } from '@/components/Workspace/CreateWorkspaceDialog';
-import { PlusIcon, HexagonIcon, TrashIcon } from 'lucide-react';
+import { PlusIcon, HexagonIcon, TrashIcon, ChevronLeft, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
   getLastWorkspaceSlugs,
   updateLastWorkspaceCookie,
 } from '@/lib/utils';
+import { EditWorkspaceDialog } from '@/components/Workspace/EditWorkspaceDialog';
 
 export function WorkspaceManagementPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -55,6 +56,15 @@ export function WorkspaceManagementPage() {
     setWorkspaceToDelete(null);
   };
 
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      // If no history, navigate to a default route
+      navigate('/dashboard');
+    }
+  };
+
   const workspaceColors = [
     'bg-chart-1',
     'bg-chart-2',
@@ -68,10 +78,20 @@ export function WorkspaceManagementPage() {
 
   return (
     <div className='min-h-screen w-full bg-background flex flex-col items-center justify-center px-6'>
-      {/* Title */}
-      <h1 className='text-3xl md:text-4xl text-foreground mb-12'>
-        Select a workspace
-      </h1>
+      <div className="container py-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <h1 className="text-2xl font-semibold">Workspace Management</h1>
+        </div>
+      </div>
 
       {/* Workspace Cards */}
       <div className='flex flex-wrap gap-8 justify-center mb-12 max-w-6xl'>
@@ -117,14 +137,14 @@ export function WorkspaceManagementPage() {
                 .slice(0, 2);
 
               return (
-                <div
-                  key={workspace.id}
-                  className='flex flex-col items-center cursor-pointer group relative'
+                <div 
+                  key={workspace.id} 
+                  className="relative group"
                   onClick={() => handleNavigateToWorkspace(workspace.slug)}
                 >
                   <div
                     className={cn(
-                      'w-48 h-48 rounded-xl',
+                      'w-48 h-48 rounded-xl cursor-pointer',
                       colorClass,
                       'flex items-center justify-center mb-4 transition-transform group-hover:scale-105 shadow-lg group-hover:shadow-2xl hover:shadow-2xl',
                     )}
@@ -137,15 +157,25 @@ export function WorkspaceManagementPage() {
                     <span className='text-6xl font-bold text-background'>
                       {initials}
                     </span>
-                    {/* Delete button overlay */}
-                    <Button
-                      variant='destructive'
-                      size='icon'
-                      className='absolute top-2 right-2 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity'
-                      onClick={(e) => handleDeleteWorkspace(workspace, e)}
-                    >
-                      <TrashIcon className='h-4 w-4' />
-                    </Button>
+                    {/* Button overlay */}
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <EditWorkspaceDialog
+                        workspace={{
+                          id: workspace.id,
+                          name: workspace.name,
+                          slug: workspace.slug,
+                          role: workspace.role
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => handleDeleteWorkspace(workspace, e)}
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <span className='text-muted-foreground text-lg group-hover:text-foreground transition-colors'>
                     {workspace.name}
@@ -178,15 +208,6 @@ export function WorkspaceManagementPage() {
         )}
       </div>
 
-      {/* Back Button */}
-      <Button
-        onClick={() => navigate('/workspaces')}
-        variant='outline'
-        className='border-border text-foreground hover:bg-muted hover:border-border'
-      >
-        Back
-      </Button>
-
       <CreateWorkspaceDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
@@ -216,6 +237,25 @@ export function WorkspaceManagementPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Back to Workspace Button */}
+      <div className="fixed bottom-8">
+        <Button
+          variant="outline"
+          onClick={() => {
+            const lastUsedSlug = getLastWorkspaceSlugs().current;
+            if (lastUsedSlug) {
+              navigate(`/dashboard/${lastUsedSlug}`);
+            } else {
+              navigate(-1);
+            }
+          }}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Workspace
+        </Button>
+      </div>
     </div>
   );
 }
