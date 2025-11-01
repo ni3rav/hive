@@ -16,7 +16,7 @@ import {
 } from '@/hooks/useCategory';
 import type { Category, CreateCategoryData } from '@/types/category';
 import CategoryList from './CategoryList';
-import CategoryForm from './CategoryForm'; // <-- FIX: Correct default import
+import CategoryForm from './CategoryForm';
 import {
   Card,
   CardContent,
@@ -26,8 +26,6 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
-
-type CategoryFormData = Omit<CreateCategoryData, 'slug'>;
 
 export default function CategoriesManager() {
   const workspaceSlug = useWorkspaceSlug();
@@ -74,23 +72,19 @@ export default function CategoriesManager() {
     setPendingDeleteId(null);
   };
 
-  const handleSaveCategory = async (categoryData: CategoryFormData) => {
+  const handleSaveCategory = async (categoryData: CreateCategoryData) => {
     if (!workspaceSlug) return;
 
-    try {
-      if (view === 'create') {
-        await createCategoryMutation.mutateAsync(categoryData);
-        setView('list');
-      } else if (view === 'edit' && selectedCategory) {
-        await updateCategoryMutation.mutateAsync({
-          categorySlug: selectedCategory.slug,
-          data: categoryData
-        });
-        setSelectedCategory(null);
-        setView('list');
-      }
-    } catch (error) {
-      console.error('Failed to save category:', error);
+    if (view === 'create') {
+      await createCategoryMutation.mutateAsync(categoryData);
+      setView('list');
+    } else if (view === 'edit' && selectedCategory) {
+      await updateCategoryMutation.mutateAsync({
+        categorySlug: selectedCategory.slug,
+        data: categoryData
+      });
+      setSelectedCategory(null);
+      setView('list');
     }
   };
 

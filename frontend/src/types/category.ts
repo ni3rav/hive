@@ -5,11 +5,8 @@ export interface Category {
   slug: string;
 }
 
-export interface CategoryFormData {
+export interface CreateCategoryData {
   name: string;
-  description?: string;
-}
-
-export interface CreateCategoryData extends CategoryFormData {
   slug: string;
+  description?: string;
 }

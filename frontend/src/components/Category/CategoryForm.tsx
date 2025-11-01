@@ -1,5 +1,5 @@
-import type { Category, CategoryFormData } from '@/types/category';
-import { useMemo } from 'react';
+import type { Category, CreateCategoryData } from '@/types/category';
+import { useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 interface CategoryFormProps {
   initialData: Category | null;
-  onSave: (data: CategoryFormData) => Promise<void>;
+  onSave: (
+    data: Omit<CreateCategoryData, 'slug'> & { slug: string },
+  ) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -29,11 +31,20 @@ export default function CategoryForm({
   isSubmitting,
 }: CategoryFormProps) {
   const isEditing = !!initialData;
+  const slugInputRef = useRef<HTMLInputElement>(null);
 
   const formSchema = useMemo(
     () =>
       z.object({
         name: z.string().min(1, 'Name is required'),
+        slug: z
+          .string()
+          .min(1, 'Slug is required')
+          .max(50, 'Slug must be at most 50 characters')
+          .regex(
+            /^[a-z0-9-]+$/,
+            'Slug can only contain lowercase letters, numbers, and hyphens',
+          ),
         description: z.string().optional().default(''),
       }),
     [],
@@ -44,28 +55,69 @@ export default function CategoryForm({
     handleSubmit,
     formState: { errors, isDirty },
     watch,
-  } = useForm<CategoryFormData>({
+    setError,
+  } = useForm<Omit<CreateCategoryData, 'id'>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || '',
+      slug: initialData?.slug || '',
       description: initialData?.description || '',
     },
   });
 
   const nameValue = watch('name');
-  const isValid = isEditing ? isDirty : nameValue && nameValue.trim().length > 0;
+  const slugValue = watch('slug');
+  const isValid = isEditing
+    ? isDirty
+    : nameValue &&
+      nameValue.trim().length > 0 &&
+      slugValue &&
+      slugValue.trim().length > 0;
 
-  const onSubmit = handleSubmit(async (data: CategoryFormData) => {
-    if (!data.name || !data.name.trim()) {
+  const onSubmit = handleSubmit(async (data) => {
+    if (!data.name || !data.name.trim() || !data.slug || !data.slug.trim()) {
       return;
     }
-    await onSave(data);
+    try {
+      await onSave(data);
+    } catch (error: unknown) {
+      const apiError = error as {
+        response?: {
+          status?: number;
+          data?: { message?: string };
+        };
+      };
+
+      if (apiError.response?.status === 409) {
+        const message =
+          apiError.response.data?.message ||
+          'Category slug already exists in this workspace';
+        setError('slug', {
+          type: 'server',
+          message,
+        });
+        // Focus the slug field and scroll to it
+        setTimeout(() => {
+          slugInputRef.current?.focus();
+          slugInputRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }, 100);
+        // Don't re-throw 409 errors - let user fix the slug
+        return;
+      }
+      // Re-throw other errors
+      throw error;
+    }
   });
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
       <CardHeader>
-        <CardTitle>{isEditing ? 'Edit Category' : 'Create New Category'}</CardTitle>
+        <CardTitle>
+          {isEditing ? 'Edit Category' : 'Create New Category'}
+        </CardTitle>
         <CardDescription>
           {isEditing
             ? 'Update the details for this category.'
@@ -87,14 +139,42 @@ export default function CategoryForm({
             )}
           </div>
           <div className='space-y-2'>
+            <Label htmlFor='slug'>Slug</Label>
+            <Input
+              id='slug'
+              {...register('slug')}
+              ref={(e) => {
+                register('slug').ref(e);
+                slugInputRef.current = e;
+              }}
+              placeholder="URL-friendly slug (e.g., 'technology')"
+              required
+              className={
+                errors.slug
+                  ? 'border-destructive focus-visible:ring-destructive'
+                  : ''
+              }
+            />
+            {errors.slug?.message && (
+              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                {errors.slug.message}
+              </p>
+            )}
+            <p className='text-xs text-muted-foreground'>
+              Lowercase letters, numbers, and hyphens only. Max 50 characters.
+            </p>
+          </div>
+          <div className='space-y-2'>
             <Label htmlFor='description'>Description (Optional)</Label>
             <Textarea
               id='description'
               {...register('description')}
               placeholder='Share a brief description of this category.'
             />
-             {errors.description?.message && (
-              <p className='text-sm text-destructive'>{errors.description.message}</p>
+            {errors.description?.message && (
+              <p className='text-sm text-destructive'>
+                {errors.description.message}
+              </p>
             )}
           </div>
 
@@ -107,10 +187,7 @@ export default function CategoryForm({
             >
               Cancel
             </Button>
-            <Button
-              type='submit'
-              disabled={isSubmitting || !isValid}
-            >
+            <Button type='submit' disabled={isSubmitting || !isValid}>
               {isSubmitting ? 'Saving...' : 'Save Category'}
             </Button>
           </div>
