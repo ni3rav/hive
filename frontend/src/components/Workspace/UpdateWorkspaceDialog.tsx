@@ -63,10 +63,9 @@ export function UpdateWorkspaceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Workspace</DialogTitle>
+          <DialogTitle>Update Workspace Name</DialogTitle>
           <DialogDescription>
-            Update your workspace name. Note: You cannot change the workspace
-            slug.
+            You cannot change the workspace slug.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleUpdateWorkspace} className='space-y-4'>
