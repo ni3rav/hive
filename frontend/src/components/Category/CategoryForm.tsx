@@ -14,7 +14,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-type CategoryFormData = Partial<Omit<CreateCategoryData, 'slug'>>;
+type CategoryFormData = Omit<CreateCategoryData, 'slug'>;
 
 interface CategoryFormProps {
   initialData: Category | null;
@@ -34,7 +34,7 @@ export default function CategoryForm({
   const formSchema = useMemo(
     () =>
       z.object({
-        name: z.string().min(1, 'Name is required').optional(),
+        name: z.string().min(1, 'Name is required'),
         description: z.string().optional().default(''),
       }),
     [],
