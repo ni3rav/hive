@@ -45,7 +45,12 @@ export default function Editor() {
   }, [workspaceSlug]);
 
   useEffect(() => {
-    if (metadata.title || metadata.excerpt) {
+    if (
+      metadata.title ||
+      metadata.excerpt ||
+      metadata.category?.length ||
+      metadata.authors?.length
+    ) {
       saveMetadata(metadata, workspaceSlug);
     }
   }, [metadata, workspaceSlug]);
