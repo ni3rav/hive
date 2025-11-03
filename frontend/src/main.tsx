@@ -113,8 +113,8 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense
         fallback={
-          <div className='flex items-center justify-center p-8'>
-            <Spinner />
+          <div className='flex h-screen w-screen items-center justify-center'>
+            <Spinner className='size-5' />
           </div>
         }
       >

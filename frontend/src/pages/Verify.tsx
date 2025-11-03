@@ -49,7 +49,7 @@ export function VerifyPage() {
   }, [isParamsValid, verifyEmail]);
 
   return (
-    <div className='min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-4'>
+    <div className='w-full min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-4'>
       <div className='w-full max-w-md'>
         <div className='flex items-center justify-center mb-8'>
           <Hexagon className='h-10 w-10 text-primary' />
@@ -91,9 +91,9 @@ export function VerifyPage() {
             )}
           </CardHeader>
 
-          <CardContent className='flex justify-center py-6'>
+          <CardContent className='flex flex-col items-center justify-center py-6'>
             {!isParamsValid && (
-              <AlertCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
+              <AlertCircle className='h-16 w-16 text-destructive' />
             )}
             {isParamsValid && isPending && (
               <Spinner className='h-16 w-16 text-primary' />
@@ -102,8 +102,8 @@ export function VerifyPage() {
               <CheckCircle className='h-16 w-16 text-primary' />
             )}
             {isParamsValid && isError && (
-              <div className='text-center'>
-                <AlertCircle className='h-16 w-16 text-destructive mx-auto mb-4' />
+              <div className='flex flex-col items-center text-center'>
+                <AlertCircle className='h-16 w-16 text-destructive mb-4' />
                 <p className='text-muted-foreground'>
                   The verification link may be invalid or expired.
                 </p>
@@ -119,10 +119,10 @@ export function VerifyPage() {
             )}
             {isParamsValid && isSuccess && (
               <Button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/workspaces')}
                 className='bg-primary text-primary-foreground hover:bg-primary/90 font-medium'
               >
-                Login to Your Account
+                Go to Workspaces
               </Button>
             )}
             {isParamsValid && isError && (
@@ -141,19 +141,19 @@ export default function Verify() {
   const email = searchParams.get('email');
 
   return (
-    <div className="container flex items-center justify-center min-h-screen">
-      <Card className="w-[400px]">
+    <div className='w-full min-h-screen flex items-center justify-center p-4'>
+      <Card className='w-full max-w-md'>
         <CardHeader>
-          <h2 className="text-2xl font-bold text-center">Verify Your Email</h2>
+          <h2 className='text-2xl font-bold text-center'>Verify Your Email</h2>
         </CardHeader>
         <CardContent>
           {email ? (
-            <p className="text-center">
-              A verification link has been sent to <strong>{email}</strong>. Please
-              check your inbox and click the link to verify your account.
+            <p className='text-center'>
+              A verification link has been sent to <strong>{email}</strong>.
+              Please check your inbox and click the link to verify your account.
             </p>
           ) : (
-            <p className="text-center">
+            <p className='text-center'>
               Please check your email for the verification link.
             </p>
           )}
@@ -162,5 +162,3 @@ export default function Verify() {
     </div>
   );
 }
-
-
