@@ -38,6 +38,13 @@ import {
 import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
 import { getUserFromEmail } from '../utils/user';
 import { env } from '../env';
+import { sendEmail } from '../utils/email';
+import {
+  verificationEmail,
+  passwordResetEmail,
+  VERIFICATION_EMAIL_FROM,
+  PASSWORD_RESET_EMAIL_FROM,
+} from '../templates';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
@@ -91,12 +98,29 @@ export async function registerController(req: Request, res: Response) {
       return user;
     });
 
-    // TODO: In production, send verification link via email instead of response
-    return created(res, 'User registered successfully', {
-      userId: user.id,
-      verificationLinkToken: token,
-      verificationLinkExpiresAt: expiresAt,
+    const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
+
+    const [emailError] = await sendEmail({
+      to: user.email,
+      subject: 'Verify your email - Hive',
+      html: verificationEmail({
+        name: user.name,
+        verificationLink,
+      }),
+      from: VERIFICATION_EMAIL_FROM,
     });
+
+    if (emailError) {
+      console.error('Failed to send verification email:', emailError);
+    }
+
+    return created(
+      res,
+      'User registered successfully. Please check your email to verify your account.',
+      {
+        userId: user.id,
+      },
+    );
   } catch (error) {
     console.error('Error in registerController:', error);
     return serverError(res, 'Failed to register user');
@@ -151,12 +175,26 @@ export async function loginController(req: Request, res: Response) {
         expiresAt: expiresAt,
       });
 
-      // TODO: for now, returning token but send it via email later
-      return forbidden(res, 'Email not verified', {
-        userId: user.id,
-        verificationLinkToken: token,
-        verificationLinkExpiresAt: expiresAt,
+      const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
+
+      const [emailError] = await sendEmail({
+        to: user.email,
+        subject: 'Verify your email - Hive',
+        html: verificationEmail({
+          name: user.name,
+          verificationLink,
+        }),
+        from: VERIFICATION_EMAIL_FROM,
       });
+
+      if (emailError) {
+        console.error('Failed to send verification email:', emailError);
+      }
+
+      return forbidden(
+        res,
+        "Email not verified. We've sent a new verification link to your email.",
+      );
     }
 
     //* creating session and setting cookies
@@ -314,10 +352,27 @@ export async function generateResetPasswordLinkController(
     return serverError(res, 'Error while creating reset password link');
   }
 
-  //* TODO: for now sending in response otherwise use ses here
   const resetLink = `${env.FRONTEND_URL}/reset?email=${link.email}&token=${link.token}`;
 
-  return created(res, resetLink);
+  const [emailError] = await sendEmail({
+    to: user.email,
+    subject: 'Reset your password - Hive',
+    html: passwordResetEmail({
+      name: user.name,
+      resetLink,
+    }),
+    from: PASSWORD_RESET_EMAIL_FROM,
+  });
+
+  if (emailError) {
+    console.error('Failed to send password reset email:', emailError);
+    return serverError(res, 'Failed to send password reset email');
+  }
+
+  return created(
+    res,
+    'Password reset link sent to your email. Please check your inbox.',
+  );
 }
 
 export async function resetPasswordController(req: Request, res: Response) {
