@@ -149,7 +149,19 @@ export async function createPost(
       return post;
     });
 
-    return [null, result] as const;
+    // fetch post with relations for response
+    const postWithRelations = await db.query.postsTable.findFirst({
+      where: and(
+        eq(postsTable.id, result.id),
+        eq(postsTable.workspaceId, workspace.id),
+      ),
+      with: {
+        author: true,
+        category: true,
+      },
+    });
+
+    return [null, postWithRelations || result] as const;
   } catch (error) {
     return [error, null] as const;
   }
@@ -257,7 +269,19 @@ export async function updatePost(
       return updatedPost;
     });
 
-    return [null, result] as const;
+    // fetch post with relations for response
+    const postWithRelations = await db.query.postsTable.findFirst({
+      where: and(
+        eq(postsTable.id, result.id),
+        eq(postsTable.workspaceId, workspace.id),
+      ),
+      with: {
+        author: true,
+        category: true,
+      },
+    });
+
+    return [null, postWithRelations || result] as const;
   } catch (error) {
     return [error, null] as const;
   }

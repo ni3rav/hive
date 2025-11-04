@@ -33,7 +33,10 @@ export const createPostSchema = z.object({
   contentJson: z.unknown().refine((val) => val !== null && val !== undefined, {
     message: 'content json is required',
   }),
-  publishedAt: z.coerce.date().optional(),
+  publishedAt: z
+    .union([z.coerce.date(), z.null()])
+    .optional()
+    .transform((val) => (val === null ? undefined : val)),
 });
 
 export const updatePostSchema = z.object({
@@ -80,7 +83,10 @@ export const updatePostSchema = z.object({
       visible: z.boolean().optional(),
       contentHtml: z.string().min(1, 'content html is required').optional(),
       contentJson: z.unknown().optional(),
-      publishedAt: z.coerce.date().optional(),
+      publishedAt: z
+        .union([z.coerce.date(), z.null()])
+        .optional()
+        .transform((val) => (val === null ? undefined : val)),
     })
     .refine(
       (data) => Object.values(data).some((value) => value !== undefined),
