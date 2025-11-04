@@ -29,6 +29,12 @@ export async function getPostsByWorkspaceSlug(workspaceSlug: string) {
       with: {
         author: true,
         category: true,
+        creator: true,
+        postTags: {
+          with: {
+            tag: true,
+          },
+        },
       },
       orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
     });
@@ -158,10 +164,20 @@ export async function createPost(
       with: {
         author: true,
         category: true,
+        creator: true,
+        postTags: {
+          with: {
+            tag: true,
+          },
+        },
       },
     });
 
-    return [null, postWithRelations || result] as const;
+    if (!postWithRelations) {
+      throw new Error('failed to fetch created post with relations');
+    }
+
+    return [null, postWithRelations] as const;
   } catch (error) {
     return [error, null] as const;
   }
@@ -278,10 +294,20 @@ export async function updatePost(
       with: {
         author: true,
         category: true,
+        creator: true,
+        postTags: {
+          with: {
+            tag: true,
+          },
+        },
       },
     });
 
-    return [null, postWithRelations || result] as const;
+    if (!postWithRelations) {
+      throw new Error('failed to fetch updated post with relations');
+    }
+
+    return [null, postWithRelations] as const;
   } catch (error) {
     return [error, null] as const;
   }

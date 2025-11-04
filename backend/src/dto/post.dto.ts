@@ -4,12 +4,9 @@ import { postsTable, postContentTable } from '../db/schema';
 export interface PostMetadataResponseDto {
   id: string;
   workspaceId: string;
-  createdBy: string;
-  authorId: string | null;
   title: string;
   slug: string;
   excerpt: string;
-  categorySlug: string | null;
   status: string;
   visible: boolean;
   createdAt: Date;
@@ -24,6 +21,15 @@ export interface PostMetadataResponseDto {
     name: string;
     slug: string;
   } | null;
+  creator: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  tags: Array<{
+    slug: string;
+    name: string;
+  }>;
 }
 
 //* with content (for single post endpoint)
@@ -55,17 +61,25 @@ export function toPostMetadataResponseDto(
       name: string;
       slug: string;
     } | null;
+    creator: {
+      id: string;
+      name: string;
+      email: string;
+    };
+    postTags: Array<{
+      tag: {
+        slug: string;
+        name: string;
+      };
+    }>;
   },
 ): PostMetadataResponseDto {
   return {
     id: post.id,
     workspaceId: post.workspaceId,
-    createdBy: post.createdBy,
-    authorId: post.authorId,
     title: post.title,
     slug: post.slug,
     excerpt: post.excerpt,
-    categorySlug: post.categorySlug,
     status: post.status,
     visible: post.visible,
     createdAt: post.createdAt,
@@ -84,6 +98,15 @@ export function toPostMetadataResponseDto(
           slug: post.category.slug,
         }
       : null,
+    creator: {
+      id: post.creator.id,
+      name: post.creator.name,
+      email: post.creator.email,
+    },
+    tags: post.postTags.map((pt) => ({
+      slug: pt.tag.slug,
+      name: pt.tag.name,
+    })),
   };
 }
 
@@ -99,6 +122,17 @@ export function toPostMetadataListResponseDto(
         name: string;
         slug: string;
       } | null;
+      creator: {
+        id: string;
+        name: string;
+        email: string;
+      };
+      postTags: Array<{
+        tag: {
+          slug: string;
+          name: string;
+        };
+      }>;
     }
   >,
 ): PostMetadataResponseDto[] {
