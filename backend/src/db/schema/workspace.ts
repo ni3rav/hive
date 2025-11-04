@@ -7,6 +7,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { usersTable } from './auth';
 import { authorTable } from './author';
+import { categoryTable } from './category';
+import { tagTable } from './tag';
+import { postsTable } from './post';
 import { relations } from 'drizzle-orm';
 
 export const workspacesTable = pgTable('workspaces', {
@@ -48,6 +51,9 @@ export const workspacesRelations = relations(
     }),
     workspaceUsers: many(workspaceUsersTable),
     authors: many(authorTable),
+    categories: many(categoryTable),
+    tags: many(tagTable),
+    posts: many(postsTable),
   }),
 );
 

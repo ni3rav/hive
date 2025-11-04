@@ -50,6 +50,18 @@ export const postContentTable = pgTable('post_content', {
   content: text('content').notNull(),
 });
 
-export const postsRelations = relations(postsTable, ({ many }) => ({
+export const postsRelations = relations(postsTable, ({ one, many }) => ({
+  workspace: one(workspacesTable, {
+    fields: [postsTable.workspaceId],
+    references: [workspacesTable.id],
+  }),
+  author: one(authorTable, {
+    fields: [postsTable.authorId],
+    references: [authorTable.id],
+  }),
+  category: one(categoryTable, {
+    fields: [postsTable.categorySlug, postsTable.workspaceId],
+    references: [categoryTable.slug, categoryTable.workspaceId],
+  }),
   postTags: many(postTagsTable),
 }));
