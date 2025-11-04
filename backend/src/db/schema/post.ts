@@ -35,7 +35,7 @@ export const postsTable = pgTable(
     status: varchar('status', { length: 20 }).default('draft').notNull(),
     visible: boolean('visible').notNull().default(false),
     createdAt: timestamp('created_at').notNull().defaultNow(),
-    publishedAt: timestamp('published_at').notNull(),
+    publishedAt: timestamp('published_at'),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (t) => [
