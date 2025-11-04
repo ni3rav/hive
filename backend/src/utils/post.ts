@@ -39,15 +39,15 @@ export async function getPostsByWorkspaceSlug(workspaceSlug: string) {
 }
 
 //* get a single post with full content and relations
-export async function getPostByIdWithContent(
-  postId: string,
+export async function getPostBySlugWithContent(
+  postSlug: string,
   workspaceSlug: string,
 ) {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
     const post = await db.query.postsTable.findFirst({
       where: and(
-        eq(postsTable.id, postId),
+        eq(postsTable.slug, postSlug),
         eq(postsTable.workspaceId, workspace.id),
       ),
       with: {
@@ -157,7 +157,7 @@ export async function createPost(
 
 //* update a post with content and tags
 export async function updatePost(
-  postId: string,
+  postSlug: string,
   workspaceSlug: string,
   data: {
     title?: string;
@@ -179,7 +179,7 @@ export async function updatePost(
     // check if post exists
     const existingPost = await db.query.postsTable.findFirst({
       where: and(
-        eq(postsTable.id, postId),
+        eq(postsTable.slug, postSlug),
         eq(postsTable.workspaceId, workspace.id),
       ),
     });
@@ -218,7 +218,7 @@ export async function updatePost(
         })
         .where(
           and(
-            eq(postsTable.id, postId),
+            eq(postsTable.slug, postSlug),
             eq(postsTable.workspaceId, workspace.id),
           ),
         )
@@ -232,19 +232,21 @@ export async function updatePost(
             contentHtml: sanitizedHtml,
             contentJson: data.contentJson,
           })
-          .where(eq(postContentTable.postId, postId));
+          .where(eq(postContentTable.postId, updatedPost.id));
       }
 
       // update tags if provided
       if (data.tagSlugs !== undefined) {
         // remove old tags
-        await tx.delete(postTagsTable).where(eq(postTagsTable.postId, postId));
+        await tx
+          .delete(postTagsTable)
+          .where(eq(postTagsTable.postId, updatedPost.id));
 
         // add new tags
         if (data.tagSlugs.length > 0) {
           await tx.insert(postTagsTable).values(
             data.tagSlugs.map((tagSlug) => ({
-              postId,
+              postId: updatedPost.id,
               tagSlug,
               workspaceId: workspace.id,
             })),
@@ -262,7 +264,7 @@ export async function updatePost(
 }
 
 //* delete a post (cascade will delete content and tag associations)
-export async function deletePost(postId: string, workspaceSlug: string) {
+export async function deletePost(postSlug: string, workspaceSlug: string) {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
 
@@ -270,7 +272,7 @@ export async function deletePost(postId: string, workspaceSlug: string) {
       .delete(postsTable)
       .where(
         and(
-          eq(postsTable.id, postId),
+          eq(postsTable.slug, postSlug),
           eq(postsTable.workspaceId, workspace.id),
         ),
       );

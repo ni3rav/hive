@@ -37,7 +37,15 @@ export const createPostSchema = z.object({
 });
 
 export const updatePostSchema = z.object({
-  postId: z.uuid('invalid post id'),
+  postSlug: z
+    .string()
+    .trim()
+    .min(1, 'post slug is required')
+    .max(255, 'post slug must be at most 255 characters')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'post slug must be lowercase alphanumeric with hyphens',
+    ),
   data: z
     .object({
       title: z
@@ -81,9 +89,25 @@ export const updatePostSchema = z.object({
 });
 
 export const getPostSchema = z.object({
-  postId: z.uuid('invalid post id'),
+  postSlug: z
+    .string()
+    .trim()
+    .min(1, 'post slug is required')
+    .max(255, 'post slug must be at most 255 characters')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'post slug must be lowercase alphanumeric with hyphens',
+    ),
 });
 
 export const deletePostSchema = z.object({
-  postId: z.uuid('invalid post id'),
+  postSlug: z
+    .string()
+    .trim()
+    .min(1, 'post slug is required')
+    .max(255, 'post slug must be at most 255 characters')
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      'post slug must be lowercase alphanumeric with hyphens',
+    ),
 });
