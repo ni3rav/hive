@@ -78,6 +78,13 @@
       "when": 1761928643170,
       "tag": "0010_unknown_hercules",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1762268198392,
+      "tag": "0011_absurd_blizzard",
+      "breakpoints": true
     }
   ]
 }
