@@ -63,6 +63,7 @@ export default function CategorySelect({
           ) : (
             <span
               className={cn('truncate', !selected && 'text-muted-foreground')}
+              title={selected ? `slug: ${selected.slug}` : undefined}
             >
               {selected ? selected.name : placeholder}
             </span>
@@ -102,13 +103,15 @@ export default function CategorySelect({
                       <Check
                         className={cn(
                           'mr-2 h-4 w-4',
-                          // FIX: Compare value against category.slug
-                          value === category.slug
-                            ? 'opacity-100'
-                            : 'opacity-0',
+                          value === category.slug ? 'opacity-100' : 'opacity-0',
                         )}
                       />
-                      <div className='truncate'>{category.name}</div>
+                      <div className='flex flex-col flex-1 min-w-0'>
+                        <div className='truncate'>{category.name}</div>
+                        <div className='truncate text-xs text-muted-foreground'>
+                          {category.slug}
+                        </div>
+                      </div>
                     </CommandItem>
                   ))}
             </CommandGroup>

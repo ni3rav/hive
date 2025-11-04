@@ -3,7 +3,6 @@ import { useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Card,
   CardContent,
@@ -33,7 +32,6 @@ export default function CategoryForm({
   const isEditing = !!initialData;
   const nameInputRef = useRef<HTMLInputElement>(null);
   const slugInputRef = useRef<HTMLInputElement>(null);
-  const descriptionInputRef = useRef<HTMLTextAreaElement>(null);
 
   const formSchema = useMemo(
     () =>
@@ -47,7 +45,6 @@ export default function CategoryForm({
             /^[a-z0-9-]+$/,
             'Slug can only contain lowercase letters, numbers, and hyphens',
           ),
-        description: z.string().optional().default(''),
       }),
     [],
   );
@@ -58,12 +55,11 @@ export default function CategoryForm({
     formState: { errors, isDirty },
     watch,
     setError,
-  } = useForm<Omit<CreateCategoryData, 'id'>>({
+  } = useForm<CreateCategoryData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || '',
       slug: initialData?.slug || '',
-      description: initialData?.description || '',
     },
   });
 
@@ -78,12 +74,6 @@ export default function CategoryForm({
       } else if (errors.slug && slugInputRef.current) {
         slugInputRef.current.focus();
         slugInputRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      } else if (errors.description && descriptionInputRef.current) {
-        descriptionInputRef.current.focus();
-        descriptionInputRef.current.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
@@ -204,28 +194,6 @@ export default function CategoryForm({
             <p className='text-xs text-muted-foreground'>
               Lowercase letters, numbers, and hyphens only. Max 50 characters.
             </p>
-          </div>
-          <div className='space-y-2'>
-            <Label htmlFor='description'>Description (Optional)</Label>
-            <Textarea
-              id='description'
-              {...register('description')}
-              ref={(e) => {
-                register('description').ref(e);
-                descriptionInputRef.current = e;
-              }}
-              placeholder='Share a brief description of this category.'
-              className={
-                errors.description
-                  ? 'border-destructive focus-visible:ring-destructive'
-                  : ''
-              }
-            />
-            {errors.description?.message && (
-              <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
-                {errors.description.message}
-              </p>
-            )}
           </div>
 
           <div className='flex justify-end gap-3'>

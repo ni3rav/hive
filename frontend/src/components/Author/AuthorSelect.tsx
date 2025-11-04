@@ -63,6 +63,7 @@ export default function AuthorSelect({
           ) : (
             <span
               className={cn('truncate', !selected && 'text-muted-foreground')}
+              title={selected ? `email: ${selected.email}` : undefined}
             >
               {selected ? selected.name : placeholder}
             </span>
@@ -110,7 +111,12 @@ export default function AuthorSelect({
                         value === author.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
-                    <div className='truncate'>{author.name}</div>
+                    <div className='flex flex-col flex-1 min-w-0'>
+                      <div className='truncate'>{author.name}</div>
+                      <div className='truncate text-xs text-muted-foreground'>
+                        {author.email}
+                      </div>
+                    </div>
                   </CommandItem>
                 ))
               )}

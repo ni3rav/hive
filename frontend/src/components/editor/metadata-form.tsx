@@ -15,13 +15,15 @@ import {
   AccordionTrigger,
 } from '@/components/accordion-animated';
 import { Calendar as CalendarIcon, Settings } from 'lucide-react';
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React, { useEffect } from 'react';
+import { cn, getCookie, setCookie } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
 import AuthorSelect from '@/components/Author/AuthorSelect';
 import CategorySelect from '@/components/Category/CategorySelect';
 import TagMultiSelect from '@/components/Tag/TagMultiSelect';
+
+const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
 
 interface MetadataFormProps {
   isExpanded: boolean;
@@ -42,8 +44,19 @@ export function MetadataForm({
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
-  // Note: Metadata persistence is now handled by the parent Editor component
-  // with workspace-specific storage. No need for local persistence here.
+  //* initialize expanded state from cookie on mount
+  useEffect(() => {
+    const savedExpanded = getCookie(METADATA_EXPANDED_COOKIE);
+    if (savedExpanded !== undefined) {
+      setIsExpanded(savedExpanded === 'true');
+    }
+  }, [setIsExpanded]);
+
+  useEffect(() => {
+    setCookie(METADATA_EXPANDED_COOKIE, String(isExpanded), {
+      maxAgeSeconds: 365 * 24 * 60 * 60,
+    });
+  }, [isExpanded]);
 
   return (
     <Accordion
