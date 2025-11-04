@@ -49,7 +49,8 @@ export default function Editor() {
       metadata.title ||
       metadata.excerpt ||
       metadata.category?.length ||
-      metadata.authors?.length
+      metadata.authors?.length ||
+      metadata.tags?.length
     ) {
       saveMetadata(metadata, workspaceSlug);
     }

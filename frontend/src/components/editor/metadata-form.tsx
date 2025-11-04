@@ -14,13 +14,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/accordion-animated';
-import { Calendar as CalendarIcon, Settings, Tag } from 'lucide-react';
+import { Calendar as CalendarIcon, Settings } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
 import AuthorSelect from '@/components/Author/AuthorSelect';
 import CategorySelect from '@/components/Category/CategorySelect';
+import TagMultiSelect from '@/components/Tag/TagMultiSelect';
 
 interface MetadataFormProps {
   isExpanded: boolean;
@@ -181,11 +182,17 @@ export function MetadataForm({
               </div>
 
               <label className='text-muted-foreground font-medium'>Tags</label>
-              <div className='relative flex items-center'>
-                <Tag className='absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none' />
-                <Input
-                  className={cn('h-9 w-full pl-10', formFieldClasses)}
-                  placeholder='Select some tags'
+              <div>
+                <TagMultiSelect
+                  value={metadata.tags}
+                  onChange={(tagSlugs) => {
+                    setMetadata((prev) => ({
+                      ...prev,
+                      tags: tagSlugs,
+                    }));
+                  }}
+                  placeholder='Select tags...'
+                  allowCreate
                 />
               </div>
             </div>
