@@ -70,7 +70,7 @@ export function toPostMetadataResponseDto(
       tag: {
         slug: string;
         name: string;
-      };
+      } | null;
     }>;
   },
 ): PostMetadataResponseDto {
@@ -103,10 +103,12 @@ export function toPostMetadataResponseDto(
       name: post.creator.name,
       email: post.creator.email,
     },
-    tags: post.postTags.map((pt) => ({
-      slug: pt.tag.slug,
-      name: pt.tag.name,
-    })),
+    tags: post.postTags
+      .filter((pt) => pt.tag !== null)
+      .map((pt) => ({
+        slug: pt.tag!.slug,
+        name: pt.tag!.name,
+      })),
   };
 }
 
@@ -131,7 +133,7 @@ export function toPostMetadataListResponseDto(
         tag: {
           slug: string;
           name: string;
-        };
+        } | null;
       }>;
     }
   >,
@@ -160,7 +162,7 @@ export function toPostWithContentResponseDto(
       tag: {
         slug: string;
         name: string;
-      };
+      } | null;
     }>;
   },
 ): PostWithContentResponseDto {
@@ -176,9 +178,11 @@ export function toPostWithContentResponseDto(
       name: post.creator.name,
       email: post.creator.email,
     },
-    tags: post.postTags.map((pt) => ({
-      slug: pt.tag.slug,
-      name: pt.tag.name,
-    })),
+    tags: post.postTags
+      .filter((pt) => pt.tag !== null)
+      .map((pt) => ({
+        slug: pt.tag!.slug,
+        name: pt.tag!.name,
+      })),
   };
 }
