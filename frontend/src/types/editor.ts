@@ -1,9 +1,11 @@
 export interface PostMetadata {
   title: string;
   slug: string;
-  authors: string[];
+  authorId?: string;
   publishedAt: Date;
   excerpt: string;
-  category: string[] | null;
-  tags: string[];
+  categorySlug?: string;
+  tagSlugs: string[];
+  visible: boolean;
+  status: 'draft' | 'published';
 }

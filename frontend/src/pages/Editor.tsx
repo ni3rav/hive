@@ -16,11 +16,13 @@ const PlateEditor = lazyComponent(
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
   slug: '',
-  authors: [],
+  authorId: undefined,
   publishedAt: new Date(),
   excerpt: '',
-  category: [],
-  tags: [],
+  categorySlug: undefined,
+  tagSlugs: [],
+  visible: true,
+  status: 'draft',
 });
 
 export default function Editor() {
@@ -48,9 +50,9 @@ export default function Editor() {
     if (
       metadata.title ||
       metadata.excerpt ||
-      metadata.category?.length ||
-      metadata.authors?.length ||
-      metadata.tags?.length
+      metadata.categorySlug ||
+      metadata.authorId ||
+      metadata.tagSlugs?.length
     ) {
       saveMetadata(metadata, workspaceSlug);
     }
