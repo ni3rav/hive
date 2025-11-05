@@ -51,7 +51,11 @@ export default function TagMultiSelect({
     onChange(newValue);
   };
 
-  const handleRemove = (tagSlug: string, e: React.MouseEvent) => {
+  const handleRemove = (
+    tagSlug: string,
+    e: React.MouseEvent | React.KeyboardEvent,
+  ) => {
+    e.preventDefault();
     e.stopPropagation();
     onChange(value.filter((s) => s !== tagSlug));
   };
@@ -74,17 +78,28 @@ export default function TagMultiSelect({
                   <Badge
                     key={tag.slug}
                     variant='secondary'
-                    className='bg-muted hover:bg-muted text-foreground'
+                    className='bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30'
                     title={`slug: ${tag.slug}`}
                   >
                     {tag.name}
-                    <button
-                      type='button'
+                    <div
+                      role='button'
+                      tabIndex={0}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
                       onClick={(e) => handleRemove(tag.slug, e)}
-                      className='ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2'
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleRemove(tag.slug, e);
+                        }
+                      }}
+                      className='ml-1 rounded-full cursor-pointer outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2'
                     >
-                      <X className='h-3 w-3 text-muted-foreground hover:text-foreground' />
-                    </button>
+                      <X className='h-3 w-3 text-primary/70 hover:text-primary' />
+                    </div>
                   </Badge>
                 ))
               ) : (

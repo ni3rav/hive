@@ -1,13 +1,14 @@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
@@ -312,40 +313,21 @@ export function MetadataForm({
                 control={control}
                 name='status'
                 render={({ field }) => (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant='outline'
-                        className={cn(
-                          'h-9 w-full justify-between',
-                          formFieldClasses,
-                        )}
-                      >
-                        <span className='capitalize'>
-                          {field.value || 'draft'}
-                        </span>
-                        <span className='text-muted-foreground'>▼</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          field.onChange('draft');
-                          syncToParent();
-                        }}
-                      >
-                        Draft
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          field.onChange('published');
-                          syncToParent();
-                        }}
-                      >
-                        Published
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value as 'draft' | 'published');
+                      syncToParent();
+                    }}
+                  >
+                    <SelectTrigger className={cn('h-9', formFieldClasses)}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='draft'>Draft</SelectItem>
+                      <SelectItem value='published'>Published</SelectItem>
+                    </SelectContent>
+                  </Select>
                 )}
               />
 
@@ -357,10 +339,10 @@ export function MetadataForm({
                 name='visible'
                 render={({ field }) => (
                   <div className='flex items-center gap-2'>
-                    <Checkbox
+                    <Switch
                       checked={field.value}
                       onCheckedChange={(checked) => {
-                        field.onChange(checked === true);
+                        field.onChange(checked);
                         syncToParent();
                       }}
                     />
