@@ -1,0 +1,60 @@
+import type { Value } from 'platejs';
+
+export interface Post {
+  id: string;
+  workspaceId: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  status: 'draft' | 'published';
+  visible: boolean;
+  createdAt: Date;
+  publishedAt: Date | null;
+  updatedAt: Date;
+  author?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  category?: {
+    name: string;
+    slug: string;
+  } | null;
+  creator: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  tags: Array<{
+    slug: string;
+    name: string;
+  }>;
+}
+
+export interface CreatePostData {
+  title: string;
+  slug: string;
+  excerpt: string;
+  authorId?: string;
+  categorySlug?: string;
+  tagSlugs: string[];
+  status: 'draft' | 'published';
+  visible: boolean;
+  contentHtml: string;
+  contentJson: Value;
+  publishedAt?: Date | null;
+}
+
+export interface UpdatePostData {
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  authorId?: string;
+  categorySlug?: string;
+  tagSlugs?: string[];
+  status?: 'draft' | 'published';
+  visible?: boolean;
+  contentHtml?: string;
+  contentJson?: Value;
+  publishedAt?: Date | null;
+}
