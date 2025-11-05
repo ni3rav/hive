@@ -106,12 +106,17 @@ export async function createPostController(req: Request, res: Response) {
   );
 
   if (error) {
-    if (
-      (error as Error).message === 'post slug already exists in this workspace'
-    ) {
+    const errorMessage = (error as Error).message;
+    if (errorMessage === 'post slug already exists in this workspace') {
       return conflict(res, 'post slug already exists in this workspace');
-    } else if ((error as Error).message === 'workspace not found') {
+    } else if (errorMessage === 'workspace not found') {
       return notFound(res, 'workspace not found');
+    } else if (
+      errorMessage.includes('author not found') ||
+      errorMessage.includes('category not found') ||
+      errorMessage.includes('tags not found')
+    ) {
+      return validationError(res, errorMessage);
     } else {
       console.error('error creating post:', error);
       return serverError(res, 'failed to create post');
@@ -148,14 +153,19 @@ export async function updatePostController(req: Request, res: Response) {
   );
 
   if (error) {
-    if ((error as Error).message === 'workspace not found') {
+    const errorMessage = (error as Error).message;
+    if (errorMessage === 'workspace not found') {
       return notFound(res, 'workspace not found');
-    } else if ((error as Error).message === 'post not found') {
+    } else if (errorMessage === 'post not found') {
       return notFound(res, 'post not found');
-    } else if (
-      (error as Error).message === 'post slug already exists in this workspace'
-    ) {
+    } else if (errorMessage === 'post slug already exists in this workspace') {
       return conflict(res, 'post slug already exists in this workspace');
+    } else if (
+      errorMessage.includes('author not found') ||
+      errorMessage.includes('category not found') ||
+      errorMessage.includes('tags not found')
+    ) {
+      return validationError(res, errorMessage);
     } else {
       console.error('error updating post:', error);
       return serverError(res, 'failed to update post');

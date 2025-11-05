@@ -4,8 +4,11 @@ import {
   postContentTable,
   postTagsTable,
   workspacesTable,
+  tagTable,
+  authorTable,
+  categoryTable,
 } from '../db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { sanitizePostHtml } from './sanitize';
 
 async function getWorkspaceBySlug(workspaceSlug: string) {
@@ -110,6 +113,55 @@ export async function createPost(
 
     if (existingPost) {
       throw new Error('post slug already exists in this workspace');
+    }
+
+    //* author exists in workspace
+    if (data.authorId) {
+      const author = await db.query.authorTable.findFirst({
+        where: and(
+          eq(authorTable.id, data.authorId),
+          eq(authorTable.workspaceId, workspace.id),
+        ),
+      });
+      if (!author) {
+        throw new Error(
+          'author not found or does not belong to this workspace',
+        );
+      }
+    }
+
+    //* category exists in workspace
+    if (data.categorySlug) {
+      const category = await db.query.categoryTable.findFirst({
+        where: and(
+          eq(categoryTable.slug, data.categorySlug),
+          eq(categoryTable.workspaceId, workspace.id),
+        ),
+      });
+      if (!category) {
+        throw new Error(
+          'category not found or does not belong to this workspace',
+        );
+      }
+    }
+
+    //* tags exist in workspace
+    if (data.tagSlugs && data.tagSlugs.length > 0) {
+      const existingTags = await db.query.tagTable.findMany({
+        where: and(
+          inArray(tagTable.slug, data.tagSlugs),
+          eq(tagTable.workspaceId, workspace.id),
+        ),
+      });
+      const existingTagSlugs = new Set(existingTags.map((t) => t.slug));
+      const invalidTagSlugs = data.tagSlugs.filter(
+        (slug) => !existingTagSlugs.has(slug),
+      );
+      if (invalidTagSlugs.length > 0) {
+        throw new Error(
+          `tags not found or do not belong to this workspace: ${invalidTagSlugs.join(', ')}`,
+        );
+      }
     }
 
     // sanitize html content
@@ -227,6 +279,55 @@ export async function updatePost(
 
       if (duplicatePost) {
         throw new Error('post slug already exists in this workspace');
+      }
+    }
+
+    // validate author exists and belongs to workspace
+    if (data.authorId) {
+      const author = await db.query.authorTable.findFirst({
+        where: and(
+          eq(authorTable.id, data.authorId),
+          eq(authorTable.workspaceId, workspace.id),
+        ),
+      });
+      if (!author) {
+        throw new Error(
+          'author not found or does not belong to this workspace',
+        );
+      }
+    }
+
+    // validate category exists in workspace
+    if (data.categorySlug) {
+      const category = await db.query.categoryTable.findFirst({
+        where: and(
+          eq(categoryTable.slug, data.categorySlug),
+          eq(categoryTable.workspaceId, workspace.id),
+        ),
+      });
+      if (!category) {
+        throw new Error(
+          'category not found or does not belong to this workspace',
+        );
+      }
+    }
+
+    // validate tags exist in workspace
+    if (data.tagSlugs !== undefined && data.tagSlugs.length > 0) {
+      const existingTags = await db.query.tagTable.findMany({
+        where: and(
+          inArray(tagTable.slug, data.tagSlugs),
+          eq(tagTable.workspaceId, workspace.id),
+        ),
+      });
+      const existingTagSlugs = new Set(existingTags.map((t) => t.slug));
+      const invalidTagSlugs = data.tagSlugs.filter(
+        (slug) => !existingTagSlugs.has(slug),
+      );
+      if (invalidTagSlugs.length > 0) {
+        throw new Error(
+          `tags not found or do not belong to this workspace: ${invalidTagSlugs.join(', ')}`,
+        );
       }
     }
 
