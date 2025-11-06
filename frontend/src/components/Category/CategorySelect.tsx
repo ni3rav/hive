@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, Settings } from 'lucide-react';
+import { Check, ChevronsUpDown, Settings, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -87,6 +87,19 @@ export default function CategorySelect({
               <CommandEmpty>No categories found.</CommandEmpty>
             )}
             <CommandGroup heading='Categories'>
+              {value && (
+                <CommandItem
+                  value='__none__'
+                  onSelect={() => {
+                    onChange(null, null);
+                    setOpen(false);
+                  }}
+                  className='cursor-pointer text-muted-foreground'
+                >
+                  <X className='mr-2 h-4 w-4' />
+                  <span>None</span>
+                </CommandItem>
+              )}
               {isLoading
                 ? null
                 : (categories as Category[]).map((category) => (
@@ -94,8 +107,11 @@ export default function CategorySelect({
                       key={category.id}
                       value={category.name}
                       onSelect={() => {
-                        // FIX: Pass category.slug to onChange
-                        onChange(category.slug!, category);
+                        if (value === category.slug) {
+                          onChange(null, null);
+                        } else {
+                          onChange(category.slug!, category);
+                        }
                         setOpen(false);
                       }}
                       className='cursor-pointer'

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, Settings } from 'lucide-react'; // Changed Plus to Settings
+import { Check, ChevronsUpDown, Settings, X } from 'lucide-react'; // Changed Plus to Settings
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -88,6 +88,19 @@ export default function AuthorSelect({
               <CommandEmpty>No authors found.</CommandEmpty>
             )}
             <CommandGroup heading='Authors'>
+              {value && (
+                <CommandItem
+                  value='__none__'
+                  onSelect={() => {
+                    onChange(null, null);
+                    setOpen(false);
+                  }}
+                  className='cursor-pointer text-muted-foreground'
+                >
+                  <X className='mr-2 h-4 w-4' />
+                  <span>None</span>
+                </CommandItem>
+              )}
               {isLoading ? (
                 <div className='space-y-2 p-3'>
                   <Skeleton className='h-5 w-full' />
@@ -100,7 +113,11 @@ export default function AuthorSelect({
                     key={author.id}
                     value={author.name}
                     onSelect={() => {
-                      onChange(author.id!, author);
+                      if (value === author.id) {
+                        onChange(null, null);
+                      } else {
+                        onChange(author.id!, author);
+                      }
                       setOpen(false);
                     }}
                     className='cursor-pointer'
