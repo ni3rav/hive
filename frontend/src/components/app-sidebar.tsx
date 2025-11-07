@@ -18,6 +18,7 @@ import {
   FileText,
   Layers,
   Tag,
+  UserCog,
 } from 'lucide-react';
 import { WorkspaceSwitcher } from '@/components/Workspace/workspaceSwitcher';
 import { useParams } from 'react-router-dom';
@@ -47,6 +48,11 @@ const navItems = [
     title: 'Tags',
     url: 'tags',
     icon: Tag,
+  },
+  {
+    title: 'Members',
+    url: 'members',
+    icon: UserCog,
   },
   {
     title: 'Editor',
