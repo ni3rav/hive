@@ -1,11 +1,11 @@
 import { MetadataForm } from '@/components/metadata-form';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { type PostMetadata } from '@/types/editor';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
-import { Tiptap } from '@/components/editor/Tiptap';
+import { Tiptap, type TiptapHandle } from '@/components/editor/Tiptap';
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
@@ -23,6 +23,7 @@ export default function Editor() {
   const workspaceSlug = useWorkspaceSlug();
   const [isExpanded, setIsExpanded] = useState(false);
   const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
+  const editorRef = useRef<TiptapHandle>(null);
 
   useEffect(() => {
     const savedMetadata = loadMetadata(workspaceSlug);
@@ -77,9 +78,11 @@ export default function Editor() {
           metadata={metadata}
           setMetadata={setMetadata}
           onTitleChange={onTitleChange}
+          editorRef={editorRef as React.RefObject<TiptapHandle>}
+          workspaceSlug={workspaceSlug ?? ''}
         />
         <div className='mt-6 flex-1 min-h-0'>
-          <Tiptap workspaceSlug={workspaceSlug} />
+          <Tiptap ref={editorRef} workspaceSlug={workspaceSlug} />
         </div>
       </div>
     </ErrorBoundary>

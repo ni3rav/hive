@@ -22,7 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/accordion-animated';
-import { Calendar as CalendarIcon, Settings } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { cn, getCookie, setCookie } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -36,6 +36,14 @@ import {
   postMetadataSchema,
   type PostMetadataFormData,
 } from '@/lib/validations/post';
+import { useCreatePost } from '@/hooks/usePost';
+import type { TiptapHandle } from '@/components/editor/Tiptap';
+import {
+  getContentFromEditor,
+  isEditorEmpty as checkEditorEmpty,
+} from '@/components/editor/content-utils';
+import { clearWorkspacePersistence } from '@/components/editor/persistence';
+import { toast } from 'sonner';
 
 const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
 
@@ -45,6 +53,8 @@ interface MetadataFormProps {
   metadata: PostMetadata;
   setMetadata: React.Dispatch<React.SetStateAction<PostMetadata>>;
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  editorRef: React.RefObject<TiptapHandle>;
+  workspaceSlug: string;
 }
 
 export function MetadataForm({
@@ -53,10 +63,14 @@ export function MetadataForm({
   metadata,
   setMetadata,
   onTitleChange,
+  editorRef,
+  workspaceSlug,
 }: MetadataFormProps) {
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
+
+  const createPostMutation = useCreatePost(workspaceSlug);
 
   const defaultValues = useMemo<PostMetadataFormData>(
     () => ({
@@ -79,7 +93,15 @@ export function MetadataForm({
     mode: 'onBlur',
   });
 
-  const { register, control, watch, setValue, reset, getValues } = form;
+  const {
+    register,
+    control,
+    watch,
+    setValue,
+    reset,
+    getValues,
+    formState: { errors, isValid },
+  } = form;
 
   const titleValue = watch('title');
   const slugValue = watch('slug');
@@ -144,6 +166,114 @@ export function MetadataForm({
     syncToParent();
   };
 
+  const handleClear = () => {
+    // Reset form to initial values using react-hook-form
+    const initialValues: PostMetadataFormData = {
+      title: '',
+      slug: '',
+      excerpt: '',
+      authorId: undefined,
+      categorySlug: undefined,
+      tagSlugs: [],
+      publishedAt: new Date(),
+      visible: true,
+      status: 'draft',
+    };
+
+    // Reset form with react-hook-form
+    reset(initialValues);
+
+    // Sync to parent metadata state
+    setMetadata({
+      title: '',
+      slug: '',
+      excerpt: '',
+      authorId: undefined,
+      categorySlug: undefined,
+      tagSlugs: [],
+      publishedAt: new Date(),
+      visible: true,
+      status: 'draft',
+    });
+
+    // Clear editor content
+    const editor = editorRef.current?.editor;
+    if (editor) {
+      editor.commands.setContent('<p></p>');
+    }
+  };
+
+  const handleSave = async () => {
+    // Validate form first
+    const isValidForm = await form.trigger();
+    if (!isValidForm) {
+      toast.error('Please fix the form errors before saving');
+      return;
+    }
+
+    // Check editor content
+    const editor = editorRef.current?.editor;
+    if (!editor) {
+      toast.error('Editor is not ready');
+      return;
+    }
+
+    if (checkEditorEmpty(editor)) {
+      toast.error('Post content cannot be empty');
+      return;
+    }
+
+    // Get form values
+    const formValues = getValues();
+
+    // Get content from editor
+    const { contentHtml, contentJson } = getContentFromEditor(editor);
+
+    // Prepare post data
+    const postData = {
+      title: formValues.title,
+      slug: formValues.slug,
+      excerpt: formValues.excerpt || '',
+      authorId: formValues.authorId,
+      categorySlug: formValues.categorySlug,
+      tagSlugs: formValues.tagSlugs || [],
+      status: formValues.status,
+      visible: formValues.visible,
+      contentHtml,
+      contentJson,
+      publishedAt:
+        formValues.status === 'published' ? formValues.publishedAt : null,
+    };
+
+    // Create post
+    createPostMutation.mutate(postData, {
+      onSuccess: () => {
+        // Clear localStorage after successful save
+        clearWorkspacePersistence(workspaceSlug);
+        // Reset form to initial state
+        setMetadata({
+          title: '',
+          slug: '',
+          excerpt: '',
+          authorId: undefined,
+          categorySlug: undefined,
+          tagSlugs: [],
+          publishedAt: new Date(),
+          visible: true,
+          status: 'draft',
+        });
+        // Clear editor
+        editor.commands.setContent('<p></p>');
+      },
+    });
+  };
+
+  // Check if save button should be disabled
+  const editor = editorRef.current?.editor;
+  const editorIsEmpty = editor ? checkEditorEmpty(editor) : true;
+  const isSaveDisabled =
+    !isValid || createPostMutation.isPending || !editor || editorIsEmpty;
+
   return (
     <Accordion
       type='single'
@@ -174,35 +304,81 @@ export function MetadataForm({
                 </span>
               </div>
             </div>
-            <div className='flex items-center gap-2 text-sm text-muted-foreground flex-shrink-0'>
-              <Settings className='h-4 w-4' />
-              <span>Details</span>
+            <div className='flex items-center gap-2 flex-shrink-0'>
+              <div
+                className='flex items-center gap-2'
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaveDisabled}
+                  size='sm'
+                  className='h-8'
+                >
+                  {createPostMutation.isPending ? (
+                    <>
+                      <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                      {statusValue === 'published'
+                        ? 'Publishing...'
+                        : 'Saving...'}
+                    </>
+                  ) : statusValue === 'published' ? (
+                    'Publish'
+                  ) : (
+                    'Save Draft'
+                  )}
+                </Button>
+                <Button
+                  onClick={handleClear}
+                  variant='outline'
+                  size='sm'
+                  className='h-8'
+                  disabled={createPostMutation.isPending}
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
           </div>
         </AccordionTrigger>
         <AccordionContent>
           <div className='p-6 space-y-6'>
-            <Input
-              type='text'
-              placeholder='A Great Title'
-              className={cn(
-                'w-full h-auto bg-none border-none px-4 py-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug tracking-tight shadow-none',
-                'placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:border-none !outline-none',
-                'caret-primary selection:bg-primary selection:text-primary-foreground',
+            <div>
+              <Input
+                type='text'
+                placeholder='A Great Title'
+                className={cn(
+                  'w-full h-auto bg-none border-none px-4 py-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug tracking-tight shadow-none',
+                  'placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:border-none !outline-none',
+                  'caret-primary selection:bg-primary selection:text-primary-foreground',
+                  errors.title && 'border-b border-destructive',
+                )}
+                {...register('title', {
+                  onChange: handleTitleChange,
+                  onBlur: handleBlur,
+                })}
+              />
+              {errors.title && (
+                <p className='text-sm text-destructive mt-1 px-4'>
+                  {errors.title.message}
+                </p>
               )}
-              {...register('title', {
-                onChange: handleTitleChange,
-                onBlur: handleBlur,
-              })}
-            />
+            </div>
 
             <div className='grid grid-cols-1 md:grid-cols-[120px_1fr] md:items-center gap-x-6 gap-y-6 text-sm'>
               <label className='text-muted-foreground font-medium'>Slug</label>
-              <Input
-                readOnly
-                className={cn('h-9', formFieldClasses, readOnlyClasses)}
-                {...register('slug', { onBlur: handleBlur })}
-              />
+              <div>
+                <Input
+                  readOnly
+                  className={cn('h-9', formFieldClasses, readOnlyClasses)}
+                  {...register('slug', { onBlur: handleBlur })}
+                />
+                {errors.slug && (
+                  <p className='text-sm text-destructive mt-1'>
+                    {errors.slug.message}
+                  </p>
+                )}
+              </div>
 
               <label className='text-muted-foreground font-medium'>
                 Author
@@ -264,11 +440,22 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium self-start md:pt-2'>
                 Excerpt
               </label>
-              <Textarea
-                placeholder='A short description of your post. Recommended to be 155 characters or less.'
-                className={cn('min-h-[80px]', formFieldClasses)}
-                {...register('excerpt', { onBlur: handleBlur })}
-              />
+              <div>
+                <Textarea
+                  placeholder='A short description of your post. Recommended to be 155 characters or less.'
+                  className={cn(
+                    'min-h-[80px]',
+                    formFieldClasses,
+                    errors.excerpt && 'border-destructive',
+                  )}
+                  {...register('excerpt', { onBlur: handleBlur })}
+                />
+                {errors.excerpt && (
+                  <p className='text-sm text-destructive mt-1'>
+                    {errors.excerpt.message}
+                  </p>
+                )}
+              </div>
 
               <label className='text-muted-foreground font-medium'>
                 Category

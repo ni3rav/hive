@@ -1,6 +1,6 @@
 import { apiGet, apiPatch, apiPost, apiDelete } from '@/lib/api-client';
 import type { Post, CreatePostData, UpdatePostData } from '@/types/post';
-import type { Value } from 'platejs';
+import type { ProseMirrorJSON } from '@/components/editor/persistence';
 
 export async function apiGetWorkspacePosts(
   workspaceSlug: string,
@@ -12,11 +12,11 @@ export async function apiGetPost(
   workspaceSlug: string,
   postSlug: string,
 ): Promise<
-  Post & { content: { id: string; contentHtml: string; contentJson: Value } }
+  Post & { content: { id: string; contentHtml: string; contentJson: ProseMirrorJSON } }
 > {
   return apiGet<
     Post & {
-      content: { id: string; contentHtml: string; contentJson: Value };
+      content: { id: string; contentHtml: string; contentJson: ProseMirrorJSON };
     }
   >(`/api/post/${workspaceSlug}/${postSlug}`);
 }

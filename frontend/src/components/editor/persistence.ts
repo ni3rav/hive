@@ -1,4 +1,9 @@
-import type { Value } from 'platejs';
+// ProseMirror JSON document type
+export type ProseMirrorJSON = {
+  type: string;
+  content?: ProseMirrorJSON[];
+  [key: string]: unknown;
+};
 
 export const DEFAULT_METADATA_STORAGE_PREFIX = 'hive-editor-metadata';
 export const DEFAULT_CONTENT_STORAGE_PREFIX = 'hive-editor-content';
@@ -72,17 +77,15 @@ export const clearMetadata = (workspaceSlug?: string) => {
 
 /**
  * Saves content for a specific workspace
- * Supports both Plate.js Value and Tiptap HTML string
+ * Stores ProseMirror JSON format
  */
-export const saveContent = (content: Value | string, workspaceSlug?: string) => {
+export const saveContent = (content: ProseMirrorJSON, workspaceSlug?: string) => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
       workspaceSlug,
     );
-    // Store as-is if string (Tiptap HTML), otherwise stringify (Plate.js)
-    const serialized = typeof content === 'string' ? content : JSON.stringify(content);
-    localStorage.setItem(storageKey, serialized);
+    localStorage.setItem(storageKey, JSON.stringify(content));
   } catch (error) {
     console.error('Failed to persist editor content', error);
   }
@@ -90,9 +93,9 @@ export const saveContent = (content: Value | string, workspaceSlug?: string) => 
 
 /**
  * Loads content for a specific workspace
- * Returns either Plate.js Value or Tiptap HTML string
+ * Returns ProseMirror JSON format
  */
-export const loadContent = (workspaceSlug?: string): Value | string | null => {
+export const loadContent = (workspaceSlug?: string): ProseMirrorJSON | null => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
@@ -101,12 +104,7 @@ export const loadContent = (workspaceSlug?: string): Value | string | null => {
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
     
-    // Try to parse as JSON (Plate.js), otherwise return as string (Tiptap HTML)
-    try {
-    return JSON.parse(raw);
-    } catch {
-      return raw;
-    }
+    return JSON.parse(raw) as ProseMirrorJSON;
   } catch (error) {
     console.error('Failed to load editor content from storage', error);
     return null;

@@ -1,4 +1,4 @@
-import type { Value } from 'platejs';
+import type { ProseMirrorJSON } from '@/components/editor/persistence';
 
 export interface Post {
   id: string;
@@ -41,7 +41,7 @@ export interface CreatePostData {
   status: 'draft' | 'published';
   visible: boolean;
   contentHtml: string;
-  contentJson: Value;
+  contentJson: ProseMirrorJSON;
   publishedAt?: Date | null;
 }
 
@@ -55,6 +55,6 @@ export interface UpdatePostData {
   status?: 'draft' | 'published';
   visible?: boolean;
   contentHtml?: string;
-  contentJson?: Value;
+  contentJson?: ProseMirrorJSON;
   publishedAt?: Date | null;
 }
