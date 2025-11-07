@@ -1,9 +1,16 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import { useEffect } from 'react';
 import { loadContent, saveContent } from './persistence';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Toolbar } from './Toolbar';
 import './tiptap.css';
 
 interface TiptapProps {
@@ -18,8 +25,24 @@ export function Tiptap({ workspaceSlug }: TiptapProps) {
           levels: [1, 2, 3, 4, 5, 6],
         },
       }),
+      Underline,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'tiptap-link',
+        },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        defaultAlignment: 'left',
+      }),
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
       Placeholder.configure({
-        placeholder: 'Type "/" for commands or start writing...',
+        placeholder: 'Start writing...',
       }),
     ],
     content: '<p></p>',
@@ -51,12 +74,15 @@ export function Tiptap({ workspaceSlug }: TiptapProps) {
   }
 
   return (
-    <div className='h-full w-full bg-background text-foreground border-border rounded-lg overflow-hidden border'>
-      <ScrollArea className='h-full'>
-        <div className='p-4 min-h-full'>
-          <EditorContent editor={editor} />
-        </div>
-      </ScrollArea>
+    <div className='h-full w-full bg-background text-foreground border-border rounded-lg overflow-hidden border flex flex-col'>
+      <Toolbar editor={editor} />
+      <div className='flex-1 min-h-0'>
+        <ScrollArea className='h-full'>
+          <div className='p-4 min-h-full'>
+            <EditorContent editor={editor} />
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 }
