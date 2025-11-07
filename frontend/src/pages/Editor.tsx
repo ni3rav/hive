@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { type PostMetadata } from '@/types/editor';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
+import { Tiptap } from '@/components/editor/Tiptap';
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
@@ -69,7 +70,7 @@ export default function Editor() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full p-6'>
+      <div className='h-full p-6 flex flex-col overflow-y-scroll'>
         <MetadataForm
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
@@ -77,6 +78,9 @@ export default function Editor() {
           setMetadata={setMetadata}
           onTitleChange={onTitleChange}
         />
+        <div className='mt-6 flex-1 min-h-0'>
+          <Tiptap workspaceSlug={workspaceSlug} />
+        </div>
       </div>
     </ErrorBoundary>
   );

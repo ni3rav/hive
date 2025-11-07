@@ -72,14 +72,17 @@ export const clearMetadata = (workspaceSlug?: string) => {
 
 /**
  * Saves content for a specific workspace
+ * Supports both Plate.js Value and Tiptap HTML string
  */
-export const saveContent = (content: Value, workspaceSlug?: string) => {
+export const saveContent = (content: Value | string, workspaceSlug?: string) => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
       workspaceSlug,
     );
-    localStorage.setItem(storageKey, JSON.stringify(content));
+    // Store as-is if string (Tiptap HTML), otherwise stringify (Plate.js)
+    const serialized = typeof content === 'string' ? content : JSON.stringify(content);
+    localStorage.setItem(storageKey, serialized);
   } catch (error) {
     console.error('Failed to persist editor content', error);
   }
@@ -87,8 +90,9 @@ export const saveContent = (content: Value, workspaceSlug?: string) => {
 
 /**
  * Loads content for a specific workspace
+ * Returns either Plate.js Value or Tiptap HTML string
  */
-export const loadContent = (workspaceSlug?: string): Value | null => {
+export const loadContent = (workspaceSlug?: string): Value | string | null => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
@@ -96,7 +100,13 @@ export const loadContent = (workspaceSlug?: string): Value | null => {
     );
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
+    
+    // Try to parse as JSON (Plate.js), otherwise return as string (Tiptap HTML)
+    try {
     return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
   } catch (error) {
     console.error('Failed to load editor content from storage', error);
     return null;
