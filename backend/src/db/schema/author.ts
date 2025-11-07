@@ -8,6 +8,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { workspacesTable } from './workspace';
 import { relations } from 'drizzle-orm';
+import { postsTable } from './post';
 
 export const authorTable = pgTable(
   'authors',
@@ -25,9 +26,10 @@ export const authorTable = pgTable(
   (t) => [index('idx_authors_workspace_id').on(t.workspaceId)],
 );
 
-export const authorRelations = relations(authorTable, ({ one }) => ({
+export const authorRelations = relations(authorTable, ({ one, many }) => ({
   workspace: one(workspacesTable, {
     fields: [authorTable.workspaceId],
     references: [workspacesTable.id],
   }),
+  posts: many(postsTable),
 }));

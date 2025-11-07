@@ -29,6 +29,14 @@ export default function LoginPage() {
           navigate('/dashboard');
         },
         onError: (error: unknown) => {
+          const apiError = error as { response?: { status?: number } };
+          
+          // Handle email not verified (403)
+          if (apiError.response?.status === 403) {
+            toast.error('Email not verified. Please check your email for verification link.');
+            return;
+          }
+          
           const message = getAuthErrorMessage(error, 'login', 'Login failed');
           toast.error(message);
         },

@@ -1,32 +1,29 @@
-import { MetadataForm } from '@/components/editor/metadata-form';
+import { MetadataForm } from '@/components/metadata-form';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { type PostMetadata } from '@/types/editor';
-import { lazyComponent } from '@/components/editor/lazy';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
-import { Spinner } from '@/components/ui/spinner';
-
-const PlateEditor = lazyComponent(
-  '/src/components/editor/plate-editor.tsx',
-  'PlateEditor',
-);
+import { Tiptap, type TiptapHandle } from '@/components/editor/Tiptap';
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
   slug: '',
-  authors: [],
+  authorId: undefined,
   publishedAt: new Date(),
   excerpt: '',
-  category: [],
-  tags: [],
+  categorySlug: undefined,
+  tagSlugs: [],
+  visible: true,
+  status: 'draft',
 });
 
 export default function Editor() {
   const workspaceSlug = useWorkspaceSlug();
   const [isExpanded, setIsExpanded] = useState(false);
   const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
+  const editorRef = useRef<TiptapHandle>(null);
 
   useEffect(() => {
     const savedMetadata = loadMetadata(workspaceSlug);
@@ -48,8 +45,9 @@ export default function Editor() {
     if (
       metadata.title ||
       metadata.excerpt ||
-      metadata.category?.length ||
-      metadata.authors?.length
+      metadata.categorySlug ||
+      metadata.authorId ||
+      metadata.tagSlugs?.length
     ) {
       saveMetadata(metadata, workspaceSlug);
     }
@@ -73,23 +71,19 @@ export default function Editor() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full p-6'>
+      <div className='h-full p-6 flex flex-col overflow-y-scroll'>
         <MetadataForm
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}
           metadata={metadata}
           setMetadata={setMetadata}
           onTitleChange={onTitleChange}
+          editorRef={editorRef as React.RefObject<TiptapHandle>}
+          workspaceSlug={workspaceSlug ?? ''}
         />
-        <Suspense
-          fallback={
-            <div className='flex justify-center p-8'>
-              <Spinner />
-            </div>
-          }
-        >
-          <PlateEditor />
-        </Suspense>
+        <div className='mt-6 flex-1 min-h-0'>
+          <Tiptap ref={editorRef} workspaceSlug={workspaceSlug} />
+        </div>
       </div>
     </ErrorBoundary>
   );

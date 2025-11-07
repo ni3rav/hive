@@ -31,9 +31,10 @@ const pages: Record<string, () => Promise<unknown>> = import.meta.glob(
   '/src/pages/**/*.tsx',
 );
 
-// Vite glob map for components
+// Vite glob map for components - only editor-specific components to avoid conflicts
+// with statically imported UI components used throughout the app
 const components: Record<string, () => Promise<unknown>> = import.meta.glob(
-  '/src/components/**/*.tsx',
+  '/src/components/editor/**/*.tsx',
 );
 
 // Lazy from a known page path with optional named export

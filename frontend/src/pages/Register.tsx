@@ -33,8 +33,10 @@ export default function RegisterPage() {
       },
       {
         onSuccess: () => {
-          toast.success('Registration successful!.');
-          navigate('/dashboard');
+          toast.success(
+            'Registration successful! Please check your email to verify your account.',
+          );
+          navigate('/login');
         },
         onError: (error: unknown) => {
           const message = getAuthErrorMessage(

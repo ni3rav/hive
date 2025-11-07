@@ -9,6 +9,7 @@ import {
   primaryKey,
 } from 'drizzle-orm/pg-core';
 import { workspaceUsersTable, workspacesTable } from './workspace';
+import { postsTable } from './post';
 
 export const usersTable = pgTable(
   'users',
@@ -71,4 +72,5 @@ export const passwordResetLinksTable = pgTable(
 export const usersRelations = relations(usersTable, ({ many }) => ({
   workspaceUsers: many(workspaceUsersTable),
   ownedWorkspaces: many(workspacesTable),
+  createdPosts: many(postsTable),
 }));

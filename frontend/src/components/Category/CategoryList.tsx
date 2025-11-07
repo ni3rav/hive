@@ -46,8 +46,7 @@ export default function CategoryList({
     return categories.filter(
       (c) =>
         c.name?.toLowerCase().includes(q) ||
-        c.slug?.toLowerCase().includes(q) ||
-        c.description?.toLowerCase().includes(q),
+        c.slug?.toLowerCase().includes(q),
     );
   }, [categories, search]);
 

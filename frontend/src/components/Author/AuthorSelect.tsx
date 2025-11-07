@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, Settings } from 'lucide-react'; // Changed Plus to Settings
+import { Check, ChevronsUpDown, Settings, X } from 'lucide-react'; // Changed Plus to Settings
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -63,6 +63,7 @@ export default function AuthorSelect({
           ) : (
             <span
               className={cn('truncate', !selected && 'text-muted-foreground')}
+              title={selected ? `email: ${selected.email}` : undefined}
             >
               {selected ? selected.name : placeholder}
             </span>
@@ -87,6 +88,19 @@ export default function AuthorSelect({
               <CommandEmpty>No authors found.</CommandEmpty>
             )}
             <CommandGroup heading='Authors'>
+              {value && (
+                <CommandItem
+                  value='__none__'
+                  onSelect={() => {
+                    onChange(null, null);
+                    setOpen(false);
+                  }}
+                  className='cursor-pointer text-muted-foreground'
+                >
+                  <X className='mr-2 h-4 w-4' />
+                  <span>None</span>
+                </CommandItem>
+              )}
               {isLoading ? (
                 <div className='space-y-2 p-3'>
                   <Skeleton className='h-5 w-full' />
@@ -99,7 +113,11 @@ export default function AuthorSelect({
                     key={author.id}
                     value={author.name}
                     onSelect={() => {
-                      onChange(author.id!, author);
+                      if (value === author.id) {
+                        onChange(null, null);
+                      } else {
+                        onChange(author.id!, author);
+                      }
                       setOpen(false);
                     }}
                     className='cursor-pointer'
@@ -110,7 +128,12 @@ export default function AuthorSelect({
                         value === author.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
-                    <div className='truncate'>{author.name}</div>
+                    <div className='flex flex-col flex-1 min-w-0'>
+                      <div className='truncate'>{author.name}</div>
+                      <div className='truncate text-xs text-muted-foreground'>
+                        {author.email}
+                      </div>
+                    </div>
                   </CommandItem>
                 ))
               )}

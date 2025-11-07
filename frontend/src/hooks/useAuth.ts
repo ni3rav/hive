@@ -37,13 +37,8 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: apiRegister,
-    onSuccess: () => {
-      // Invalidate the user query so it refetches with new registration data
-      queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().base });
-    },
   });
 }
 
@@ -61,6 +56,7 @@ export function useLogout() {
 
 export function useVerifyEmail(data: VerifyEmailData) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       if (!import.meta.env.PROD) {
@@ -69,8 +65,10 @@ export function useVerifyEmail(data: VerifyEmailData) {
       return apiVerifyEmail(data);
     },
     onSuccess: () => {
+      // Invalidate user query to refetch with new session
+      queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().base });
       toast.success('Email verified successfully');
-      navigate('/dashboard');
+      navigate('/workspaces');
     },
     onError: (error: unknown) => {
       const message = getAuthErrorMessage(

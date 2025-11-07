@@ -16,6 +16,8 @@ import { lazyPage } from '@/components/editor/lazy';
 import { Suspense } from 'react';
 import { Spinner } from './components/ui/spinner';
 import CategoriesManager from './components/Category/CategoryManager';
+import MemberManager from './components/Member/MemberManager';
+import InviteMemberPage from './components/Member/InviteMemberPage';
 
 const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
@@ -31,6 +33,7 @@ const WorkspaceManagementPage = lazyPage(
 );
 const Editor = lazyPage('/src/pages/Editor.tsx');
 const AuthorsPage = lazyPage('/src/pages/Author.tsx');
+const TagsPage = lazyPage('/src/pages/Tag.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -96,6 +99,18 @@ const router = createBrowserRouter([
             path: 'categories',
             element: <CategoriesManager />,
           },
+          {
+            path: 'tags',
+            element: <TagsPage />,
+          },
+          {
+            path: 'members/invite',
+            element: <InviteMemberPage />,
+          },
+          {
+            path: 'members',
+            element: <MemberManager />,
+          },
           { path: '*', element: <NotFound /> },
         ],
       },
@@ -113,8 +128,8 @@ createRoot(document.getElementById('root')!).render(
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense
         fallback={
-          <div className='flex items-center justify-center p-8'>
-            <Spinner />
+          <div className='flex h-screen w-screen items-center justify-center'>
+            <Spinner className='size-5' />
           </div>
         }
       >

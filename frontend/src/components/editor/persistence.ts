@@ -1,4 +1,9 @@
-import type { Value } from 'platejs';
+// ProseMirror JSON document type
+export type ProseMirrorJSON = {
+  type: string;
+  content?: ProseMirrorJSON[];
+  [key: string]: unknown;
+};
 
 export const DEFAULT_METADATA_STORAGE_PREFIX = 'hive-editor-metadata';
 export const DEFAULT_CONTENT_STORAGE_PREFIX = 'hive-editor-content';
@@ -72,8 +77,9 @@ export const clearMetadata = (workspaceSlug?: string) => {
 
 /**
  * Saves content for a specific workspace
+ * Stores ProseMirror JSON format
  */
-export const saveContent = (content: Value, workspaceSlug?: string) => {
+export const saveContent = (content: ProseMirrorJSON, workspaceSlug?: string) => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
@@ -87,8 +93,9 @@ export const saveContent = (content: Value, workspaceSlug?: string) => {
 
 /**
  * Loads content for a specific workspace
+ * Returns ProseMirror JSON format
  */
-export const loadContent = (workspaceSlug?: string): Value | null => {
+export const loadContent = (workspaceSlug?: string): ProseMirrorJSON | null => {
   try {
     const storageKey = getWorkspaceStorageKey(
       DEFAULT_CONTENT_STORAGE_PREFIX,
@@ -96,7 +103,8 @@ export const loadContent = (workspaceSlug?: string): Value | null => {
     );
     const raw = localStorage.getItem(storageKey);
     if (!raw) return null;
-    return JSON.parse(raw);
+    
+    return JSON.parse(raw) as ProseMirrorJSON;
   } catch (error) {
     console.error('Failed to load editor content from storage', error);
     return null;

@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { categoryTable, workspacesTable, postsTable } from '../db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 async function getWorkspaceBySlug(workspaceSlug: string) {
   const workspace = await db.query.workspacesTable.findFirst({
@@ -101,7 +101,30 @@ export async function updateCategory(
 
       // update category and all related posts in a transaction
       const result = await db.transaction(async (tx) => {
-        // category
+        const postsToUpdate = await tx.query.postsTable.findMany({
+          where: and(
+            eq(postsTable.categorySlug, categorySlug),
+            eq(postsTable.workspaceId, workspace.id),
+          ),
+          columns: { id: true },
+        });
+
+        const postIds = postsToUpdate.map((p) => p.id);
+
+        // step 2: temporarily set posts categorySlug to null
+        // this breaks the foreign key reference to allow category update
+        if (postIds.length > 0) {
+          await tx
+            .update(postsTable)
+            .set({ categorySlug: null })
+            .where(
+              and(
+                eq(postsTable.categorySlug, categorySlug),
+                eq(postsTable.workspaceId, workspace.id),
+              ),
+            );
+        }
+
         const [updatedCategory] = await tx
           .update(categoryTable)
           .set(data)
@@ -113,16 +136,12 @@ export async function updateCategory(
           )
           .returning();
 
-        // update all posts referencing this category
-        await tx
-          .update(postsTable)
-          .set({ categorySlug: data.slug })
-          .where(
-            and(
-              eq(postsTable.categorySlug, categorySlug),
-              eq(postsTable.workspaceId, workspace.id),
-            ),
-          );
+        if (postIds.length > 0) {
+          await tx
+            .update(postsTable)
+            .set({ categorySlug: data.slug })
+            .where(inArray(postsTable.id, postIds));
+        }
 
         return updatedCategory;
       });
@@ -154,14 +173,30 @@ export async function deleteCategory(
 ) {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
-    const result = await db
-      .delete(categoryTable)
-      .where(
-        and(
-          eq(categoryTable.slug, categorySlug),
-          eq(categoryTable.workspaceId, workspace.id),
-        ),
-      );
+
+    const result = await db.transaction(async (tx) => {
+      await tx
+        .update(postsTable)
+        .set({ categorySlug: null })
+        .where(
+          and(
+            eq(postsTable.categorySlug, categorySlug),
+            eq(postsTable.workspaceId, workspace.id),
+          ),
+        );
+
+      // delete the category
+      const deleteResult = await tx
+        .delete(categoryTable)
+        .where(
+          and(
+            eq(categoryTable.slug, categorySlug),
+            eq(categoryTable.workspaceId, workspace.id),
+          ),
+        );
+
+      return deleteResult;
+    });
 
     if (result.rowCount === 0) {
       return [

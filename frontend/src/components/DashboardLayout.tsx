@@ -20,24 +20,12 @@ export function DashboardLayout() {
 
   if (isLoading) {
     return (
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className='flex flex-col h-screen overflow-hidden'>
-          <header className='flex h-16 shrink-0 items-center gap-2'>
-            <div className='flex items-center gap-2 px-4'>
-              <SidebarTrigger />
-            </div>
-          </header>
-          <main className='flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0 overflow-hidden'>
-            <div className='flex items-center justify-center h-full'>
-              <div className='flex items-center gap-2 text-muted-foreground'>
-                <Spinner className='size-5' />
-                <span>Verifying workspace…</span>
-              </div>
-            </div>
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
+      <div className='flex h-screen w-screen items-center justify-center'>
+        <div className='flex items-center gap-2 text-muted-foreground'>
+          <Spinner className='size-5' />
+          {/* <span>Verifying workspace…</span> */}
+        </div>
+      </div>
     );
   }
 

@@ -5,6 +5,7 @@ import { router as authorRouter } from './routes/author';
 import { router as categoryRouter } from './routes/category';
 import { router as tagRouter } from './routes/tag';
 import { router as workspaceRouter } from './routes/workspace';
+import { router as postRouter } from './routes/post';
 import cookieParser from 'cookie-parser';
 import { env } from './env';
 import morgan from 'morgan';
@@ -35,6 +36,7 @@ app.use('/api/author', authMiddleware, authorRouter);
 app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
+app.use('/api/post', authMiddleware, postRouter);
 
 type BodyParserSyntaxError = SyntaxError & { type?: string; status?: number };
 

@@ -1,0 +1,1 @@
+ALTER TABLE "post_tags" ADD CONSTRAINT "fk_post_tags_tag" FOREIGN KEY ("tag_slug","workspace_id") REFERENCES "public"."tags"("slug","workspace_id") ON DELETE cascade ON UPDATE no action;

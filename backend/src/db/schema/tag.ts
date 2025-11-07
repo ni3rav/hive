@@ -5,6 +5,7 @@ import {
   varchar,
   timestamp,
   index,
+  foreignKey,
 } from 'drizzle-orm/pg-core';
 import { workspacesTable } from './workspace';
 import { postsTable } from './post';
@@ -45,6 +46,11 @@ export const postTagsTable = pgTable(
       name: 'post_tags_pk',
       columns: [t.postId, t.tagSlug],
     }),
+    foreignKey({
+      columns: [t.tagSlug, t.workspaceId],
+      foreignColumns: [tagTable.slug, tagTable.workspaceId],
+      name: 'fk_post_tags_tag',
+    }).onDelete('cascade'),
   ],
 );
 
