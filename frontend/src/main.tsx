@@ -16,6 +16,8 @@ import { lazyPage } from '@/components/editor/lazy';
 import { Suspense } from 'react';
 import { Spinner } from './components/ui/spinner';
 import CategoriesManager from './components/Category/CategoryManager';
+import MemberManager from './components/Member/MemberManager';
+import InviteMemberPage from './components/Member/InviteMemberPage';
 
 const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
@@ -100,6 +102,14 @@ const router = createBrowserRouter([
           {
             path: 'tags',
             element: <TagsPage />,
+          },
+          {
+            path: 'members/invite',
+            element: <InviteMemberPage />,
+          },
+          {
+            path: 'members',
+            element: <MemberManager />,
           },
           { path: '*', element: <NotFound /> },
         ],

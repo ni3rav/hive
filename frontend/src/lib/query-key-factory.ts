@@ -117,8 +117,8 @@ export class QueryKeys {
       return [...this.base, 'info'];
     },
 
-    members() {
-      return [...this.base, 'members'];
+    members(workspaceSlug: string) {
+      return [...this.base, 'members', workspaceSlug];
     },
 
     workspace(workspaceSlug: string) {
