@@ -34,6 +34,7 @@ const WorkspaceManagementPage = lazyPage(
 const Editor = lazyPage('/src/pages/Editor.tsx');
 const AuthorsPage = lazyPage('/src/pages/Author.tsx');
 const TagsPage = lazyPage('/src/pages/Tag.tsx');
+const PostPage = lazyPage('/src/pages/Post.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -102,6 +103,10 @@ const router = createBrowserRouter([
           {
             path: 'tags',
             element: <TagsPage />,
+          },
+          {
+            path: 'posts',
+            element: <PostPage />,
           },
           {
             path: 'members/invite',
