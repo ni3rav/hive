@@ -36,13 +36,16 @@ import {
   postMetadataSchema,
   type PostMetadataFormData,
 } from '@/lib/validations/post';
-import { useCreatePost } from '@/hooks/usePost';
+import { useCreatePost, useUpdatePost } from '@/hooks/usePost';
 import type { TiptapHandle } from '@/components/editor/Tiptap';
 import {
   getContentFromEditor,
   isEditorEmpty as checkEditorEmpty,
 } from '@/components/editor/content-utils';
-import { clearWorkspacePersistence } from '@/components/editor/persistence';
+import {
+  clearWorkspacePersistence,
+  clearContent,
+} from '@/components/editor/persistence';
 import { toast } from 'sonner';
 
 const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
@@ -55,6 +58,8 @@ interface MetadataFormProps {
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   editorRef: React.RefObject<TiptapHandle>;
   workspaceSlug: string;
+  postSlug?: string;
+  isEditing?: boolean;
 }
 
 export function MetadataForm({
@@ -65,12 +70,18 @@ export function MetadataForm({
   onTitleChange,
   editorRef,
   workspaceSlug,
+  postSlug,
+  isEditing = false,
 }: MetadataFormProps) {
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
   const createPostMutation = useCreatePost(workspaceSlug);
+  const updatePostMutation = useUpdatePost(
+    workspaceSlug,
+    postSlug || '',
+  );
 
   const defaultValues = useMemo<PostMetadataFormData>(
     () => ({
@@ -232,7 +243,7 @@ export function MetadataForm({
     // Prepare post data
     const postData = {
       title: formValues.title,
-      slug: formValues.slug,
+      slug: isEditing ? undefined : formValues.slug, // Don't send slug when updating
       excerpt: formValues.excerpt || '',
       authorId: formValues.authorId,
       categorySlug: formValues.categorySlug,
@@ -245,34 +256,49 @@ export function MetadataForm({
         formValues.status === 'published' ? formValues.publishedAt : null,
     };
 
-    // Create post
-    createPostMutation.mutate(postData, {
-      onSuccess: () => {
-        // Clear localStorage after successful save
-        clearWorkspacePersistence(workspaceSlug);
-        // Reset form to initial state
-        setMetadata({
-          title: '',
-          slug: '',
-          excerpt: '',
-          authorId: undefined,
-          categorySlug: undefined,
-          tagSlugs: [],
-          publishedAt: new Date(),
-          visible: true,
-          status: 'draft',
-        });
-        // Clear editor
-        editor.commands.setContent('<p></p>');
-      },
-    });
+    if (isEditing && postSlug) {
+      // Update existing post
+      updatePostMutation.mutate(postData, {
+        onSuccess: () => {
+          // Clear all localStorage persistence after successful update
+          clearWorkspacePersistence(workspaceSlug);
+          // Explicitly clear editor content from localStorage
+          clearContent(workspaceSlug);
+        },
+      });
+    } else {
+      // Create new post
+      createPostMutation.mutate(postData as typeof postData & { slug: string }, {
+        onSuccess: () => {
+          // Clear localStorage after successful save
+          clearWorkspacePersistence(workspaceSlug);
+          // Reset form to initial state
+          setMetadata({
+            title: '',
+            slug: '',
+            excerpt: '',
+            authorId: undefined,
+            categorySlug: undefined,
+            tagSlugs: [],
+            publishedAt: new Date(),
+            visible: true,
+            status: 'draft',
+          });
+          // Clear editor
+          editor.commands.setContent('<p></p>');
+        },
+      });
+    }
   };
 
   // Check if save button should be disabled
   const editor = editorRef.current?.editor;
   const editorIsEmpty = editor ? checkEditorEmpty(editor) : true;
+  const isSaving = isEditing
+    ? updatePostMutation.isPending
+    : createPostMutation.isPending;
   const isSaveDisabled =
-    !isValid || createPostMutation.isPending || !editor || editorIsEmpty;
+    !isValid || isSaving || !editor || editorIsEmpty;
 
   return (
     <Accordion
@@ -315,7 +341,7 @@ export function MetadataForm({
                   size='sm'
                   className='h-8'
                 >
-                  {createPostMutation.isPending ? (
+                  {isSaving ? (
                     <>
                       <Loader2 className='mr-2 h-3 w-3 animate-spin' />
                       {statusValue === 'published'
@@ -323,9 +349,9 @@ export function MetadataForm({
                         : 'Saving...'}
                     </>
                   ) : statusValue === 'published' ? (
-                    'Publish'
+                    isEditing ? 'Update & Publish' : 'Publish'
                   ) : (
-                    'Save Draft'
+                    isEditing ? 'Update Draft' : 'Save Draft'
                   )}
                 </Button>
                 <Button
@@ -333,7 +359,7 @@ export function MetadataForm({
                   variant='outline'
                   size='sm'
                   className='h-8'
-                  disabled={createPostMutation.isPending}
+                  disabled={isSaving}
                 >
                   Clear
                 </Button>
@@ -369,8 +395,12 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>Slug</label>
               <div>
                 <Input
-                  readOnly
-                  className={cn('h-9', formFieldClasses, readOnlyClasses)}
+                  readOnly={isEditing}
+                  className={cn(
+                    'h-9',
+                    formFieldClasses,
+                    isEditing && readOnlyClasses,
+                  )}
                   {...register('slug', { onBlur: handleBlur })}
                 />
                 {errors.slug && (

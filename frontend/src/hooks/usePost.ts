@@ -2,6 +2,7 @@ import {
   apiCreatePost,
   apiUpdatePost,
   apiGetWorkspacePosts,
+  apiGetPost,
   apiDeletePost,
 } from '@/api/post';
 import type { CreatePostData, UpdatePostData, Post } from '@/types/post';
@@ -19,6 +20,15 @@ export function useWorkspacePosts(workspaceSlug: string) {
     queryFn: () => apiGetWorkspacePosts(workspaceSlug),
     retry: false,
     enabled: !!workspaceSlug,
+  });
+}
+
+export function usePost(workspaceSlug: string, postSlug: string) {
+  return useQuery({
+    queryKey: QueryKeys.postKeys().post(workspaceSlug, postSlug),
+    queryFn: () => apiGetPost(workspaceSlug, postSlug),
+    retry: false,
+    enabled: !!workspaceSlug && !!postSlug,
   });
 }
 

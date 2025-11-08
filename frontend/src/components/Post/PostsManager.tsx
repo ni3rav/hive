@@ -34,9 +34,7 @@ import { useNavigate } from 'react-router-dom';
 export default function PostsManager() {
   const workspaceSlug = useWorkspaceSlug();
   const navigate = useNavigate();
-  const { data: posts, isLoading, isError } = useWorkspacePosts(
-    workspaceSlug!,
-  );
+  const { data: posts, isLoading, isError } = useWorkspacePosts(workspaceSlug!);
   const deletePostMutation = useDeletePost(workspaceSlug!);
 
   const [pendingDeleteSlug, setPendingDeleteSlug] = useState<string | null>(
@@ -49,8 +47,7 @@ export default function PostsManager() {
   };
 
   const handleEdit = (postSlug: string) => {
-    // Navigate to editor - will be implemented later
-    console.log('Edit post:', postSlug);
+    navigate(`/dashboard/${workspaceSlug}/editor?postSlug=${postSlug}`);
   };
 
   const handleDelete = (postSlug: string) => {
@@ -146,10 +143,12 @@ export default function PostsManager() {
               <CardTitle>Posts</CardTitle>
               <CardDescription>Manage your blog posts</CardDescription>
             </div>
-            <Button onClick={handleNewPost} className='whitespace-nowrap'>
-              <Plus size={16} className='mr-1' />
-              New Post
-            </Button>
+            {postsArray.length > 0 && (
+              <Button onClick={handleNewPost} className='whitespace-nowrap'>
+                <Plus size={16} className='mr-1' />
+                New Post
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
             {postsArray.length === 0 ? (
@@ -183,8 +182,8 @@ export default function PostsManager() {
           <DialogHeader>
             <DialogTitle>Delete post</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the post
-              and all its content.
+              This action cannot be undone. This will permanently delete the
+              post and all its content.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -208,4 +207,3 @@ export default function PostsManager() {
     </>
   );
 }
-
