@@ -168,44 +168,61 @@ export async function createPost(
     const sanitizedHtml = sanitizePostHtml(data.contentHtml);
 
     // create post, content, and tag associations in transaction
-    const result = await db.transaction(async (tx) => {
-      // create post
-      const [post] = await tx
-        .insert(postsTable)
-        .values({
-          workspaceId: workspace.id,
-          createdBy: userId,
-          authorId: data.authorId,
-          title: data.title,
-          slug: data.slug,
-          excerpt: data.excerpt,
-          categorySlug: data.categorySlug,
-          status: data.status,
-          visible: data.visible,
-          publishedAt: data.publishedAt,
-        })
-        .returning();
-
-      // create post content
-      await tx.insert(postContentTable).values({
-        postId: post.id,
-        contentHtml: sanitizedHtml,
-        contentJson: data.contentJson,
-      });
-
-      // create tag associations
-      if (data.tagSlugs && data.tagSlugs.length > 0) {
-        await tx.insert(postTagsTable).values(
-          data.tagSlugs.map((tagSlug) => ({
-            postId: post.id,
-            tagSlug,
+    let result;
+    try {
+      result = await db.transaction(async (tx) => {
+        // create post
+        const [post] = await tx
+          .insert(postsTable)
+          .values({
             workspaceId: workspace.id,
-          })),
-        );
-      }
+            createdBy: userId,
+            authorId: data.authorId,
+            title: data.title,
+            slug: data.slug,
+            excerpt: data.excerpt,
+            categorySlug: data.categorySlug,
+            status: data.status,
+            visible: data.visible,
+            publishedAt: data.publishedAt,
+          })
+          .returning();
 
-      return post;
-    });
+        // create post content
+        await tx.insert(postContentTable).values({
+          postId: post.id,
+          contentHtml: sanitizedHtml,
+          contentJson: data.contentJson,
+        });
+
+        // create tag associations
+        if (data.tagSlugs && data.tagSlugs.length > 0) {
+          await tx.insert(postTagsTable).values(
+            data.tagSlugs.map((tagSlug) => ({
+              postId: post.id,
+              tagSlug,
+              workspaceId: workspace.id,
+            })),
+          );
+        }
+
+        return post;
+      });
+    } catch (error: unknown) {
+      const dbError = error as {
+        code?: string;
+        constraint?: string;
+        cause?: { code?: string; constraint?: string };
+      };
+
+      const errorCode = dbError.code || dbError.cause?.code;
+      const errorConstraint = dbError.constraint || dbError.cause?.constraint;
+
+      if (errorCode === '23505' && errorConstraint === 'posts_slug_unique') {
+        throw new Error('post slug already exists in this workspace');
+      }
+      throw error;
+    }
 
     // fetch post with relations for response
     const postWithRelations = await db.query.postsTable.findFirst({

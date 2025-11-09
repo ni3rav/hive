@@ -38,6 +38,7 @@ import {
   type PostMetadataFormData,
 } from '@/lib/validations/post';
 import { useCreatePost, useUpdatePost } from '@/hooks/usePost';
+import type { CreatePostData } from '@/types/post';
 import type { TiptapHandle } from '@/components/editor/Tiptap';
 import {
   getContentFromEditor,
@@ -58,6 +59,7 @@ interface MetadataFormProps {
   workspaceSlug: string;
   postSlug?: string;
   isEditing?: boolean;
+  originalPublishedAt?: Date;
 }
 
 export function MetadataForm({
@@ -70,6 +72,7 @@ export function MetadataForm({
   workspaceSlug,
   postSlug,
   isEditing = false,
+  originalPublishedAt,
 }: MetadataFormProps) {
   const navigate = useNavigate();
   const formFieldClasses =
@@ -228,7 +231,7 @@ export function MetadataForm({
 
     const { contentHtml, contentJson } = getContentFromEditor(editor);
 
-    const postData = {
+    const postData: Record<string, unknown> = {
       title: formValues.title,
       slug: isEditing ? undefined : formValues.slug,
       excerpt: formValues.excerpt || '',
@@ -239,9 +242,16 @@ export function MetadataForm({
       visible: formValues.visible,
       contentHtml,
       contentJson,
-      publishedAt:
-        formValues.status === 'published' ? formValues.publishedAt : null,
     };
+
+    if (!isEditing) {
+      postData.publishedAt = formValues.publishedAt;
+    } else if (
+      originalPublishedAt &&
+      formValues.publishedAt.getTime() !== originalPublishedAt.getTime()
+    ) {
+      postData.publishedAt = formValues.publishedAt;
+    }
 
     if (isEditing && postSlug) {
       updatePostMutation.mutate(postData, {
@@ -259,7 +269,11 @@ export function MetadataForm({
       });
     } else {
       createPostMutation.mutate(
-        postData as typeof postData & { slug: string },
+        {
+          ...postData,
+          slug: formValues.slug,
+          publishedAt: formValues.publishedAt,
+        } as CreatePostData & { slug: string; publishedAt: Date },
         {
           onSuccess: () => {
             const editor = editorRef.current?.editor;
@@ -388,40 +402,48 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>
                 Published at
               </label>
-              <Controller
-                control={control}
-                name='publishedAt'
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant='outline'
-                        className={cn(
-                          'w-[240px] justify-start text-left font-normal h-9 px-3',
-                          formFieldClasses,
-                        )}
-                      >
-                        <CalendarIcon className='mr-2 h-4 w-4' />
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date || new Date());
-                          syncToParent();
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+              <div>
+                <Controller
+                  control={control}
+                  name='publishedAt'
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant='outline'
+                          className={cn(
+                            'w-[240px] justify-start text-left font-normal h-9 px-3',
+                            formFieldClasses,
+                            errors.publishedAt && 'border-destructive',
+                          )}
+                        >
+                          <CalendarIcon className='mr-2 h-4 w-4' />
+                          {field.value ? (
+                            format(field.value, 'PPP')
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-0' align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={field.value}
+                          onSelect={(date) => {
+                            field.onChange(date || new Date());
+                            syncToParent();
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
+                {errors.publishedAt && (
+                  <p className='text-sm text-destructive mt-1'>
+                    {errors.publishedAt.message}
+                  </p>
                 )}
-              />
+              </div>
 
               <label className='text-muted-foreground font-medium self-start md:pt-2'>
                 Excerpt

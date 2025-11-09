@@ -245,6 +245,7 @@ export default function EditPost() {
           workspaceSlug={workspaceSlug ?? ''}
           postSlug={postSlug}
           isEditing={true}
+          originalPublishedAt={originalMetadata?.publishedAt}
         />
         <div className='mt-6 flex-1 min-h-0'>
           <Tiptap
