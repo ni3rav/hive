@@ -60,6 +60,7 @@ interface MetadataFormProps {
   postSlug?: string;
   isEditing?: boolean;
   originalPublishedAt?: Date;
+  originalSlug?: string;
 }
 
 export function MetadataForm({
@@ -73,11 +74,11 @@ export function MetadataForm({
   postSlug,
   isEditing = false,
   originalPublishedAt,
+  originalSlug,
 }: MetadataFormProps) {
   const navigate = useNavigate();
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
-  const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
   const createPostMutation = useCreatePost(workspaceSlug);
   const updatePostMutation = useUpdatePost(workspaceSlug, postSlug || '');
@@ -118,6 +119,7 @@ export function MetadataForm({
   const publishedAtValue = watch('publishedAt');
   const categorySlugValue = watch('categorySlug');
   const statusValue = watch('status');
+  const slugManuallyEditedRef = React.useRef(false);
 
   const syncToParent = useCallback(() => {
     const values = getValues();
@@ -136,10 +138,16 @@ export function MetadataForm({
 
   useEffect(() => {
     reset(defaultValues);
+    slugManuallyEditedRef.current = false;
   }, [defaultValues, reset]);
 
   useEffect(() => {
-    if (titleValue) {
+    if (
+      !isEditing &&
+      titleValue &&
+      !slugValue &&
+      !slugManuallyEditedRef.current
+    ) {
       const autoSlug = titleValue
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -147,11 +155,11 @@ export function MetadataForm({
         .replace(/-+/g, '-')
         .replace(/^-+|-+$/g, '')
         .trim();
-      if (autoSlug && autoSlug !== slugValue) {
+      if (autoSlug) {
         setValue('slug', autoSlug, { shouldValidate: true });
       }
     }
-  }, [titleValue, slugValue, setValue]);
+  }, [titleValue, slugValue, setValue, isEditing]);
 
   useEffect(() => {
     const savedExpanded = getCookie(METADATA_EXPANDED_COOKIE);
@@ -189,6 +197,7 @@ export function MetadataForm({
       status: 'draft',
     };
 
+    slugManuallyEditedRef.current = false;
     reset(initialValues);
 
     setMetadata({
@@ -233,7 +242,6 @@ export function MetadataForm({
 
     const postData: Record<string, unknown> = {
       title: formValues.title,
-      slug: isEditing ? undefined : formValues.slug,
       excerpt: formValues.excerpt || '',
       authorId: formValues.authorId,
       categorySlug: formValues.categorySlug,
@@ -245,12 +253,18 @@ export function MetadataForm({
     };
 
     if (!isEditing) {
+      postData.slug = formValues.slug;
       postData.publishedAt = formValues.publishedAt;
-    } else if (
-      originalPublishedAt &&
-      formValues.publishedAt.getTime() !== originalPublishedAt.getTime()
-    ) {
-      postData.publishedAt = formValues.publishedAt;
+    } else {
+      if (originalSlug && formValues.slug !== originalSlug) {
+        postData.slug = formValues.slug;
+      }
+      if (
+        originalPublishedAt &&
+        formValues.publishedAt.getTime() !== originalPublishedAt.getTime()
+      ) {
+        postData.publishedAt = formValues.publishedAt;
+      }
     }
 
     if (isEditing && postSlug) {
@@ -365,13 +379,20 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>Slug</label>
               <div>
                 <Input
-                  readOnly={isEditing}
                   className={cn(
                     'h-9',
                     formFieldClasses,
-                    isEditing && readOnlyClasses,
+                    errors.slug && 'border-destructive',
                   )}
-                  {...register('slug', { onBlur: handleBlur })}
+                  {...register('slug', {
+                    onChange: () => {
+                      slugManuallyEditedRef.current = true;
+                    },
+                    onBlur: () => {
+                      syncToParent();
+                      form.clearErrors('slug');
+                    },
+                  })}
                 />
                 {errors.slug && (
                   <p className='text-sm text-destructive mt-1'>
