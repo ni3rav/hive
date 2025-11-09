@@ -15,6 +15,9 @@ export const getEditorExtensions = () => [
     heading: {
       levels: [1, 2, 3, 4, 5, 6],
     },
+    // Disable link and underline since we're configuring them separately below
+    link: false,
+    underline: false,
   }),
   Underline,
   Link.configure({
