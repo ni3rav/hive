@@ -89,6 +89,10 @@ const router = createBrowserRouter([
             element: <DashboardPage />,
           },
           {
+            path: 'editor/:postSlug',
+            element: <Editor />,
+          },
+          {
             path: 'editor',
             element: <Editor />,
           },

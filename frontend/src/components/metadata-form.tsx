@@ -24,6 +24,7 @@ import {
 } from '@/components/accordion-animated';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import React, { useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn, getCookie, setCookie } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
@@ -42,10 +43,7 @@ import {
   getContentFromEditor,
   isEditorEmpty as checkEditorEmpty,
 } from '@/components/editor/content-utils';
-import {
-  clearWorkspacePersistence,
-  clearContent,
-} from '@/components/editor/persistence';
+import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
 
 const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
@@ -73,15 +71,13 @@ export function MetadataForm({
   postSlug,
   isEditing = false,
 }: MetadataFormProps) {
+  const navigate = useNavigate();
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
   const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
   const createPostMutation = useCreatePost(workspaceSlug);
-  const updatePostMutation = useUpdatePost(
-    workspaceSlug,
-    postSlug || '',
-  );
+  const updatePostMutation = useUpdatePost(workspaceSlug, postSlug || '');
 
   const defaultValues = useMemo<PostMetadataFormData>(
     () => ({
@@ -178,7 +174,6 @@ export function MetadataForm({
   };
 
   const handleClear = () => {
-    // Reset form to initial values using react-hook-form
     const initialValues: PostMetadataFormData = {
       title: '',
       slug: '',
@@ -191,10 +186,8 @@ export function MetadataForm({
       status: 'draft',
     };
 
-    // Reset form with react-hook-form
     reset(initialValues);
 
-    // Sync to parent metadata state
     setMetadata({
       title: '',
       slug: '',
@@ -207,7 +200,6 @@ export function MetadataForm({
       status: 'draft',
     });
 
-    // Clear editor content
     const editor = editorRef.current?.editor;
     if (editor) {
       editor.commands.setContent('<p></p>');
@@ -215,14 +207,12 @@ export function MetadataForm({
   };
 
   const handleSave = async () => {
-    // Validate form first
     const isValidForm = await form.trigger();
     if (!isValidForm) {
       toast.error('Please fix the form errors before saving');
       return;
     }
 
-    // Check editor content
     const editor = editorRef.current?.editor;
     if (!editor) {
       toast.error('Editor is not ready');
@@ -234,16 +224,13 @@ export function MetadataForm({
       return;
     }
 
-    // Get form values
     const formValues = getValues();
 
-    // Get content from editor
     const { contentHtml, contentJson } = getContentFromEditor(editor);
 
-    // Prepare post data
     const postData = {
       title: formValues.title,
-      slug: isEditing ? undefined : formValues.slug, // Don't send slug when updating
+      slug: isEditing ? undefined : formValues.slug,
       excerpt: formValues.excerpt || '',
       authorId: formValues.authorId,
       categorySlug: formValues.categorySlug,
@@ -257,48 +244,54 @@ export function MetadataForm({
     };
 
     if (isEditing && postSlug) {
-      // Update existing post
       updatePostMutation.mutate(postData, {
         onSuccess: () => {
-          // Clear all localStorage persistence after successful update
+          const editor = editorRef.current?.editor;
+          if (editor) {
+            editor.commands.setContent('<p></p>');
+          }
+
           clearWorkspacePersistence(workspaceSlug);
-          // Explicitly clear editor content from localStorage
-          clearContent(workspaceSlug);
+          clearWorkspacePersistence(undefined);
+
+          navigate(`/dashboard/${workspaceSlug}/posts`);
         },
       });
     } else {
-      // Create new post
-      createPostMutation.mutate(postData as typeof postData & { slug: string }, {
-        onSuccess: () => {
-          // Clear localStorage after successful save
-          clearWorkspacePersistence(workspaceSlug);
-          // Reset form to initial state
-          setMetadata({
-            title: '',
-            slug: '',
-            excerpt: '',
-            authorId: undefined,
-            categorySlug: undefined,
-            tagSlugs: [],
-            publishedAt: new Date(),
-            visible: true,
-            status: 'draft',
-          });
-          // Clear editor
-          editor.commands.setContent('<p></p>');
+      createPostMutation.mutate(
+        postData as typeof postData & { slug: string },
+        {
+          onSuccess: () => {
+            const editor = editorRef.current?.editor;
+            if (editor) {
+              editor.commands.setContent('<p></p>');
+            }
+
+            clearWorkspacePersistence(workspaceSlug);
+            clearWorkspacePersistence(undefined);
+
+            setMetadata({
+              title: '',
+              slug: '',
+              excerpt: '',
+              authorId: undefined,
+              categorySlug: undefined,
+              tagSlugs: [],
+              publishedAt: new Date(),
+              visible: true,
+              status: 'draft',
+            });
+          },
         },
-      });
+      );
     }
   };
-
-  // Check if save button should be disabled
   const editor = editorRef.current?.editor;
   const editorIsEmpty = editor ? checkEditorEmpty(editor) : true;
   const isSaving = isEditing
     ? updatePostMutation.isPending
     : createPostMutation.isPending;
-  const isSaveDisabled =
-    !isValid || isSaving || !editor || editorIsEmpty;
+  const isSaveDisabled = !isValid || isSaving || !editor || editorIsEmpty;
 
   return (
     <Accordion
@@ -309,61 +302,24 @@ export function MetadataForm({
     >
       <AccordionItem value='metadata'>
         <AccordionTrigger className='hover:no-underline'>
-          <div className='flex items-center justify-between w-full pr-4'>
-            <div className='flex items-center gap-3 text-sm truncate flex-1 min-w-0'>
-              <span
-                className='font-semibold truncate max-w-60'
-                title={titleValue || 'Untitled Post'}
-              >
-                {titleValue || 'Untitled Post'}
+          <div className='flex items-center gap-3 text-sm truncate flex-1 min-w-0'>
+            <span
+              className='font-semibold truncate max-w-60'
+              title={titleValue || 'Untitled Post'}
+            >
+              {titleValue || 'Untitled Post'}
+            </span>
+            <Separator orientation='vertical' className='h-4' />
+            <div className='flex items-center gap-4 text-muted-foreground'>
+              <span>{format(publishedAtValue || new Date(), 'PPP')}</span>
+              <span className='hidden sm:inline-block'>•</span>
+              <span className='hidden sm:inline-block'>
+                Category: {categorySlugValue || 'None'}
               </span>
-              <Separator orientation='vertical' className='h-4' />
-              <div className='flex items-center gap-4 text-muted-foreground'>
-                <span>{format(publishedAtValue || new Date(), 'PPP')}</span>
-                <span className='hidden sm:inline-block'>•</span>
-                <span className='hidden sm:inline-block'>
-                  Category: {categorySlugValue || 'None'}
-                </span>
-                <span className='hidden sm:inline-block'>•</span>
-                <span className='hidden sm:inline-block capitalize'>
-                  {statusValue || 'draft'}
-                </span>
-              </div>
-            </div>
-            <div className='flex items-center gap-2 flex-shrink-0'>
-              <div
-                className='flex items-center gap-2'
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaveDisabled}
-                  size='sm'
-                  className='h-8'
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className='mr-2 h-3 w-3 animate-spin' />
-                      {statusValue === 'published'
-                        ? 'Publishing...'
-                        : 'Saving...'}
-                    </>
-                  ) : statusValue === 'published' ? (
-                    isEditing ? 'Update & Publish' : 'Publish'
-                  ) : (
-                    isEditing ? 'Update Draft' : 'Save Draft'
-                  )}
-                </Button>
-                <Button
-                  onClick={handleClear}
-                  variant='outline'
-                  size='sm'
-                  className='h-8'
-                  disabled={isSaving}
-                >
-                  Clear
-                </Button>
-              </div>
+              <span className='hidden sm:inline-block'>•</span>
+              <span className='hidden sm:inline-block capitalize'>
+                {statusValue || 'draft'}
+              </span>
             </div>
           </div>
         </AccordionTrigger>
@@ -569,6 +525,42 @@ export function MetadataForm({
                   </div>
                 )}
               />
+            </div>
+            <div className='flex items-center justify-start gap-2 pt-4 border-t border-border/40'>
+              <Button
+                onClick={handleSave}
+                disabled={isSaveDisabled}
+                size='sm'
+                className='h-8'
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                    {statusValue === 'published'
+                      ? 'Publishing...'
+                      : 'Saving...'}
+                  </>
+                ) : statusValue === 'published' ? (
+                  isEditing ? (
+                    'Update & Publish'
+                  ) : (
+                    'Publish'
+                  )
+                ) : isEditing ? (
+                  'Update Draft'
+                ) : (
+                  'Save Draft'
+                )}
+              </Button>
+              <Button
+                onClick={handleClear}
+                variant='outline'
+                size='sm'
+                className='h-8'
+                disabled={isSaving}
+              >
+                Clear
+              </Button>
             </div>
           </div>
         </AccordionContent>

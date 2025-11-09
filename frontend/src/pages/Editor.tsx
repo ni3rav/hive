@@ -2,7 +2,7 @@ import { MetadataForm } from '@/components/metadata-form';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { type PostMetadata } from '@/types/editor';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { usePost } from '@/hooks/usePost';
@@ -48,8 +48,7 @@ const getInitialMetadata = (): PostMetadata => ({
 export default function Editor() {
   const workspaceSlug = useWorkspaceSlug();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const postSlug = searchParams.get('postSlug');
+  const { postSlug } = useParams<{ postSlug?: string }>();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
@@ -57,6 +56,8 @@ export default function Editor() {
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const editorRef = useRef<TiptapHandle>(null);
+  const previousPostSlugRef = useRef<string | undefined>(undefined);
+  const isInitialMountRef = useRef(true);
 
   const {
     data: post,
@@ -65,14 +66,22 @@ export default function Editor() {
     error: postError,
   } = usePost(workspaceSlug || '', postSlug || '');
 
-  // Check for existing draft when component mounts or postSlug changes
   useEffect(() => {
     if (!workspaceSlug) return;
+
+    const postSlugChanged = !isInitialMountRef.current && previousPostSlugRef.current !== postSlug;
+    
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+    }
+    
+    if (!postSlugChanged && previousPostSlugRef.current !== undefined) {
+      return;
+    }
 
     const hasDraft = () => {
       const savedMetadata = loadMetadata(workspaceSlug);
       const savedContent = loadContent(workspaceSlug);
-      // Check if there's meaningful content (not just empty/default)
       if (savedMetadata) {
         const title = savedMetadata.title;
         const excerpt = savedMetadata.excerpt;
@@ -81,7 +90,6 @@ export default function Editor() {
         if (hasTitle || hasExcerpt) return true;
       }
       if (savedContent) {
-        // Check if content is more than just empty paragraph
         const contentStr = JSON.stringify(savedContent);
         if (
           contentStr &&
@@ -95,10 +103,8 @@ export default function Editor() {
 
     const proceedWithLoad = () => {
       if (postSlug) {
-        // Editing existing post - will load from API
         setIsEditing(true);
       } else {
-        // New post - load from localStorage if exists
         const savedMetadata = loadMetadata(workspaceSlug);
         if (savedMetadata) {
           setMetadata({
@@ -110,9 +116,10 @@ export default function Editor() {
           });
         }
       }
+      previousPostSlugRef.current = postSlug;
     };
 
-    if (hasDraft()) {
+    if (hasDraft() && postSlugChanged) {
       setShowWarningDialog(true);
       setPendingAction(() => () => {
         clearWorkspacePersistence(workspaceSlug);
@@ -147,7 +154,6 @@ export default function Editor() {
     }
   }, [post, isEditing]);
 
-  // Auto-save when editing (postSlug exists)
   useEffect(() => {
     if (postSlug && isEditing) {
       if (
@@ -164,7 +170,6 @@ export default function Editor() {
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isEditing) {
-      // Don't auto-generate slug when editing
       setMetadata((prev) => ({
         ...prev,
         title: e.target.value,
@@ -189,7 +194,13 @@ export default function Editor() {
   const handleCancelWarning = () => {
     setShowWarningDialog(false);
     setPendingAction(null);
-    if (postSlug) {
+    if (previousPostSlugRef.current !== undefined) {
+      if (previousPostSlugRef.current) {
+        navigate(`/dashboard/${workspaceSlug}/editor/${previousPostSlugRef.current}`);
+      } else {
+        navigate(`/dashboard/${workspaceSlug}/editor`);
+      }
+    } else {
       navigate(`/dashboard/${workspaceSlug}/posts`);
     }
   };
@@ -198,7 +209,6 @@ export default function Editor() {
     navigate(`/dashboard/${workspaceSlug}/posts`);
   };
 
-  // Loading state
   if (isLoadingPost && postSlug) {
     return (
       <div className='flex h-full items-center justify-center'>
@@ -210,7 +220,6 @@ export default function Editor() {
     );
   }
 
-  // Error state
   if (isPostError && postSlug) {
     return (
       <div className='flex h-full items-center justify-center p-6'>
@@ -260,8 +269,7 @@ export default function Editor() {
           <DialogHeader>
             <DialogTitle>Discard Draft?</DialogTitle>
             <DialogDescription>
-              You have unsaved changes in your draft. Loading{' '}
-              {postSlug ? 'this post' : 'a new post'} will overwrite your
+              You have unsaved changes in your draft. {postSlug ? `Loading post "${postSlug}"` : 'Starting a new post'} will overwrite your
               current draft. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>

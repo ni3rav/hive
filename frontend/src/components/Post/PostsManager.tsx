@@ -47,7 +47,7 @@ export default function PostsManager() {
   };
 
   const handleEdit = (postSlug: string) => {
-    navigate(`/dashboard/${workspaceSlug}/editor?postSlug=${postSlug}`);
+    navigate(`/dashboard/${workspaceSlug}/editor/${postSlug}`);
   };
 
   const handleDelete = (postSlug: string) => {
