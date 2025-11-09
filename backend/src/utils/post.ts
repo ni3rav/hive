@@ -218,7 +218,11 @@ export async function createPost(
       const errorCode = dbError.code || dbError.cause?.code;
       const errorConstraint = dbError.constraint || dbError.cause?.constraint;
 
-      if (errorCode === '23505' && errorConstraint === 'posts_slug_unique') {
+      if (
+        errorCode === '23505' &&
+        (errorConstraint === 'posts_slug_unique' ||
+          errorConstraint === 'posts_workspace_slug_unique')
+      ) {
         throw new Error('post slug already exists in this workspace');
       }
       throw error;
