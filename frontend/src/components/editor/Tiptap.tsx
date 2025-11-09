@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { useEffect, useImperativeHandle, forwardRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { loadContent, saveContent } from './persistence';
+import type { ProseMirrorJSON } from './persistence';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toolbar } from './Toolbar';
 import { getEditorExtensions } from './extensions';
@@ -9,6 +10,8 @@ import './tiptap.css';
 
 interface TiptapProps {
   workspaceSlug?: string;
+  initialContent?: ProseMirrorJSON | null;
+  disablePersistence?: boolean;
 }
 
 export interface TiptapHandle {
@@ -16,14 +19,16 @@ export interface TiptapHandle {
 }
 
 export const Tiptap = forwardRef<TiptapHandle, TiptapProps>(
-  ({ workspaceSlug }, ref) => {
+  ({ workspaceSlug, initialContent, disablePersistence = false }, ref) => {
     const editor = useEditor({
       extensions: getEditorExtensions(),
       content: '<p></p>',
       immediatelyRender: false,
       onUpdate: ({ editor }) => {
-        const content = editor.getJSON();
-        saveContent(content, workspaceSlug);
+        if (!disablePersistence) {
+          const content = editor.getJSON();
+          saveContent(content, workspaceSlug);
+        }
       },
       editorProps: {
         attributes: {
@@ -39,13 +44,18 @@ export const Tiptap = forwardRef<TiptapHandle, TiptapProps>(
     useEffect(() => {
       if (!editor) return;
 
+      if (initialContent) {
+        editor.commands.setContent(initialContent);
+        return;
+      }
+
       const savedContent = loadContent(workspaceSlug);
       if (savedContent) {
         editor.commands.setContent(savedContent);
       } else {
         editor.commands.setContent('<p></p>');
       }
-    }, [workspaceSlug, editor]);
+    }, [workspaceSlug, editor, initialContent]);
 
     if (!editor) {
       return null;

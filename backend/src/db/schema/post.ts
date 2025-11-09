@@ -7,6 +7,7 @@ import {
   text,
   jsonb,
   foreignKey,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { authorTable } from './author';
@@ -29,7 +30,7 @@ export const postsTable = pgTable(
       onDelete: 'set null',
     }),
     title: varchar('title').notNull(),
-    slug: varchar('slug').notNull().unique(),
+    slug: varchar('slug').notNull(),
     excerpt: text('excerpt').default('').notNull(),
     categorySlug: varchar('category_slug', { length: 255 }),
     status: varchar('status', { length: 20 }).default('draft').notNull(),
@@ -44,6 +45,7 @@ export const postsTable = pgTable(
       foreignColumns: [categoryTable.slug, categoryTable.workspaceId],
       name: 'fk_post_category',
     }).onDelete('set null'),
+    unique('posts_workspace_slug_unique').on(t.workspaceId, t.slug),
   ],
 );
 

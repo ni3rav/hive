@@ -19,9 +19,27 @@ export const postMetadataSchema = z.object({
   authorId: z.string().uuid('Invalid author ID').optional(),
   categorySlug: z.string().trim().max(255).optional(),
   tagSlugs: z.array(z.string()),
-  publishedAt: z.date(),
+  publishedAt: z
+    .date({
+      required_error: 'Published date is required',
+      invalid_type_error: 'Published date must be a valid date',
+    })
+    .refine((date) => !isNaN(date.getTime()), {
+      message: 'Published date must be a valid date',
+    }),
   visible: z.boolean(),
   status: z.enum(['draft', 'published']),
+});
+
+export const postMetadataUpdateSchema = postMetadataSchema.extend({
+  publishedAt: z
+    .date({
+      invalid_type_error: 'Published date must be a valid date',
+    })
+    .refine((date) => !isNaN(date.getTime()), {
+      message: 'Published date must be a valid date',
+    })
+    .optional(),
 });
 
 export type PostMetadataFormData = z.infer<typeof postMetadataSchema>;

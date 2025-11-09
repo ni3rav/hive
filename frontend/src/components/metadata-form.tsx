@@ -24,6 +24,7 @@ import {
 } from '@/components/accordion-animated';
 import { Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import React, { useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn, getCookie, setCookie } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type PostMetadata } from '@/types/editor';
@@ -37,15 +38,13 @@ import {
   type PostMetadataFormData,
 } from '@/lib/validations/post';
 import { useCreatePost, useUpdatePost } from '@/hooks/usePost';
+import type { CreatePostData } from '@/types/post';
 import type { TiptapHandle } from '@/components/editor/Tiptap';
 import {
   getContentFromEditor,
   isEditorEmpty as checkEditorEmpty,
 } from '@/components/editor/content-utils';
-import {
-  clearWorkspacePersistence,
-  clearContent,
-} from '@/components/editor/persistence';
+import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
 
 const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
@@ -60,6 +59,8 @@ interface MetadataFormProps {
   workspaceSlug: string;
   postSlug?: string;
   isEditing?: boolean;
+  originalPublishedAt?: Date;
+  originalSlug?: string;
 }
 
 export function MetadataForm({
@@ -72,16 +73,15 @@ export function MetadataForm({
   workspaceSlug,
   postSlug,
   isEditing = false,
+  originalPublishedAt,
+  originalSlug,
 }: MetadataFormProps) {
+  const navigate = useNavigate();
   const formFieldClasses =
     'bg-transparent border border-border/40 rounded-md transition-all duration-300 hover:border-border/80 focus-visible:ring-1 focus-visible:ring-primary/80 focus-visible:shadow-lg focus-visible:shadow-primary/10';
-  const readOnlyClasses = 'bg-muted/50 cursor-not-allowed';
 
   const createPostMutation = useCreatePost(workspaceSlug);
-  const updatePostMutation = useUpdatePost(
-    workspaceSlug,
-    postSlug || '',
-  );
+  const updatePostMutation = useUpdatePost(workspaceSlug, postSlug || '');
 
   const defaultValues = useMemo<PostMetadataFormData>(
     () => ({
@@ -119,6 +119,7 @@ export function MetadataForm({
   const publishedAtValue = watch('publishedAt');
   const categorySlugValue = watch('categorySlug');
   const statusValue = watch('status');
+  const slugManuallyEditedRef = React.useRef(false);
 
   const syncToParent = useCallback(() => {
     const values = getValues();
@@ -137,10 +138,16 @@ export function MetadataForm({
 
   useEffect(() => {
     reset(defaultValues);
+    slugManuallyEditedRef.current = false;
   }, [defaultValues, reset]);
 
   useEffect(() => {
-    if (titleValue) {
+    if (
+      !isEditing &&
+      titleValue &&
+      !slugValue &&
+      !slugManuallyEditedRef.current
+    ) {
       const autoSlug = titleValue
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '')
@@ -148,11 +155,11 @@ export function MetadataForm({
         .replace(/-+/g, '-')
         .replace(/^-+|-+$/g, '')
         .trim();
-      if (autoSlug && autoSlug !== slugValue) {
+      if (autoSlug) {
         setValue('slug', autoSlug, { shouldValidate: true });
       }
     }
-  }, [titleValue, slugValue, setValue]);
+  }, [titleValue, slugValue, setValue, isEditing]);
 
   useEffect(() => {
     const savedExpanded = getCookie(METADATA_EXPANDED_COOKIE);
@@ -178,7 +185,6 @@ export function MetadataForm({
   };
 
   const handleClear = () => {
-    // Reset form to initial values using react-hook-form
     const initialValues: PostMetadataFormData = {
       title: '',
       slug: '',
@@ -191,10 +197,9 @@ export function MetadataForm({
       status: 'draft',
     };
 
-    // Reset form with react-hook-form
+    slugManuallyEditedRef.current = false;
     reset(initialValues);
 
-    // Sync to parent metadata state
     setMetadata({
       title: '',
       slug: '',
@@ -207,7 +212,6 @@ export function MetadataForm({
       status: 'draft',
     });
 
-    // Clear editor content
     const editor = editorRef.current?.editor;
     if (editor) {
       editor.commands.setContent('<p></p>');
@@ -215,14 +219,12 @@ export function MetadataForm({
   };
 
   const handleSave = async () => {
-    // Validate form first
     const isValidForm = await form.trigger();
     if (!isValidForm) {
       toast.error('Please fix the form errors before saving');
       return;
     }
 
-    // Check editor content
     const editor = editorRef.current?.editor;
     if (!editor) {
       toast.error('Editor is not ready');
@@ -234,16 +236,12 @@ export function MetadataForm({
       return;
     }
 
-    // Get form values
     const formValues = getValues();
 
-    // Get content from editor
     const { contentHtml, contentJson } = getContentFromEditor(editor);
 
-    // Prepare post data
-    const postData = {
+    const postData: Record<string, unknown> = {
       title: formValues.title,
-      slug: isEditing ? undefined : formValues.slug, // Don't send slug when updating
       excerpt: formValues.excerpt || '',
       authorId: formValues.authorId,
       categorySlug: formValues.categorySlug,
@@ -252,53 +250,76 @@ export function MetadataForm({
       visible: formValues.visible,
       contentHtml,
       contentJson,
-      publishedAt:
-        formValues.status === 'published' ? formValues.publishedAt : null,
     };
 
+    if (!isEditing) {
+      postData.slug = formValues.slug;
+      postData.publishedAt = formValues.publishedAt;
+    } else {
+      if (originalSlug && formValues.slug !== originalSlug) {
+        postData.slug = formValues.slug;
+      }
+      if (
+        originalPublishedAt &&
+        formValues.publishedAt.getTime() !== originalPublishedAt.getTime()
+      ) {
+        postData.publishedAt = formValues.publishedAt;
+      }
+    }
+
     if (isEditing && postSlug) {
-      // Update existing post
       updatePostMutation.mutate(postData, {
         onSuccess: () => {
-          // Clear all localStorage persistence after successful update
+          const editor = editorRef.current?.editor;
+          if (editor) {
+            editor.commands.setContent('<p></p>');
+          }
+
           clearWorkspacePersistence(workspaceSlug);
-          // Explicitly clear editor content from localStorage
-          clearContent(workspaceSlug);
+          clearWorkspacePersistence(undefined);
+
+          navigate(`/dashboard/${workspaceSlug}/posts`);
         },
       });
     } else {
-      // Create new post
-      createPostMutation.mutate(postData as typeof postData & { slug: string }, {
-        onSuccess: () => {
-          // Clear localStorage after successful save
-          clearWorkspacePersistence(workspaceSlug);
-          // Reset form to initial state
-          setMetadata({
-            title: '',
-            slug: '',
-            excerpt: '',
-            authorId: undefined,
-            categorySlug: undefined,
-            tagSlugs: [],
-            publishedAt: new Date(),
-            visible: true,
-            status: 'draft',
-          });
-          // Clear editor
-          editor.commands.setContent('<p></p>');
+      createPostMutation.mutate(
+        {
+          ...postData,
+          slug: formValues.slug,
+          publishedAt: formValues.publishedAt,
+        } as CreatePostData & { slug: string; publishedAt: Date },
+        {
+          onSuccess: () => {
+            const editor = editorRef.current?.editor;
+            if (editor) {
+              editor.commands.setContent('<p></p>');
+            }
+
+            clearWorkspacePersistence(workspaceSlug);
+            clearWorkspacePersistence(undefined);
+
+            setMetadata({
+              title: '',
+              slug: '',
+              excerpt: '',
+              authorId: undefined,
+              categorySlug: undefined,
+              tagSlugs: [],
+              publishedAt: new Date(),
+              visible: true,
+              status: 'draft',
+            });
+          },
         },
-      });
+      );
     }
   };
-
-  // Check if save button should be disabled
   const editor = editorRef.current?.editor;
   const editorIsEmpty = editor ? checkEditorEmpty(editor) : true;
   const isSaving = isEditing
     ? updatePostMutation.isPending
     : createPostMutation.isPending;
-  const isSaveDisabled =
-    !isValid || isSaving || !editor || editorIsEmpty;
+  const isSaveDisabled = !isValid || isSaving || !editor || editorIsEmpty;
 
   return (
     <Accordion
@@ -309,61 +330,24 @@ export function MetadataForm({
     >
       <AccordionItem value='metadata'>
         <AccordionTrigger className='hover:no-underline'>
-          <div className='flex items-center justify-between w-full pr-4'>
-            <div className='flex items-center gap-3 text-sm truncate flex-1 min-w-0'>
-              <span
-                className='font-semibold truncate max-w-60'
-                title={titleValue || 'Untitled Post'}
-              >
-                {titleValue || 'Untitled Post'}
+          <div className='flex items-center gap-3 text-sm truncate flex-1 min-w-0'>
+            <span
+              className='font-semibold truncate max-w-60'
+              title={titleValue || 'Untitled Post'}
+            >
+              {titleValue || 'Untitled Post'}
+            </span>
+            <Separator orientation='vertical' className='h-4' />
+            <div className='flex items-center gap-4 text-muted-foreground'>
+              <span>{format(publishedAtValue || new Date(), 'PPP')}</span>
+              <span className='hidden sm:inline-block'>•</span>
+              <span className='hidden sm:inline-block'>
+                Category: {categorySlugValue || 'None'}
               </span>
-              <Separator orientation='vertical' className='h-4' />
-              <div className='flex items-center gap-4 text-muted-foreground'>
-                <span>{format(publishedAtValue || new Date(), 'PPP')}</span>
-                <span className='hidden sm:inline-block'>•</span>
-                <span className='hidden sm:inline-block'>
-                  Category: {categorySlugValue || 'None'}
-                </span>
-                <span className='hidden sm:inline-block'>•</span>
-                <span className='hidden sm:inline-block capitalize'>
-                  {statusValue || 'draft'}
-                </span>
-              </div>
-            </div>
-            <div className='flex items-center gap-2 flex-shrink-0'>
-              <div
-                className='flex items-center gap-2'
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaveDisabled}
-                  size='sm'
-                  className='h-8'
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className='mr-2 h-3 w-3 animate-spin' />
-                      {statusValue === 'published'
-                        ? 'Publishing...'
-                        : 'Saving...'}
-                    </>
-                  ) : statusValue === 'published' ? (
-                    isEditing ? 'Update & Publish' : 'Publish'
-                  ) : (
-                    isEditing ? 'Update Draft' : 'Save Draft'
-                  )}
-                </Button>
-                <Button
-                  onClick={handleClear}
-                  variant='outline'
-                  size='sm'
-                  className='h-8'
-                  disabled={isSaving}
-                >
-                  Clear
-                </Button>
-              </div>
+              <span className='hidden sm:inline-block'>•</span>
+              <span className='hidden sm:inline-block capitalize'>
+                {statusValue || 'draft'}
+              </span>
             </div>
           </div>
         </AccordionTrigger>
@@ -395,13 +379,20 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>Slug</label>
               <div>
                 <Input
-                  readOnly={isEditing}
                   className={cn(
                     'h-9',
                     formFieldClasses,
-                    isEditing && readOnlyClasses,
+                    errors.slug && 'border-destructive',
                   )}
-                  {...register('slug', { onBlur: handleBlur })}
+                  {...register('slug', {
+                    onChange: () => {
+                      slugManuallyEditedRef.current = true;
+                    },
+                    onBlur: () => {
+                      syncToParent();
+                      form.clearErrors('slug');
+                    },
+                  })}
                 />
                 {errors.slug && (
                   <p className='text-sm text-destructive mt-1'>
@@ -432,40 +423,48 @@ export function MetadataForm({
               <label className='text-muted-foreground font-medium'>
                 Published at
               </label>
-              <Controller
-                control={control}
-                name='publishedAt'
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant='outline'
-                        className={cn(
-                          'w-[240px] justify-start text-left font-normal h-9 px-3',
-                          formFieldClasses,
-                        )}
-                      >
-                        <CalendarIcon className='mr-2 h-4 w-4' />
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={field.value}
-                        onSelect={(date) => {
-                          field.onChange(date || new Date());
-                          syncToParent();
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+              <div>
+                <Controller
+                  control={control}
+                  name='publishedAt'
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant='outline'
+                          className={cn(
+                            'w-[240px] justify-start text-left font-normal h-9 px-3',
+                            formFieldClasses,
+                            errors.publishedAt && 'border-destructive',
+                          )}
+                        >
+                          <CalendarIcon className='mr-2 h-4 w-4' />
+                          {field.value ? (
+                            format(field.value, 'PPP')
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-0' align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={field.value}
+                          onSelect={(date) => {
+                            field.onChange(date || new Date());
+                            syncToParent();
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
+                {errors.publishedAt && (
+                  <p className='text-sm text-destructive mt-1'>
+                    {errors.publishedAt.message}
+                  </p>
                 )}
-              />
+              </div>
 
               <label className='text-muted-foreground font-medium self-start md:pt-2'>
                 Excerpt
@@ -569,6 +568,42 @@ export function MetadataForm({
                   </div>
                 )}
               />
+            </div>
+            <div className='flex items-center justify-start gap-2 pt-4 border-t border-border/40'>
+              <Button
+                onClick={handleSave}
+                disabled={isSaveDisabled}
+                size='sm'
+                className='h-8'
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                    {statusValue === 'published'
+                      ? 'Publishing...'
+                      : 'Saving...'}
+                  </>
+                ) : statusValue === 'published' ? (
+                  isEditing ? (
+                    'Update & Publish'
+                  ) : (
+                    'Publish'
+                  )
+                ) : isEditing ? (
+                  'Update Draft'
+                ) : (
+                  'Save Draft'
+                )}
+              </Button>
+              <Button
+                onClick={handleClear}
+                variant='outline'
+                size='sm'
+                className='h-8'
+                disabled={isSaving}
+              >
+                Clear
+              </Button>
             </div>
           </div>
         </AccordionContent>

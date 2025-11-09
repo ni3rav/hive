@@ -8,7 +8,7 @@ import {
   authorTable,
   categoryTable,
 } from '../db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, ne } from 'drizzle-orm';
 import { sanitizePostHtml } from './sanitize';
 
 async function getWorkspaceBySlug(workspaceSlug: string) {
@@ -167,45 +167,62 @@ export async function createPost(
     // sanitize html content
     const sanitizedHtml = sanitizePostHtml(data.contentHtml);
 
-    // create post, content, and tag associations in transaction
-    const result = await db.transaction(async (tx) => {
-      // create post
-      const [post] = await tx
-        .insert(postsTable)
-        .values({
-          workspaceId: workspace.id,
-          createdBy: userId,
-          authorId: data.authorId,
-          title: data.title,
-          slug: data.slug,
-          excerpt: data.excerpt,
-          categorySlug: data.categorySlug,
-          status: data.status,
-          visible: data.visible,
-          publishedAt: data.publishedAt,
-        })
-        .returning();
-
-      // create post content
-      await tx.insert(postContentTable).values({
-        postId: post.id,
-        contentHtml: sanitizedHtml,
-        contentJson: data.contentJson,
-      });
-
-      // create tag associations
-      if (data.tagSlugs && data.tagSlugs.length > 0) {
-        await tx.insert(postTagsTable).values(
-          data.tagSlugs.map((tagSlug) => ({
-            postId: post.id,
-            tagSlug,
+    let result;
+    try {
+      result = await db.transaction(async (tx) => {
+        const [post] = await tx
+          .insert(postsTable)
+          .values({
             workspaceId: workspace.id,
-          })),
-        );
-      }
+            createdBy: userId,
+            authorId: data.authorId,
+            title: data.title,
+            slug: data.slug,
+            excerpt: data.excerpt,
+            categorySlug: data.categorySlug,
+            status: data.status,
+            visible: data.visible,
+            publishedAt: data.publishedAt,
+          })
+          .returning();
 
-      return post;
-    });
+        await tx.insert(postContentTable).values({
+          postId: post.id,
+          contentHtml: sanitizedHtml,
+          contentJson: data.contentJson,
+        });
+
+        if (data.tagSlugs && data.tagSlugs.length > 0) {
+          await tx.insert(postTagsTable).values(
+            data.tagSlugs.map((tagSlug) => ({
+              postId: post.id,
+              tagSlug,
+              workspaceId: workspace.id,
+            })),
+          );
+        }
+
+        return post;
+      });
+    } catch (error: unknown) {
+      const dbError = error as {
+        code?: string;
+        constraint?: string;
+        cause?: { code?: string; constraint?: string };
+      };
+
+      const errorCode = dbError.code || dbError.cause?.code;
+      const errorConstraint = dbError.constraint || dbError.cause?.constraint;
+
+      if (
+        errorCode === '23505' &&
+        (errorConstraint === 'posts_slug_unique' ||
+          errorConstraint === 'posts_workspace_slug_unique')
+      ) {
+        throw new Error('post slug already exists in this workspace');
+      }
+      throw error;
+    }
 
     // fetch post with relations for response
     const postWithRelations = await db.query.postsTable.findFirst({
@@ -274,6 +291,7 @@ export async function updatePost(
         where: and(
           eq(postsTable.slug, data.slug),
           eq(postsTable.workspaceId, workspace.id),
+          ne(postsTable.id, existingPost.id),
         ),
       });
 
@@ -336,57 +354,71 @@ export async function updatePost(
       ? sanitizePostHtml(data.contentHtml)
       : undefined;
 
-    // update post, content, and tags in transaction
-    const result = await db.transaction(async (tx) => {
-      // update post metadata
-      const [updatedPost] = await tx
-        .update(postsTable)
-        .set({
-          ...data,
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(postsTable.slug, postSlug),
-            eq(postsTable.workspaceId, workspace.id),
-          ),
-        )
-        .returning();
-
-      // update content if provided
-      if (sanitizedHtml && data.contentJson) {
-        await tx
-          .update(postContentTable)
+    let result;
+    try {
+      result = await db.transaction(async (tx) => {
+        const [updatedPost] = await tx
+          .update(postsTable)
           .set({
-            contentHtml: sanitizedHtml,
-            contentJson: data.contentJson,
+            ...data,
+            updatedAt: new Date(),
           })
-          .where(eq(postContentTable.postId, updatedPost.id));
-      }
+          .where(
+            and(
+              eq(postsTable.slug, postSlug),
+              eq(postsTable.workspaceId, workspace.id),
+            ),
+          )
+          .returning();
 
-      // update tags if provided
-      if (data.tagSlugs !== undefined) {
-        // remove old tags
-        await tx
-          .delete(postTagsTable)
-          .where(eq(postTagsTable.postId, updatedPost.id));
-
-        // add new tags
-        if (data.tagSlugs.length > 0) {
-          await tx.insert(postTagsTable).values(
-            data.tagSlugs.map((tagSlug) => ({
-              postId: updatedPost.id,
-              tagSlug,
-              workspaceId: workspace.id,
-            })),
-          );
+        if (sanitizedHtml && data.contentJson) {
+          await tx
+            .update(postContentTable)
+            .set({
+              contentHtml: sanitizedHtml,
+              contentJson: data.contentJson,
+            })
+            .where(eq(postContentTable.postId, updatedPost.id));
         }
+
+        if (data.tagSlugs !== undefined) {
+          await tx
+            .delete(postTagsTable)
+            .where(eq(postTagsTable.postId, updatedPost.id));
+
+          if (data.tagSlugs.length > 0) {
+            await tx.insert(postTagsTable).values(
+              data.tagSlugs.map((tagSlug) => ({
+                postId: updatedPost.id,
+                tagSlug,
+                workspaceId: workspace.id,
+              })),
+            );
+          }
+        }
+
+        return updatedPost;
+      });
+    } catch (error: unknown) {
+      const dbError = error as {
+        code?: string;
+        constraint?: string;
+        cause?: { code?: string; constraint?: string };
+      };
+
+      const errorCode = dbError.code || dbError.cause?.code;
+      const errorConstraint = dbError.constraint || dbError.cause?.constraint;
+
+      if (
+        errorCode === '23505' &&
+        (errorConstraint === 'posts_slug_unique' ||
+          errorConstraint === 'posts_workspace_slug_unique')
+      ) {
+        throw new Error('post slug already exists in this workspace');
       }
+      throw error;
+    }
 
-      return updatedPost;
-    });
-
-    // fetch post with relations for response
     const postWithRelations = await db.query.postsTable.findFirst({
       where: and(
         eq(postsTable.id, result.id),

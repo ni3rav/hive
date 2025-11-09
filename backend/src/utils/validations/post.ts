@@ -34,9 +34,20 @@ export const createPostSchema = z.object({
     message: 'content json is required',
   }),
   publishedAt: z
-    .union([z.coerce.date(), z.null()])
-    .optional()
-    .transform((val) => (val === null ? undefined : val)),
+    .union([z.coerce.date(), z.string(), z.number()])
+    .refine(
+      (val) => {
+        if (val === null || val === undefined || val === '') {
+          return false;
+        }
+        const date = val instanceof Date ? val : new Date(val);
+        return !isNaN(date.getTime());
+      },
+      {
+        message: 'publishedAt is required and must be a valid date',
+      },
+    )
+    .transform((val) => (val instanceof Date ? val : new Date(val))),
 });
 
 export const updatePostSchema = z.object({
@@ -84,9 +95,25 @@ export const updatePostSchema = z.object({
       contentHtml: z.string().min(1, 'content html is required').optional(),
       contentJson: z.unknown().optional(),
       publishedAt: z
-        .union([z.coerce.date(), z.null()])
+        .union([z.coerce.date(), z.string(), z.number()])
         .optional()
-        .transform((val) => (val === null ? undefined : val)),
+        .refine(
+          (val) => {
+            if (val === undefined) return true;
+            if (val === null || val === '') {
+              return false;
+            }
+            const date = val instanceof Date ? val : new Date(val);
+            return !isNaN(date.getTime());
+          },
+          {
+            message: 'publishedAt must be a valid date and cannot be empty',
+          },
+        )
+        .transform((val) => {
+          if (val === undefined) return undefined;
+          return val instanceof Date ? val : new Date(val);
+        }),
     })
     .refine(
       (data) => Object.values(data).some((value) => value !== undefined),

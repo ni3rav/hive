@@ -32,6 +32,7 @@ const WorkspaceManagementPage = lazyPage(
   'WorkspaceManagementPage',
 );
 const Editor = lazyPage('/src/pages/Editor.tsx');
+const EditPost = lazyPage('/src/pages/EditPost.tsx');
 const AuthorsPage = lazyPage('/src/pages/Author.tsx');
 const TagsPage = lazyPage('/src/pages/Tag.tsx');
 const PostPage = lazyPage('/src/pages/Post.tsx');
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <DashboardPage />,
+          },
+          {
+            path: 'editor/:postSlug',
+            element: <EditPost />,
           },
           {
             path: 'editor',
