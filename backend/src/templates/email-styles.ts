@@ -31,11 +31,14 @@ export const logoStyles = `
   width: 48px;
   height: 48px;
   margin: 0 auto 16px;
-  background-color: ${colors.primary};
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+`;
+
+export const logoImageStyles = `
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 12px;
 `;
 
 export const contentStyles = `

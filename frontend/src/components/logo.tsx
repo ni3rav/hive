@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { Hexagon } from 'lucide-react';
 
 export const LogoMark = ({ className = '' }: { className?: string }) => (
   <div
@@ -15,8 +14,14 @@ export const LogoMark = ({ className = '' }: { className?: string }) => (
   </div>
 );
 
-export function Logo() {
+export function Logo({ className = '' }: { className?: string }) {
   return (
-    <Hexagon className='size-8 text-primary fill-background flex items-center justify-center' />
+    <img
+      src='/hive.png'
+      alt='Hive logo'
+      className={cn('h-8 w-8 rounded-md', className)}
+      width={32}
+      height={32}
+    />
   );
 }

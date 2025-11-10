@@ -48,7 +48,6 @@ export function HeroHeader() {
           <div className='flex items-center gap-10'>
             <a href='/' className='flex shrink-0 items-center gap-2'>
               <Logo />
-              <span className='font-semibold tracking-tight'>Hive</span>
             </a>
             <nav className='hidden md:flex gap-7 text-sm'>
               {nav.map((i) => (
