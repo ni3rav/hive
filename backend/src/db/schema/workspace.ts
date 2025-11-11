@@ -11,6 +11,7 @@ import { categoryTable } from './category';
 import { tagTable } from './tag';
 import { postsTable } from './post';
 import { relations } from 'drizzle-orm';
+import { workspaceInvitationsTable } from './workspace-invitation';
 
 export const workspacesTable = pgTable('workspaces', {
   id: uuid().defaultRandom().primaryKey(),
@@ -54,6 +55,7 @@ export const workspacesRelations = relations(
     categories: many(categoryTable),
     tags: many(tagTable),
     posts: many(postsTable),
+    invitations: many(workspaceInvitationsTable),
   }),
 );
 
