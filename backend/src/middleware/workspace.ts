@@ -2,13 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
-import { unauthorized, notFound } from '../utils/responses';
+import { unauthorized, notFound, serverError } from '../utils/responses';
+import { MemberRole } from '../utils/roles';
 
 declare module 'express-serve-static-core' {
   interface Request {
     workspaceId?: string;
     workspaceSlug?: string;
-    workspaceRole?: string;
+    workspaceRole?: MemberRole;
   }
 }
 
@@ -54,14 +55,10 @@ export async function verifyWorkspaceMembership(
 
     req.workspaceId = workspace.id;
     req.workspaceSlug = workspace.slug;
-    req.workspaceRole = membership.role;
+    req.workspaceRole = membership.role as MemberRole;
     next();
   } catch (error) {
     console.error('Error verifying workspace membership:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      code: 'INTERNAL_ERROR',
-    });
+    return serverError(res, 'Internal server error');
   }
 }
