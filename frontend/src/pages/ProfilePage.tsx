@@ -1,3 +1,4 @@
+// src/pages/ProfilePage.tsx
 import { useAuth, useLogout } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +18,7 @@ import {
   History,
   ChevronRight,
   Edit,
+  ArrowLeft, // <-- ADDED: ArrowLeft for back button
 } from 'lucide-react';
 import { EditProfileForm } from '@/components/EditProfileForm';
 import { useState } from 'react';
@@ -96,6 +98,15 @@ export function ProfilePage() {
                     </div>
                   </div>
                   <div className='flex gap-2'>
+                    {/* ADDED: Back Button */}
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => navigate(-1)}
+                    >
+                      <ArrowLeft className='mr-2 h-4 w-4' />
+                      Back
+                    </Button>
                     <Button
                       variant='outline'
                       size='sm'

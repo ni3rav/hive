@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useUserWorkspaces } from '@/hooks/useWorkspace';
-import { Settings, ChevronsUpDown } from 'lucide-react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom'; // <-- ADDED useLocation
+import { useUserWorkspaces } from '@/hooks/useWorkspace'; // <-- CORRECTED hook import
+import { Settings, ChevronsUpDown, Check } from 'lucide-react';
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getLastWorkspaceSlugs, updateLastWorkspaceCookie } from '@/lib/utils';
 
+
 function RoleBadge({ role }: { role: string }) {
   return (
     <span className='inline-flex items-center rounded-full bg-secondary/80 text-secondary-foreground px-1.5 py-0 text-[10px] font-medium shrink-0'>
@@ -29,6 +30,7 @@ function RoleBadge({ role }: { role: string }) {
 export function WorkspaceSwitcher() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); 
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
   const { previous: lastUsedSlug } = getLastWorkspaceSlugs();
@@ -37,6 +39,19 @@ export function WorkspaceSwitcher() {
     if (!workspaceSlug) return null;
     return workspaces.find((ws) => ws.slug === workspaceSlug) || null;
   }, [workspaces, workspaceSlug]);
+
+  const getNextPath = (newSlug: string) => {
+    const currentPath = location.pathname;
+    const pathParts = currentPath.split('/');
+    const dashboardIndex = pathParts.indexOf('dashboard');
+
+    let remainingPath = '';
+    if (dashboardIndex !== -1 && pathParts.length > dashboardIndex + 2) {
+      remainingPath = '/' + pathParts.slice(dashboardIndex + 2).join('/');
+    }
+
+    return `/dashboard/${newSlug}${remainingPath}`;
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -109,7 +124,7 @@ export function WorkspaceSwitcher() {
                   key={workspace.id}
                   onClick={() => {
                     setOpen(false);
-                    navigate(`/dashboard/${workspace.slug}`);
+                    navigate(getNextPath(workspace.slug));
                   }}
                   className='flex flex-col items-start gap-1.5 min-w-0'
                 >
@@ -206,7 +221,8 @@ export function WorkspaceSwitcher() {
                     if (!isActive) {
                       setOpen(false);
                       updateLastWorkspaceCookie(workspace.slug);
-                      navigate(`/dashboard/${workspace.slug}`);
+                      // MODIFIED: Use getNextPath
+                      navigate(getNextPath(workspace.slug));
                     }
                   }}
                   className='gap-2 p-2'
@@ -229,6 +245,9 @@ export function WorkspaceSwitcher() {
                         <Badge className='h-4 text-[10px] px-1.5'>
                           Last used
                         </Badge>
+                      )}
+                      {isActive && (
+                        <Check className='h-4 w-4 ml-auto text-primary' />
                       )}
                     </div>
                     <span className='truncate text-xs text-muted-foreground'>

@@ -1,6 +1,7 @@
+// src/components/Member/InviteMemberDialog.tsx
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, UserPlus, Shield, Crown, Users } from 'lucide-react';
+import { Mail, UserPlus, Shield, Crown, Users, Check, ChevronDown } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -12,9 +13,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from '@/components/ui/dropdown-menu';
+import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
 import { inviteMemberSchema } from '@/lib/validations/member';
 import type { InviteMemberData, MemberRole } from '@/types/member';
 import { ROLE_HIERARCHY } from '@/types/member';
+import * as React from 'react';
 
 type Props = {
   open: boolean;
@@ -23,6 +33,10 @@ type Props = {
   isSubmitting: boolean;
   currentUserRole: MemberRole;
 };
+
+// Helper function to capitalize the first letter of the role
+const getRoleName = (role: MemberRole) =>
+  role.charAt(0).toUpperCase() + role.slice(1);
 
 export default function InviteMemberDialog({
   open,
@@ -45,10 +59,12 @@ export default function InviteMemberDialog({
     },
   });
 
+  const [selectOpen, setSelectOpen] = React.useState(false);
+  const selectedRole = watch('role');
 
-  const availableRoles: MemberRole[] = (['owner', 'admin', 'member'] as MemberRole[]).filter(
-    (role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole],
-  );
+  const availableRoles: MemberRole[] = (
+    ['owner', 'admin', 'member'] as MemberRole[]
+  ).filter((role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole]);
 
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data);
@@ -127,29 +143,69 @@ export default function InviteMemberDialog({
             <div className='space-y-2'>
               <Label htmlFor='role'>Role</Label>
               <div className='space-y-2'>
-                <select
-                  id='role'
-                  {...register('role')}
-                  className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  {availableRoles.map((role) => (
-                    <option key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                {watch('role') && (
+                <DropdownMenu open={selectOpen} onOpenChange={setSelectOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant='outline'
+                      role='combobox'
+                      aria-expanded={selectOpen}
+                      className='w-full justify-between'
+                      id='role-select-trigger'
+                    >
+                      {getRoleName(selectedRole)}
+                      <ChevronDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className='w-[var(--radix-dropdown-menu-trigger-width)]'
+                    align='start'
+                  >
+                    <DropdownMenuRadioGroup
+                      value={selectedRole}
+                      onValueChange={(newRole) => {
+                        // Manually set the value in react-hook-form
+                        setValue('role', newRole as MemberRole, {
+                          shouldDirty: true,
+                        });
+                        setSelectOpen(false);
+                      }}
+                    >
+                      {availableRoles.map((role) => (
+                        <DropdownMenuRadioItem
+                          key={role}
+                          value={role}
+                          className='min-w-[180px] pl-2 *:first:[span]:hidden'
+                        >
+                          <span className='pointer-events-none absolute left-2 flex size-3.5 items-center justify-center'>
+                            <DropdownMenuItemIndicator>
+                              <Check className='h-4 w-4' />
+                            </DropdownMenuItemIndicator>
+                          </span>
+                          <div className='flex flex-col flex-1 min-w-0'>
+                            <div className='truncate'>
+                              {getRoleName(role)}
+                            </div>
+                            <div className='truncate text-xs text-muted-foreground'>
+                              {getRoleDescription(role)}
+                            </div>
+                          </div>
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {selectedRole && (
                   <div className='flex items-start gap-2 rounded-md border bg-muted/50 p-3 text-sm'>
                     <div className='mt-0.5 text-muted-foreground'>
-                      {getRoleIcon(watch('role') as MemberRole)}
+                      {getRoleIcon(selectedRole as MemberRole)}
                     </div>
                     <div className='flex-1'>
                       <div className='font-medium'>
-                        {watch('role')?.charAt(0).toUpperCase() +
-                          watch('role')?.slice(1)}
+                        {getRoleName(selectedRole)}
                       </div>
                       <div className='text-xs text-muted-foreground'>
-                        {getRoleDescription(watch('role') as MemberRole)}
+                        {getRoleDescription(selectedRole as MemberRole)}
                       </div>
                     </div>
                   </div>
@@ -184,4 +240,3 @@ export default function InviteMemberDialog({
     </Dialog>
   );
 }
-
