@@ -58,19 +58,22 @@ export async function inviteMember(
       where: eq(usersTable.email, email),
     });
 
-    if (existingUser) {
-      if (!existingUser.emailVerified) {
-        throw new Error('user not verified');
-      }
-      const existingMembership = await db.query.workspaceUsersTable.findFirst({
-        where: and(
-          eq(workspaceUsersTable.workspaceId, workspaceId),
-          eq(workspaceUsersTable.userId, existingUser.id),
-        ),
-      });
-      if (existingMembership) {
-        throw new Error('user already a member');
-      }
+    if (!existingUser) {
+      throw new Error('user not found');
+    }
+
+    if (!existingUser.emailVerified) {
+      throw new Error('user not verified');
+    }
+
+    const existingMembership = await db.query.workspaceUsersTable.findFirst({
+      where: and(
+        eq(workspaceUsersTable.workspaceId, workspaceId),
+        eq(workspaceUsersTable.userId, existingUser.id),
+      ),
+    });
+    if (existingMembership) {
+      throw new Error('user already a member');
     }
 
     const pendingInvite = await db.query.workspaceInvitationsTable.findFirst({
