@@ -13,7 +13,7 @@ export interface CookieOptions {
 function getSessionCookieOptions(expiresAt: Date): CookieOptions {
   return {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     secure: env.isProduction,
     expires: expiresAt,
   };
