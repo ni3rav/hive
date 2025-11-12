@@ -12,7 +12,7 @@ import {
 } from './email-styles';
 import { env } from '../env';
 
-const logoUrl = new URL('/hive.png', env.FRONTEND_URL).toString();
+// const logoUrl = new URL('/hive.png', env.FRONTEND_URL).toString();
 
 interface BaseTemplateProps {
   content: string;
@@ -52,7 +52,7 @@ export const baseTemplate = ({
           <tr>
             <td style="${headerStyles}">
               <a href="${env.FRONTEND_URL}" style="${logoStyles}" target="_blank" rel="noopener">
-                <img src="${logoUrl}" alt="Hive logo" width="48" height="48" style="${logoImageStyles}" />
+                // <img src="" alt="Hive logo" width="48" height="48" style="${logoImageStyles}" />
               </a>
               <h1 style="font-size: 18px; font-weight: 600; margin: 0; color: ${colors.foreground};">Hive</h1>
             </td>
