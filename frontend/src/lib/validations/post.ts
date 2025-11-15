@@ -21,8 +21,7 @@ export const postMetadataSchema = z.object({
   tagSlugs: z.array(z.string()),
   publishedAt: z
     .date({
-      required_error: 'Published date is required',
-      invalid_type_error: 'Published date must be a valid date',
+      message: 'Published date must be a valid date',
     })
     .refine((date) => !isNaN(date.getTime()), {
       message: 'Published date must be a valid date',
@@ -34,7 +33,7 @@ export const postMetadataSchema = z.object({
 export const postMetadataUpdateSchema = postMetadataSchema.extend({
   publishedAt: z
     .date({
-      invalid_type_error: 'Published date must be a valid date',
+      message: 'Published date must be a valid date',
     })
     .refine((date) => !isNaN(date.getTime()), {
       message: 'Published date must be a valid date',

@@ -39,6 +39,9 @@ app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 app.use('/api/post', authMiddleware, postRouter);
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'OK' });
+});
 
 type BodyParserSyntaxError = SyntaxError & { type?: string; status?: number };
 
