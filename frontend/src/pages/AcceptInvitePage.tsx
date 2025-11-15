@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,98 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ArrowLeft, CheckCircle2, Loader2, Mail, Users, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Loader2,
+  Mail,
+  Users,
+  AlertCircle,
+} from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-// NOTE: These are placeholder imports for the logic implemented below.
-// In a production environment, you would import actual hooks from '@/hooks/useMember'.
-// import { useInviteDetails, useAcceptInvite } from '@/hooks/useMember';
-
-
-// --- START MOCK API & HOOK LOGIC (Placeholder for real backend integration) ---
-type InviteDetails = {
-  workspaceName: string;
-  inviterEmail: string;
-  role: string;
-  workspaceSlug: string;
-};
-
-// Simulate fetching invite details (e.g., useQuery)
-function useInviteDetails(
-  token: string | undefined,
-): {
-  data: InviteDetails | null;
-  isLoading: boolean;
-  isError: boolean;
-  error: { message: string } | null;
-} {
-  const [data, setData] = useState<InviteDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<{ message: string } | null>(null);
-
-  useEffect(() => {
-    if (!token) {
-      setIsLoading(false);
-      setIsError(true);
-      setError({ message: 'Invalid or missing invitation token' });
-      return;
-    }
-
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
-    setData(null);
-
-    // MOCK API CALL
-    const timer = setTimeout(() => {
-      if (token === 'valid-token') {
-        setData({
-          workspaceName: 'Demo Workspace',
-          inviterEmail: 'admin@example.com',
-          role: 'member',
-          workspaceSlug: 'demo-workspace',
-        });
-        setError(null);
-      } else {
-        setIsError(true);
-        setError({ message: 'This invitation is invalid, expired, or has already been accepted.' });
-      }
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [token]);
-
-  return { data, isLoading, isError, error };
-}
-
-// Simulate accepting the invite (e.g., useMutation)
-function useAcceptInvite() {
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState<{ message: string } | null>(null);
-
-  const mutate = (token: string, options: { onSuccess: (data: { workspaceSlug: string }) => void }) => {
-    setIsPending(true);
-    setError(null);
-
-    // MOCK API CALL
-    const timer = setTimeout(() => {
-      if (token === 'valid-token') {
-        setError(null);
-        options.onSuccess({ workspaceSlug: 'demo-workspace' });
-      } else {
-        setError({ message: 'Failed to accept invitation. Please try again.' });
-      }
-      setIsPending(false);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  };
-
-  return { mutate, isPending, error };
-}
-// --- END MOCK API & HOOK LOGIC ---
-
+import { useInviteDetails, useAcceptInvite } from '@/hooks/useMember';
+import { getErrorMessage } from '@/lib/error-utils';
 
 export default function AcceptInvitePage() {
   const navigate = useNavigate();
@@ -184,7 +102,10 @@ export default function AcceptInvitePage() {
 
   // 3. Error state (Invalid/Expired token)
   if (isFetchError || !inviteDetails) {
-    const errorMsg = fetchError?.message || 'This invitation is invalid, expired, or has already been accepted.';
+    const errorMsg = getErrorMessage(
+      fetchError,
+      'This invitation is invalid, expired, or has already been accepted.',
+    );
     return (
       // Applied robust centering wrapper
       <div className='w-screen h-screen grid place-items-center p-4'>
@@ -204,8 +125,8 @@ export default function AcceptInvitePage() {
             </Alert>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleGoBack } className='w-full'>
-              Go Back 
+            <Button onClick={handleGoBack} className='w-full'>
+              Go Back
             </Button>
           </CardFooter>
         </Card>
@@ -231,13 +152,11 @@ export default function AcceptInvitePage() {
             Back
           </Button>
 
-          <div className='flex flex-col items-center text-center'> 
+          <div className='flex flex-col items-center text-center'>
             <div className='flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mx-auto mb-4'>
               <Mail className='h-8 w-8 text-primary' />
             </div>
-            <CardTitle className='text-2xl'> 
-              Workspace Invitation
-            </CardTitle>
+            <CardTitle className='text-2xl'>Workspace Invitation</CardTitle>
             <CardDescription>
               You've been invited to join the workspace below.
             </CardDescription>
@@ -261,7 +180,7 @@ export default function AcceptInvitePage() {
               <div className='flex-1'>
                 <p className='text-sm font-medium'>Invited by</p>
                 <p className='text-sm text-muted-foreground'>
-                  {inviteDetails.inviterEmail}
+                  {inviteDetails.inviterName || inviteDetails.inviterEmail}
                 </p>
               </div>
             </div>
@@ -279,7 +198,9 @@ export default function AcceptInvitePage() {
 
           {acceptError && (
             <Alert variant='destructive'>
-              <AlertDescription>{acceptError.message}</AlertDescription>
+              <AlertDescription>
+                {getErrorMessage(acceptError, 'Failed to accept invitation')}
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>

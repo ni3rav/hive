@@ -18,3 +18,7 @@ export const revokeInvitationSchema = z.object({
 export const memberIdParamSchema = z.object({
   userId: z.uuid(),
 });
+
+export const invitationTokenSchema = z.object({
+  token: z.string().uuid(),
+});

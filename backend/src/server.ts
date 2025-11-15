@@ -6,6 +6,7 @@ import { router as categoryRouter } from './routes/category';
 import { router as tagRouter } from './routes/tag';
 import { router as workspaceRouter } from './routes/workspace';
 import { router as postRouter } from './routes/post';
+import { router as invitationRouter } from './routes/invitation';
 import cookieParser from 'cookie-parser';
 import { env } from './env';
 import morgan from 'morgan';
@@ -31,6 +32,7 @@ if (env.isProduction) {
 }
 
 app.use('/api/auth', authRouter);
+app.use('/api/invitations', invitationRouter);
 app.use('/api/user', authMiddleware, userRouter);
 app.use('/api/author', authMiddleware, authorRouter);
 app.use('/api/category', authMiddleware, categoryRouter);

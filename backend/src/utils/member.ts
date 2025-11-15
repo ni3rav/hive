@@ -329,3 +329,108 @@ export async function leaveWorkspace(workspaceSlug: string, userId: string) {
     return [error, null] as const;
   }
 }
+
+export async function getInvitationByToken(token: string) {
+  try {
+    const invitation = await db.query.workspaceInvitationsTable.findFirst({
+      where: eq(workspaceInvitationsTable.token, token),
+      with: {
+        workspace: true,
+        invitedByUser: true,
+      },
+    });
+
+    if (!invitation) {
+      throw new Error('invitation not found');
+    }
+
+    if (invitation.status !== 'pending') {
+      throw new Error('invitation not pending');
+    }
+
+    if (invitation.expiresAt && invitation.expiresAt < new Date()) {
+      await db
+        .update(workspaceInvitationsTable)
+        .set({ status: 'expired' })
+        .where(eq(workspaceInvitationsTable.id, invitation.id));
+      throw new Error('invitation expired');
+    }
+
+    return [null, invitation] as const;
+  } catch (error) {
+    return [error, null] as const;
+  }
+}
+
+export async function acceptInvitation(token: string, userId: string) {
+  try {
+    const invitation = await db.query.workspaceInvitationsTable.findFirst({
+      where: eq(workspaceInvitationsTable.token, token),
+    });
+
+    if (!invitation) {
+      throw new Error('invitation not found');
+    }
+
+    if (invitation.status !== 'pending') {
+      throw new Error('invitation not pending');
+    }
+
+    if (invitation.expiresAt && invitation.expiresAt < new Date()) {
+      await db
+        .update(workspaceInvitationsTable)
+        .set({ status: 'expired' })
+        .where(eq(workspaceInvitationsTable.id, invitation.id));
+      throw new Error('invitation expired');
+    }
+
+    const user = await db.query.usersTable.findFirst({
+      where: eq(usersTable.id, userId),
+    });
+
+    if (!user) {
+      throw new Error('user not found');
+    }
+
+    if (user.email !== invitation.email) {
+      throw new Error('email mismatch');
+    }
+
+    const existingMembership = await db.query.workspaceUsersTable.findFirst({
+      where: and(
+        eq(workspaceUsersTable.workspaceId, invitation.workspaceId),
+        eq(workspaceUsersTable.userId, userId),
+      ),
+    });
+
+    if (existingMembership) {
+      throw new Error('user already a member');
+    }
+
+    const workspace = await db.query.workspacesTable.findFirst({
+      where: eq(workspacesTable.id, invitation.workspaceId),
+    });
+
+    if (!workspace) {
+      throw new Error('workspace not found');
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.insert(workspaceUsersTable).values({
+        workspaceId: invitation.workspaceId,
+        userId: userId,
+        role: invitation.role,
+        joinedAt: new Date(),
+      });
+
+      await tx
+        .update(workspaceInvitationsTable)
+        .set({ status: 'accepted' })
+        .where(eq(workspaceInvitationsTable.id, invitation.id));
+    });
+
+    return [null, { workspaceSlug: workspace.slug }] as const;
+  } catch (error) {
+    return [error, null] as const;
+  }
+}

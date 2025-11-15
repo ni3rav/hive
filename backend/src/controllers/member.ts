@@ -28,6 +28,15 @@ import {
   toMemberListResponse,
   toMemberResponse,
 } from '../dto/member.dto';
+import { sendEmail } from '../utils/email';
+import {
+  workspaceInvitationEmail,
+  WORKSPACE_INVITATION_EMAIL_FROM,
+} from '../templates';
+import { db } from '../db';
+import { workspacesTable, usersTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { env } from '../env';
 
 export async function listWorkspaceMembersController(
   req: Request,
@@ -86,6 +95,36 @@ export async function inviteMemberController(req: Request, res: Response) {
         return conflict(res, 'User exists but email not verified');
       return serverError(res, 'Failed to create invitation');
     }
+
+    if (invitation) {
+      const [workspace, inviter] = await Promise.all([
+        db.query.workspacesTable.findFirst({
+          where: eq(workspacesTable.id, workspaceId),
+        }),
+        db.query.usersTable.findFirst({
+          where: eq(usersTable.id, invitedBy),
+        }),
+      ]);
+
+      if (workspace && inviter) {
+        const invitationLink = `${env.FRONTEND_URL}/accept-invite?token=${invitation.token}`;
+        const emailHtml = workspaceInvitationEmail({
+          workspaceName: workspace.name,
+          inviterName: inviter.name || inviter.email,
+          inviterEmail: inviter.email,
+          role: role,
+          invitationLink: invitationLink,
+        });
+
+        await sendEmail({
+          to: email,
+          subject: `You've been invited to join ${workspace.name}`,
+          html: emailHtml,
+          from: WORKSPACE_INVITATION_EMAIL_FROM,
+        });
+      }
+    }
+
     return created(
       res,
       'Invitation created',

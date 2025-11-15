@@ -51,9 +51,29 @@ export async function apiRevokeInvitation(
   );
 }
 
-export async function apiLeaveWorkspace(
-  workspaceSlug: string,
-): Promise<void> {
+export async function apiLeaveWorkspace(workspaceSlug: string): Promise<void> {
   return apiDelete<void>(`/api/workspace/${workspaceSlug}/members/leave`);
 }
 
+export interface InviteDetails {
+  workspaceName: string;
+  inviterEmail: string;
+  inviterName: string;
+  role: string;
+  workspaceSlug: string;
+  expiresAt?: string;
+}
+
+export async function apiGetInviteDetails(
+  token: string,
+): Promise<InviteDetails> {
+  return apiGet<InviteDetails>(`/api/invitations/${token}`);
+}
+
+export async function apiAcceptInvite(
+  token: string,
+): Promise<{ workspaceSlug: string }> {
+  return apiPost<{ workspaceSlug: string }, void>(
+    `/api/invitations/${token}/accept`,
+  );
+}

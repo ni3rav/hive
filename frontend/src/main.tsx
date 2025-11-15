@@ -71,7 +71,7 @@ const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: '/invite',
+        path: '/accept-invite',
         element: <AcceptInvitePage />,
       },
       {

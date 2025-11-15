@@ -5,6 +5,8 @@ import {
   apiRemoveMember,
   apiRevokeInvitation,
   apiLeaveWorkspace,
+  apiGetInviteDetails,
+  apiAcceptInvite,
 } from '@/api/member';
 import type {
   InviteMemberData,
@@ -101,13 +103,20 @@ export function useRemoveMember(workspaceSlug: string | undefined) {
         invitations: PendingInvitation[];
       }>(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: { members: Member[]; invitations: PendingInvitation[] } | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          members: old.members.filter((m: Member) => m.userId !== userId),
-        };
-      });
+      queryClient.setQueryData(
+        queryKey,
+        (
+          old:
+            | { members: Member[]; invitations: PendingInvitation[] }
+            | undefined,
+        ) => {
+          if (!old) return old;
+          return {
+            ...old,
+            members: old.members.filter((m: Member) => m.userId !== userId),
+          };
+        },
+      );
       return { previous };
     },
     onSuccess: () => {
@@ -150,13 +159,20 @@ export function useRevokeInvitation(workspaceSlug: string | undefined) {
         invitations: PendingInvitation[];
       }>(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: { members: Member[]; invitations: PendingInvitation[] } | undefined) => {
-        if (!old) return old;
-        return {
-          ...old,
-          invitations: old.invitations.filter((i) => i.id !== invitationId),
-        };
-      });
+      queryClient.setQueryData(
+        queryKey,
+        (
+          old:
+            | { members: Member[]; invitations: PendingInvitation[] }
+            | undefined,
+        ) => {
+          if (!old) return old;
+          return {
+            ...old,
+            invitations: old.invitations.filter((i) => i.id !== invitationId),
+          };
+        },
+      );
       return { previous };
     },
     onSuccess: () => {
@@ -202,3 +218,34 @@ export function useLeaveWorkspace(workspaceSlug: string | undefined) {
   });
 }
 
+export function useInviteDetails(token: string | undefined) {
+  return useQuery({
+    queryKey: ['invitation', token],
+    queryFn: () => {
+      if (!token) {
+        throw new Error('Token is required');
+      }
+      return apiGetInviteDetails(token);
+    },
+    retry: false,
+    enabled: !!token,
+  });
+}
+
+export function useAcceptInvite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) => {
+      return apiAcceptInvite(token);
+    },
+    onSuccess: () => {
+      toast.success('Invitation accepted');
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.workspaceKeys().list(),
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to accept invitation'));
+    },
+  });
+}
