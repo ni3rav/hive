@@ -11,10 +11,27 @@ import cookieParser from 'cookie-parser';
 import { env } from './env';
 import morgan from 'morgan';
 import cors from 'cors';
+import helmet from 'helmet';
 import { authMiddleware } from './middleware/auth';
 import { badRequest, notFound, serverError } from './utils/responses';
+import { db } from './db';
+import { sql } from 'drizzle-orm';
 
 export const app = express();
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 
@@ -39,8 +56,21 @@ app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 app.use('/api/post', authMiddleware, postRouter);
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.status(200).json({ status: 'OK' });
+app.get('/api/health', async (_req: Request, res: Response) => {
+  try {
+    await db.execute(sql`SELECT 1`);
+    res.status(200).json({
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+    });
+  } catch (error) {
+    console.error('Database health check failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      database: 'disconnected',
+    });
+  }
 });
 
 type BodyParserSyntaxError = SyntaxError & { type?: string; status?: number };
