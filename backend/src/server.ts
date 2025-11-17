@@ -16,6 +16,8 @@ import { authMiddleware } from './middleware/auth';
 import { badRequest, notFound, serverError } from './utils/responses';
 import { db } from './db';
 import { sql } from 'drizzle-orm';
+import logger from './logger';
+import pinoHTTP from 'pino-http';
 
 export const app = express();
 
@@ -44,9 +46,11 @@ if (env.isDevelopment) {
   );
 }
 
-if (env.isProduction) {
-  app.use(morgan('combined'));
-}
+app.use(
+  pinoHTTP({
+    logger,
+  }),
+);
 
 app.use('/api/auth', authRouter);
 app.use('/api/invitations', invitationRouter);
