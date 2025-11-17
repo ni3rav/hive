@@ -72,7 +72,7 @@ app.get('/api/health', async (_req: Request, res: Response) => {
       database: 'connected',
     });
   } catch (error) {
-    console.error('Database health check failed:', error);
+    logger.error(error, 'Database health check failed');
     res.status(503).json({
       status: 'ERROR',
       database: 'disconnected',
