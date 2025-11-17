@@ -9,7 +9,6 @@ import { router as postRouter } from './routes/post';
 import { router as invitationRouter } from './routes/invitation';
 import cookieParser from 'cookie-parser';
 import { env } from './env';
-import morgan from 'morgan';
 import cors from 'cors';
 import helmet from 'helmet';
 import { authMiddleware } from './middleware/auth';
@@ -40,15 +39,19 @@ app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 
-if (env.isDevelopment) {
-  app.use(
-    morgan(':method :url :status :res[content-length] - :response-time ms'),
-  );
-}
-
 app.use(
   pinoHTTP({
     logger,
+    customSuccessMessage: (req, res) => {
+      return `${req.method} ${req.url} ${res.statusCode}`;
+    },
+    autoLogging: {
+      ignore: (req) => req.url === '/api/health',
+    },
+    serializers: {
+      req: () => undefined,
+      res: () => undefined,
+    },
   }),
 );
 
