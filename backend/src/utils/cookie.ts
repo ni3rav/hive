@@ -19,6 +19,14 @@ function getSessionCookieOptions(expiresAt: Date): CookieOptions {
   };
 }
 
+function getCookieOptions(): Omit<CookieOptions, 'expires'> {
+  return {
+    httpOnly: true,
+    sameSite: env.isProduction ? 'none' : 'lax',
+    secure: env.isProduction,
+  };
+}
+
 export function setSessionCookie(
   res: Response,
   sessionId: string,
@@ -28,9 +36,5 @@ export function setSessionCookie(
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie(COOKIE_NAME, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: env.isProduction,
-  });
+  res.clearCookie(COOKIE_NAME, getCookieOptions());
 }
