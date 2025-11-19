@@ -35,3 +35,9 @@ export async function apiUpdateWorkspace(
 export async function apiDeleteWorkspace(workspaceSlug: string): Promise<void> {
   return apiDelete<void>(`/api/workspace/${workspaceSlug}`);
 }
+
+export async function apiCheckSlugAvailability(
+  slug: string,
+): Promise<{ available: boolean }> {
+  return apiGet<{ available: boolean }>(`/api/workspace/check-slug/${slug}`);
+}

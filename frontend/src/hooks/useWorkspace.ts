@@ -6,6 +6,7 @@ import {
   apiGetUserWorkspaces,
   apiUpdateWorkspace,
   apiVerifyWorkspace,
+  apiCheckSlugAvailability,
 } from '@/api/workspace';
 import { QueryKeys } from '@/lib/query-key-factory';
 import type {
@@ -200,4 +201,14 @@ export function useIsWorkspaceOwner(
     const workspace = workspaces.find((ws) => ws.slug === workspaceSlug);
     return workspace?.role === 'owner';
   }, [workspaceSlug, workspaces]);
+}
+
+export function useCheckSlugAvailability(slug: string | null) {
+  return useQuery({
+    queryKey: ['workspace-slug-check', slug],
+    queryFn: () => apiCheckSlugAvailability(slug!),
+    enabled: !!slug && slug.length >= 3,
+    retry: false,
+    staleTime: 0,
+  });
 }

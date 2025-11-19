@@ -1,46 +1,20 @@
 import z from 'zod';
 
-export const createWorkspaceSchema = z
-  .object({
-    name: z.string().min(3).max(30).trim(),
-    slug: z.string().trim(),
-  })
-  .superRefine((data, ctx) => {
-    const { name, slug } = data;
-    if (!name) {
-      ctx.addIssue({
-        path: ['slug'],
-        code: 'custom',
-        message: `Slug must be in the format "<name>-<4 alphanumeric characters>"`,
-      });
-      return;
-    }
-
-    const nameSlugFormat = name
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]/g, '');
-
-    const expectedPrefix = `${nameSlugFormat}-`;
-    if (!slug.startsWith(expectedPrefix)) {
-      ctx.addIssue({
-        path: ['slug'],
-        code: 'custom',
-        message: `Slug must start with "${expectedPrefix}" followed by 4 alphanumeric characters`,
-      });
-      return;
-    }
-
-    const suffix = slug.slice(expectedPrefix.length);
-    if (!/^[a-zA-Z0-9]{4}$/.test(suffix)) {
-      ctx.addIssue({
-        path: ['slug'],
-        code: 'custom',
-        message:
-          'Slug must end with exactly 4 alphanumeric characters after the dash',
-      });
-    }
-  });
+export const createWorkspaceSchema = z.object({
+  name: z.string().min(3).max(30).trim(),
+  slug: z
+    .string()
+    .trim()
+    .min(3, 'Slug must be at least 3 characters')
+    .max(35, 'Slug must be at most 35 characters')
+    .regex(
+      /^[a-z0-9]+([a-z0-9-]*[a-z0-9]+)*$/,
+      'Slug must contain only lowercase letters, numbers, and hyphens. Cannot start or end with a hyphen.',
+    )
+    .refine((slug) => !slug.includes('--'), {
+      message: 'Slug cannot contain consecutive hyphens',
+    }),
+});
 
 export const updateWorkspaceSchema = z.object({
   workspaceSlug: z.string().trim().min(1, 'Workspace slug is required'),
@@ -55,4 +29,8 @@ export const updateWorkspaceSchema = z.object({
 
 export const deleteWorkspaceSchema = z.object({
   workspaceSlug: z.string().trim().min(1, 'Workspace slug is required'),
+});
+
+export const checkSlugAvailabilitySchema = z.object({
+  slug: z.string().trim().min(1, 'Slug is required'),
 });

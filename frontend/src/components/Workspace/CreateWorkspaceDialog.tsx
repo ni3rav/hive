@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { useCreateWorkspace } from '@/hooks/useWorkspace';
+import { useEffect, useRef } from 'react';
+import {
+  useCreateWorkspace,
+  useCheckSlugAvailability,
+} from '@/hooks/useWorkspace';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,103 +15,219 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createWorkspaceSchema } from '@/lib/validations/workspace';
+import type { CreateWorkspaceData } from '@/types/workspace';
+import { FolderPlus, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 interface CreateWorkspaceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-function generateSlug(name: string): string {
-  const baseSlug = name
+function sanitizeSlug(name: string): string {
+  return name
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '') // Remove special chars
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-'); // Replace multiple hyphens
-
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let randomSuffix = '';
-  for (let i = 0; i < 4; i++) {
-    randomSuffix += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  const finalSlug = `${baseSlug}-${randomSuffix}`;
-  return finalSlug.length > 5 ? finalSlug : `workspace-${randomSuffix}`;
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
+
 export function CreateWorkspaceDialog({
   open,
   onOpenChange,
 }: CreateWorkspaceDialogProps) {
-  const [name, setName] = useState('');
   const createWorkspace = useCreateWorkspace();
+  const slugManuallyEditedRef = useRef(false);
 
-  const handleCreateWorkspace = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedName = name.trim();
+  const form = useForm<CreateWorkspaceData>({
+    resolver: zodResolver(createWorkspaceSchema),
+    defaultValues: {
+      workspaceName: '',
+      workspaceSlug: '',
+    },
+    mode: 'onChange',
+  });
 
-    if (!trimmedName) return;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isValid },
+  } = form;
+
+  const nameValue = watch('workspaceName');
+  const slugValue = watch('workspaceSlug');
+
+  useEffect(() => {
+    if (!slugManuallyEditedRef.current && nameValue) {
+      const sanitized = sanitizeSlug(nameValue);
+      setValue('workspaceSlug', sanitized, { shouldValidate: true });
+    }
+  }, [nameValue, setValue]);
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+      slugManuallyEditedRef.current = false;
+    }
+  }, [open, reset]);
+
+  const debouncedSlug = useDebounce(slugValue, 500);
+  const { data: slugCheck, isLoading: isCheckingSlug } =
+    useCheckSlugAvailability(
+      slugValue && !errors.workspaceSlug ? debouncedSlug : null,
+    );
+
+  const isSlugAvailable = slugCheck?.available === true;
+  const isSlugTaken = slugCheck?.available === false;
+
+  const canSubmit =
+    isValid && !isCheckingSlug && isSlugAvailable && !createWorkspace.isPending;
+
+  const onSubmit = handleSubmit(async (data) => {
+    if (!isSlugAvailable) {
+      return;
+    }
 
     try {
-      const workspaceData = {
-        workspaceName: trimmedName, // Changed back to workspaceName
-        workspaceSlug: generateSlug(trimmedName), // Changed back to workspaceSlug
-      };
-
-      const response = await createWorkspace.mutateAsync(workspaceData);
+      const response = await createWorkspace.mutateAsync(data);
 
       if (response?.slug) {
         onOpenChange(false);
-        setName('');
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error('Workspace creation error:', error);
+    } catch (error: unknown) {
       const errorMessage =
-        error.response?.data?.message || 'Failed to create workspace';
+        (error as { response?: { data?: { message?: string } } }).response?.data
+          ?.message || 'Failed to create workspace';
       toast.error(errorMessage);
     }
-  };
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Workspace</DialogTitle>
-          <DialogDescription>
-            Create a workspace to organize your content.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleCreateWorkspace} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='name'>Workspace Name</Label>
-            <Input
-              id='name'
-              name='name'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Enter workspace name'
-              className='w-full'
-              autoComplete='off'
-              required
-              minLength={1}
-              maxLength={50}
-            />
+          <div className='flex items-center gap-3'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10'>
+              <FolderPlus className='h-5 w-5 text-primary' />
+            </div>
+            <div>
+              <DialogTitle>Create Workspace</DialogTitle>
+              <DialogDescription>
+                Create a workspace to organize your content
+              </DialogDescription>
+            </div>
           </div>
+        </DialogHeader>
+        <form onSubmit={onSubmit}>
+          <div className='space-y-5 py-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='workspaceName'>Workspace Name</Label>
+              <Input
+                id='workspaceName'
+                {...register('workspaceName')}
+                placeholder='e.g., My Team'
+                autoComplete='off'
+                className={
+                  errors.workspaceName
+                    ? 'border-destructive focus-visible:ring-destructive'
+                    : ''
+                }
+                autoFocus
+              />
+              {errors.workspaceName && (
+                <p className='text-sm font-medium text-destructive'>
+                  {errors.workspaceName.message}
+                </p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='workspaceSlug'>Workspace Slug</Label>
+              <Input
+                id='workspaceSlug'
+                {...register('workspaceSlug', {
+                  onChange: () => {
+                    slugManuallyEditedRef.current = true;
+                  },
+                })}
+                placeholder='e.g., my-team'
+                autoComplete='off'
+                className={
+                  errors.workspaceSlug || isSlugTaken
+                    ? 'border-destructive focus-visible:ring-destructive'
+                    : ''
+                }
+              />
+              <div className='min-h-[20px] space-y-1'>
+                {errors.workspaceSlug && (
+                  <div className='flex items-center gap-2 text-sm font-medium text-destructive'>
+                    <XCircle className='h-4 w-4' />
+                    <span>{errors.workspaceSlug.message}</span>
+                  </div>
+                )}
+                {!errors.workspaceSlug && isCheckingSlug && (
+                  <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <span>Checking availability...</span>
+                  </div>
+                )}
+                {!errors.workspaceSlug &&
+                  !isCheckingSlug &&
+                  isSlugAvailable && (
+                    <div className='flex items-center gap-2 text-sm font-medium text-primary'>
+                      <CheckCircle2 className='h-4 w-4' />
+                      <span>Available</span>
+                    </div>
+                  )}
+                {!errors.workspaceSlug && !isCheckingSlug && isSlugTaken && (
+                  <div className='flex items-center gap-2 text-sm font-medium text-destructive'>
+                    <XCircle className='h-4 w-4' />
+                    <span>This slug is already taken</span>
+                  </div>
+                )}
+                {!errors.workspaceSlug &&
+                  !slugManuallyEditedRef.current &&
+                  slugValue && (
+                    <p className='text-xs text-muted-foreground'>
+                      Your workspace will be accessible at:{' '}
+                      <code className='rounded bg-muted px-1.5 py-0.5 text-xs font-mono'>
+                        /dashboard/{slugValue}
+                      </code>
+                    </p>
+                  )}
+              </div>
+            </div>
+          </div>
+
           <DialogFooter>
             <Button
               type='button'
               variant='outline'
-              onClick={() => {
-                onOpenChange(false);
-                setName('');
-              }}
+              onClick={() => onOpenChange(false)}
+              disabled={createWorkspace.isPending}
             >
               Cancel
             </Button>
-            <Button
-              type='submit'
-              disabled={!name.trim() || createWorkspace.isPending}
-            >
-              {createWorkspace.isPending ? 'Creating...' : 'Create'}
+            <Button type='submit' disabled={!canSubmit}>
+              {createWorkspace.isPending ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <FolderPlus className='mr-2 h-4 w-4' />
+                  Create Workspace
+                </>
+              )}
             </Button>
           </DialogFooter>
         </form>

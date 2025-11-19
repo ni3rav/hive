@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton } from '../ui/skeleton';
 
 const nav = [
   { label: 'Features', href: '#features' },
@@ -16,6 +17,7 @@ export function HeroHeader() {
   const [scrollY, setScrollY] = React.useState(0);
   const navigate = useNavigate();
   const { data: user, isLoading } = useAuth(); // Get user auth state
+
 
   React.useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
@@ -62,7 +64,9 @@ export function HeroHeader() {
             </nav>
           </div>
           <div className='flex items-center gap-3'>
-            {isLoading ? null : user ? (
+            {isLoading ? (
+              <Skeleton className='w-24 h-8 rounded-md' />
+            ) : user ? (
               // If user is logged in, show Dashboard button
               <Button
                 size='sm'

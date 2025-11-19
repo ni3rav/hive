@@ -5,6 +5,7 @@ import {
   verifyWorkspaceAccessController,
   updateWorkspaceController,
   deleteWorkspaceController,
+  checkSlugAvailabilityController,
 } from '../controllers/workspace';
 import { verifyWorkspaceMembership } from '../middleware/workspace';
 import {
@@ -19,6 +20,7 @@ import { requireMinRole } from '../middleware/workspace-role';
 
 export const router = Router();
 
+router.get('/check-slug/:slug', checkSlugAvailabilityController);
 router.post('/', createWorkspaceController);
 router.get('/', getUserWorkspacesController);
 router.get(

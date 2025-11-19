@@ -4,6 +4,18 @@ import { workspacesTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import logger from '../logger';
 
+export async function checkSlugExists(slug: string): Promise<boolean> {
+  try {
+    const workspace = await db.query.workspacesTable.findFirst({
+      where: eq(workspacesTable.slug, slug),
+    });
+    return !!workspace;
+  } catch (error) {
+    logger.error(error, 'Error checking slug existence');
+    throw error;
+  }
+}
+
 export async function getUserWorkspaces(
   userId: string,
 ): Promise<[Error, null] | [null, UserWorkspace[]]> {

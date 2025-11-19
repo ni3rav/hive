@@ -3,6 +3,7 @@ import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
   deleteWorkspaceSchema,
+  checkSlugAvailabilitySchema,
 } from '../utils/validations/workspace';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable } from '../db/schema';
@@ -11,6 +12,7 @@ import {
   getUserWorkspaces,
   updateWorkspace,
   deleteWorkspace,
+  checkSlugExists,
 } from '../utils/workspace';
 import {
   validationError,
@@ -40,7 +42,17 @@ export async function createWorkspaceController(req: Request, res: Response) {
   const userId = req.userId!;
 
   try {
-    //* wrapping operations in transaction
+    const slugExists = await checkSlugExists(slug);
+    if (slugExists) {
+      return validationError(res, 'Workspace slug already taken', [
+        {
+          path: ['slug'],
+          message: 'This workspace slug is already taken. Please try another.',
+          code: 'custom',
+        },
+      ]);
+    }
+
     const workspace = await db.transaction(async (tx) => {
       const [workspace] = await tx
         .insert(workspacesTable)
@@ -178,4 +190,25 @@ export async function deleteWorkspaceController(req: Request, res: Response) {
   }
 
   return ok(res, 'Workspace deleted successfully');
+}
+
+export async function checkSlugAvailabilityController(
+  req: Request,
+  res: Response,
+) {
+  const { slug } = req.params;
+
+  const validate = checkSlugAvailabilitySchema.safeParse({ slug });
+
+  if (!validate.success) {
+    return validationError(res, 'Invalid slug', validate.error.issues);
+  }
+
+  try {
+    const exists = await checkSlugExists(validate.data.slug);
+    return ok(res, 'Slug availability checked', { available: !exists });
+  } catch (error) {
+    logger.error(error, 'Error checking slug availability');
+    return serverError(res, 'Failed to check slug availability');
+  }
 }
