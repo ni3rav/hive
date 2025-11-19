@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mail, UserPlus, Shield, Crown, Users } from 'lucide-react';
 import {
@@ -12,6 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { inviteMemberSchema } from '@/lib/validations/member';
 import type { InviteMemberData, MemberRole } from '@/types/member';
 import { ROLE_HIERARCHY } from '@/types/member';
@@ -34,6 +41,7 @@ export default function InviteMemberDialog({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     watch,
     reset,
@@ -45,10 +53,9 @@ export default function InviteMemberDialog({
     },
   });
 
-
-  const availableRoles: MemberRole[] = (['owner', 'admin', 'member'] as MemberRole[]).filter(
-    (role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole],
-  );
+  const availableRoles: MemberRole[] = (
+    ['owner', 'admin', 'member'] as MemberRole[]
+  ).filter((role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole]);
 
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data);
@@ -126,37 +133,56 @@ export default function InviteMemberDialog({
             </div>
             <div className='space-y-2'>
               <Label htmlFor='role'>Role</Label>
-              <div className='space-y-2'>
-                <select
-                  id='role'
-                  {...register('role')}
-                  className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  {availableRoles.map((role) => (
-                    <option key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                {watch('role') && (
-                  <div className='flex items-start gap-2 rounded-md border bg-muted/50 p-3 text-sm'>
-                    <div className='mt-0.5 text-muted-foreground'>
-                      {getRoleIcon(watch('role') as MemberRole)}
-                    </div>
-                    <div className='flex-1'>
-                      <div className='font-medium'>
-                        {watch('role')?.charAt(0).toUpperCase() +
-                          watch('role')?.slice(1)}
+              <Controller
+                name='role'
+                control={control}
+                render={({ field }) => (
+                  <div className='space-y-2'>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        id='role'
+                        className={
+                          errors.role
+                            ? 'border-destructive focus-visible:ring-destructive'
+                            : ''
+                        }
+                      >
+                        <SelectValue placeholder='Select a role' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRoles.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            <div className='flex items-center gap-2'>
+                              {getRoleIcon(role)}
+                              <span>
+                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {watch('role') && (
+                      <div className='flex items-start gap-2 rounded-md border bg-muted/50 p-3 text-sm'>
+                        <div className='mt-0.5 text-muted-foreground'>
+                          {getRoleIcon(watch('role') as MemberRole)}
+                        </div>
+                        <div className='flex-1'>
+                          <div className='font-medium'>
+                            {watch('role')?.charAt(0).toUpperCase() +
+                              watch('role')?.slice(1)}
+                          </div>
+                          <div className='text-xs text-muted-foreground'>
+                            {getRoleDescription(watch('role') as MemberRole)}
+                          </div>
+                        </div>
                       </div>
-                      <div className='text-xs text-muted-foreground'>
-                        {getRoleDescription(watch('role') as MemberRole)}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
-              </div>
+              />
               {errors.role?.message && (
-                <p className='text-sm font-medium text-destructive animate-in fade-in-50 slide-in-from-top-1'>
+                <p className='text-sm font-medium text-destructive'>
                   {errors.role.message}
                 </p>
               )}
@@ -184,4 +210,3 @@ export default function InviteMemberDialog({
     </Dialog>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import {
@@ -11,9 +11,17 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { updateMemberRoleSchema } from '@/lib/validations/member';
 import type { Member, MemberRole, UpdateMemberRoleData } from '@/types/member';
 import { ROLE_HIERARCHY } from '@/types/member';
+import { Shield, Crown, Users } from 'lucide-react';
 
 type Props = {
   open: boolean;
@@ -33,7 +41,7 @@ export default function EditMemberDialog({
   currentUserRole,
 }: Props) {
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -44,14 +52,29 @@ export default function EditMemberDialog({
     },
   });
 
+  const getRoleIcon = (role: MemberRole) => {
+    switch (role) {
+      case 'owner':
+        return <Crown className='h-4 w-4' />;
+      case 'admin':
+        return <Shield className='h-4 w-4' />;
+      case 'member':
+        return <Users className='h-4 w-4' />;
+    }
+  };
+
   useEffect(() => {
     if (member) {
       reset({ role: member.role });
     }
   }, [member, reset]);
 
-  const availableRoles: MemberRole[] = (['owner', 'admin', 'member'] as MemberRole[]).filter(
-    (role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole] || role === member?.role,
+  const availableRoles: MemberRole[] = (
+    ['owner', 'admin', 'member'] as MemberRole[]
+  ).filter(
+    (role) =>
+      ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole] ||
+      role === member?.role,
   );
 
   const onFormSubmit = handleSubmit((data) => {
@@ -81,17 +104,36 @@ export default function EditMemberDialog({
           <div className='space-y-4'>
             <div className='space-y-2'>
               <Label htmlFor='role'>Role</Label>
-              <select
-                id='role'
-                {...register('role')}
-                className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-              >
-                {availableRoles.map((role) => (
-                  <option key={role} value={role}>
-                    {role.charAt(0).toUpperCase() + role.slice(1)}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name='role'
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      id='role'
+                      className={
+                        errors.role
+                          ? 'border-destructive focus-visible:ring-destructive'
+                          : ''
+                      }
+                    >
+                      <SelectValue placeholder='Select a role' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableRoles.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          <div className='flex items-center gap-2'>
+                            {getRoleIcon(role)}
+                            <span>
+                              {role.charAt(0).toUpperCase() + role.slice(1)}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.role?.message && (
                 <p className='text-sm font-medium text-destructive'>
                   {errors.role.message}
@@ -117,4 +159,3 @@ export default function EditMemberDialog({
     </Dialog>
   );
 }
-
