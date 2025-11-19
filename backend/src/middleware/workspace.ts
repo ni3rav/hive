@@ -4,6 +4,7 @@ import { workspacesTable, workspaceUsersTable } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 import { unauthorized, notFound, serverError } from '../utils/responses';
 import { MemberRole } from '../utils/roles';
+import logger from '../logger';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -58,7 +59,7 @@ export async function verifyWorkspaceMembership(
     req.workspaceRole = membership.role as MemberRole;
     next();
   } catch (error) {
-    console.error('Error verifying workspace membership:', error);
+    logger.error(error, 'Error verifying workspace membership');
     return serverError(res, 'Internal server error');
   }
 }

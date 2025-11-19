@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { usersTable } from '../db/schema';
+import logger from '../logger';
 
 export type User = typeof usersTable.$inferSelect;
 
@@ -16,7 +17,7 @@ export async function getUserFromEmail(
     }
     return [null, user];
   } catch (error) {
-    console.error('Error fetching user from email id: \n', error);
+    logger.error(error, 'Error fetching user from email id');
     return [error as Error, null];
   }
 }

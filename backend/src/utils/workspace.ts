@@ -2,6 +2,7 @@ import { db } from '../db';
 import { UserWorkspace } from '../types/workspaces';
 import { workspacesTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import logger from '../logger';
 
 export async function getUserWorkspaces(
   userId: string,
@@ -18,7 +19,7 @@ export async function getUserWorkspaces(
     });
     return [null, userWorkspaces];
   } catch (error) {
-    console.error('Error in getUserWorkspace util', error);
+    logger.error(error, 'Error in getUserWorkspace util');
     return [new Error('ERROR WHILE GETTING USER WORKSPACE'), null];
   }
 }

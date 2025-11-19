@@ -9,6 +9,7 @@ import {
   forbidden,
   conflict,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function getInvitationDetailsController(
   req: Request,
@@ -50,7 +51,7 @@ export async function getInvitationDetailsController(
       expiresAt: invitation.expiresAt?.toISOString(),
     });
   } catch (error) {
-    console.error('Error fetching invitation details:', error);
+    logger.error(error, 'Error fetching invitation details');
     return serverError(res, 'Failed to fetch invitation details');
   }
 }
@@ -95,7 +96,7 @@ export async function acceptInvitationController(req: Request, res: Response) {
 
     return ok(res, 'Invitation accepted', result);
   } catch (error) {
-    console.error('Error accepting invitation:', error);
+    logger.error(error, 'Error accepting invitation');
     return serverError(res, 'Failed to accept invitation');
   }
 }

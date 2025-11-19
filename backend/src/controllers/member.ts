@@ -37,6 +37,7 @@ import { db } from '../db';
 import { workspacesTable, usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { env } from '../env';
+import logger from '../logger';
 
 export async function listWorkspaceMembersController(
   req: Request,
@@ -63,7 +64,7 @@ export async function listWorkspaceMembersController(
       invitations: toInvitationListResponse(invitations),
     });
   } catch (_e) {
-    console.error('Error loading members:', _e);
+    logger.error(_e, 'Error loading members');
     return serverError(res, 'Failed to load members');
   }
 }
@@ -131,7 +132,7 @@ export async function inviteMemberController(req: Request, res: Response) {
       invitation && { id: invitation.id },
     );
   } catch (_e) {
-    console.error('Error creating invitation:', _e);
+    logger.error(_e, 'Error creating invitation');
     return serverError(res, 'Failed to create invitation');
   }
 }
@@ -184,7 +185,7 @@ export async function updateMemberRoleController(req: Request, res: Response) {
       }),
     );
   } catch (_e) {
-    console.error('Error updating role:', _e);
+    logger.error(_e, 'Error updating role');
     return serverError(res, 'Failed to update role');
   }
 }
@@ -215,7 +216,7 @@ export async function removeMemberController(req: Request, res: Response) {
     }
     return ok(res, 'Member removed');
   } catch (_e) {
-    console.error('Error removing member:', _e);
+    logger.error(_e, 'Error removing member');
     return serverError(res, 'Failed to remove member');
   }
 }
@@ -248,7 +249,7 @@ export async function revokeInvitationController(req: Request, res: Response) {
     }
     return ok(res, 'Invitation revoked');
   } catch (_e) {
-    console.error('Error revoking invitation:', _e);
+    logger.error(_e, 'Error revoking invitation');
     return serverError(res, 'Failed to revoke invitation');
   }
 }
@@ -269,7 +270,7 @@ export async function leaveWorkspaceController(req: Request, res: Response) {
     }
     return ok(res, 'Left workspace');
   } catch (_e) {
-    console.error('Error leaving workspace:', _e);
+    logger.error(_e, 'Error leaving workspace');
     return serverError(res, 'Failed to leave workspace');
   }
 }

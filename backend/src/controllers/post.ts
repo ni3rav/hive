@@ -25,6 +25,7 @@ import {
   serverError,
   conflict,
 } from '../utils/responses';
+import logger from '../logger';
 
 //* list all posts in workspace (metadata only, no content)
 export async function listWorkspacePostsController(
@@ -36,7 +37,7 @@ export async function listWorkspacePostsController(
   const [error, posts] = await getPostsByWorkspaceSlug(workspaceSlug);
 
   if (error) {
-    console.error('error fetching posts:', error);
+    logger.error(error, 'error fetching posts');
     return serverError(res, 'failed to fetch posts');
   }
 
@@ -72,7 +73,7 @@ export async function getPostWithContentController(
     } else if ((error as Error).message === 'post not found') {
       return notFound(res, 'post not found');
     } else {
-      console.error('error fetching post:', error);
+      logger.error(error, 'error fetching post');
       return serverError(res, 'failed to fetch post');
     }
   }
@@ -118,7 +119,7 @@ export async function createPostController(req: Request, res: Response) {
     ) {
       return validationError(res, errorMessage);
     } else {
-      console.error('error creating post:', error);
+      logger.error(error, 'error creating post');
       return serverError(res, 'failed to create post');
     }
   }
@@ -167,7 +168,7 @@ export async function updatePostController(req: Request, res: Response) {
     ) {
       return validationError(res, errorMessage);
     } else {
-      console.error('error updating post:', error);
+      logger.error(error, 'error updating post');
       return serverError(res, 'failed to update post');
     }
   }
@@ -199,7 +200,7 @@ export async function deletePostController(req: Request, res: Response) {
     } else if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'workspace not found');
     } else {
-      console.error('error deleting post:', error);
+      logger.error(error, 'error deleting post');
       return serverError(res, 'failed to delete post');
     }
   }

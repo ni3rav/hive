@@ -21,6 +21,7 @@ import {
   ok,
   serverError,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function listWorkspaceAuthorsController(
   req: Request,
@@ -31,7 +32,7 @@ export async function listWorkspaceAuthorsController(
   const [error, authors] = await getAuthorsByWorkspaceSlug(workspaceSlug);
 
   if (error) {
-    console.error('Error fetching authors:', error);
+    logger.error(error, 'Error fetching authors');
     return serverError(res, 'Failed to fetch authors');
   }
 
@@ -64,7 +65,7 @@ export async function createAuthorController(req: Request, res: Response) {
   });
 
   if (error) {
-    console.error('Error creating author:', error);
+    logger.error(error, 'Error creating author');
     return serverError(res, 'Failed to create author');
   }
 
@@ -90,7 +91,7 @@ export async function deleteAuthorController(req: Request, res: Response) {
     } else if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
     } else {
-      console.error('Error deleting author:', error);
+      logger.error(error, 'Error deleting author');
       return serverError(res, 'Failed to delete author');
     }
   }
@@ -123,7 +124,7 @@ export async function updateAuthorController(req: Request, res: Response) {
     if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
     } else {
-      console.error('Error updating author:', error);
+      logger.error(error, 'Error updating author');
       return serverError(res, 'Failed to update author');
     }
   }

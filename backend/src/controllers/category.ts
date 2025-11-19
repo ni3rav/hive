@@ -22,6 +22,7 @@ import {
   serverError,
   conflict,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function listWorkspaceCategoriesController(
   req: Request,
@@ -32,7 +33,7 @@ export async function listWorkspaceCategoriesController(
   const [error, categories] = await getCategoriesByWorkspaceSlug(workspaceSlug);
 
   if (error) {
-    console.error('Error fetching categories:', error);
+    logger.error(error, 'Error fetching categories');
     return serverError(res, 'Failed to fetch categories');
   }
 
@@ -69,7 +70,7 @@ export async function createCategoryController(req: Request, res: Response) {
     ) {
       return conflict(res, 'Category slug already exists in this workspace');
     }
-    console.error('Error creating category:', error);
+    logger.error(error, 'Error creating category');
     return serverError(res, 'Failed to create category');
   }
 
@@ -102,7 +103,7 @@ export async function deleteCategoryController(req: Request, res: Response) {
     } else if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
     } else {
-      console.error('Error deleting category:', error);
+      logger.error(error, 'Error deleting category');
       return serverError(res, 'Failed to delete category');
     }
   }
@@ -142,7 +143,7 @@ export async function updateCategoryController(req: Request, res: Response) {
     ) {
       return conflict(res, 'Category slug already exists in this workspace');
     } else {
-      console.error('Error updating category:', error);
+      logger.error(error, 'Error updating category');
       return serverError(res, 'Failed to update category');
     }
   }

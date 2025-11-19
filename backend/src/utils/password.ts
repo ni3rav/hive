@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { db } from '../db';
 import { passwordResetLinksTable } from '../db/schema';
+import logger from '../logger';
 
 const SALT_ROUNDS = 12;
 const RESET_PASSWORD_LINK_AGE = 1000 * 60 * 15; // 15 minutes
@@ -13,7 +14,7 @@ export async function hashPassword(
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     return [null, hash];
   } catch (err) {
-    console.error('Error hashing password:', err);
+    logger.error(err, 'Error hashing password');
     return [err as Error, null];
   }
 }
@@ -26,7 +27,7 @@ export async function verifyPassword(
     const isValid = await bcrypt.compare(password, hashedPassword);
     return [null, isValid];
   } catch (err) {
-    console.error('Error verifying password:', err);
+    logger.error(err, 'Error verifying password');
     return [err as Error, null];
   }
 }
@@ -53,7 +54,7 @@ export async function createResetPasswordLink(
       .returning();
     return [null, link];
   } catch (error) {
-    console.error('Error creating reset password link', error);
+    logger.error(error, 'Error creating reset password link');
     return [error as Error, null];
   }
 }

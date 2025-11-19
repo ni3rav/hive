@@ -19,6 +19,7 @@ import {
   serverError,
   conflict,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function listWorkspaceTagsController(req: Request, res: Response) {
   const workspaceSlug = req.workspaceSlug!;
@@ -26,7 +27,7 @@ export async function listWorkspaceTagsController(req: Request, res: Response) {
   const [error, tags] = await getTagsByWorkspaceSlug(workspaceSlug);
 
   if (error) {
-    console.error('Error fetching tags:', error);
+    logger.error(error, 'Error fetching tags');
     return serverError(res, 'Failed to fetch tags');
   }
 
@@ -62,7 +63,7 @@ export async function createTagController(req: Request, res: Response) {
     ) {
       return conflict(res, 'Tag slug already exists in this workspace');
     }
-    console.error('Error creating tag:', error);
+    logger.error(error, 'Error creating tag');
     return serverError(res, 'Failed to create tag');
   }
 
@@ -88,7 +89,7 @@ export async function deleteTagController(req: Request, res: Response) {
     } else if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
     } else {
-      console.error('Error deleting tag:', error);
+      logger.error(error, 'Error deleting tag');
       return serverError(res, 'Failed to delete tag');
     }
   }
@@ -127,7 +128,7 @@ export async function updateTagController(req: Request, res: Response) {
     ) {
       return conflict(res, 'Tag slug already exists in this workspace');
     } else {
-      console.error('Error updating tag:', error);
+      logger.error(error, 'Error updating tag');
       return serverError(res, 'Failed to update tag');
     }
   }

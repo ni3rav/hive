@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { sessionIdSchema } from './validations/common';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema';
+import logger from '../logger';
 
 export const SESSION_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
 export const VERIFICATION_LINK_AGE = 1000 * 60 * 15; // 15 minutes
@@ -30,7 +31,7 @@ export async function createSession(
       .values({ id: sessionId, userId, expiresAt });
     return [null, { sessionId, expiresAt }];
   } catch (err) {
-    console.error('Error creating session:', err);
+    logger.error(err, 'Error creating session');
     return [err as Error, null];
   }
 }

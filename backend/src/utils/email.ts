@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { env } from '../env';
+import logger from '../logger';
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -27,13 +28,13 @@ export const sendEmail = async (options: SendEmailOptions) => {
     });
 
     if (error) {
-      console.error('Email send error:', error);
+      logger.error(error, 'Email send error');
       return [error, null] as const;
     }
 
     return [null, data] as const;
   } catch (error) {
-    console.error('Email send exception:', error);
+    logger.error(error, 'Email send exception');
     return [error, null] as const;
   }
 };

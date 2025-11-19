@@ -45,6 +45,7 @@ import {
   VERIFICATION_EMAIL_FROM,
   PASSWORD_RESET_EMAIL_FROM,
 } from '../templates';
+import logger from '../logger';
 
 export async function registerController(req: Request, res: Response) {
   //* validating reqeust body
@@ -73,7 +74,7 @@ export async function registerController(req: Request, res: Response) {
     const [hashError, hashedPassword] = await hashPassword(password);
 
     if (hashError || !hashedPassword) {
-      console.error(hashError);
+      logger.error(hashError);
       return serverError(res, 'Internal Server Error while Registering');
     }
 
@@ -111,7 +112,7 @@ export async function registerController(req: Request, res: Response) {
     });
 
     if (emailError) {
-      console.error('Failed to send verification email:', emailError);
+      logger.error(emailError, 'Failed to send verification email');
     }
 
     return created(
@@ -122,7 +123,7 @@ export async function registerController(req: Request, res: Response) {
       },
     );
   } catch (error) {
-    console.error('Error in registerController:', error);
+    logger.error(error, 'Error in registerController');
     return serverError(res, 'Failed to register user');
   }
 }
@@ -188,7 +189,7 @@ export async function loginController(req: Request, res: Response) {
       });
 
       if (emailError) {
-        console.error('Failed to send verification email:', emailError);
+        logger.error(emailError, 'Failed to send verification email');
       }
 
       return forbidden(
@@ -208,7 +209,7 @@ export async function loginController(req: Request, res: Response) {
 
     return ok(res, 'Logged in successfully');
   } catch (error) {
-    console.error('Error in loginController:', error);
+    logger.error(error, 'Error in loginController');
     return serverError(res, 'Failed to login');
   }
 }
@@ -223,7 +224,7 @@ export async function logoutController(req: Request, res: Response) {
 
     return ok(res, 'Logged out successfully');
   } catch (error) {
-    console.error('Error in logoutController:', error);
+    logger.error(error, 'Error in logoutController');
     return serverError(res, 'Failed to logout');
   }
 }
@@ -248,7 +249,7 @@ export async function meController(req: Request, res: Response) {
       email: user.email,
     });
   } catch (error) {
-    console.error('Error in meController:', error);
+    logger.error(error, 'Error in meController');
     return serverError(res, 'Failed to retrieve user');
   }
 }
@@ -312,7 +313,7 @@ export async function verifyController(req: Request, res: Response) {
 
     return ok(res, 'Email verified and logged in successfully');
   } catch (error) {
-    console.error('Error in verifyController:', error);
+    logger.error(error, 'Error in verifyController');
     return serverError(res, 'Failed to verify email');
   }
 }
@@ -341,7 +342,7 @@ export async function generateResetPasswordLinkController(
       'Check if correct email address was entered or not',
     );
   } else if (error) {
-    console.error('Error in generateResetPasswordLinkController', error);
+    logger.error(error, 'Error in generateResetPasswordLinkController');
     return serverError(res, 'Error while fetching user');
   }
 
@@ -365,7 +366,7 @@ export async function generateResetPasswordLinkController(
   });
 
   if (emailError) {
-    console.error('Failed to send password reset email:', emailError);
+    logger.error(emailError, 'Failed to send password reset email');
     return serverError(res, 'Failed to send password reset email');
   }
 
@@ -405,14 +406,14 @@ export async function resetPasswordController(req: Request, res: Response) {
     const [hashPassowrdError, newHashedPassword] = await hashPassword(password);
 
     if (hashPassowrdError || !newHashedPassword) {
-      console.error(hashPassowrdError);
+      logger.error(hashPassowrdError);
       return serverError(res, 'Internal server error while resetting password');
     }
 
     const [userError, user] = await getUserFromEmail(email);
 
     if (userError) {
-      console.error(userError);
+      logger.error(userError);
       return serverError(res, 'Error while resetting password for the user');
     }
 
@@ -443,7 +444,7 @@ export async function resetPasswordController(req: Request, res: Response) {
     });
     return ok(res, 'Password reset successfully');
   } catch (error) {
-    console.error('Error in resetPasswordController \n', error);
+    logger.error(error, 'Error in resetPasswordController');
     return serverError(res, 'Error while resetting password');
   }
 }

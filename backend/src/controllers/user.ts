@@ -10,6 +10,7 @@ import {
   ok,
   serverError,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function editProfileController(req: Request, res: Response) {
   const validatedBody = editProfileSchema.safeParse(req.body);
@@ -64,7 +65,7 @@ export async function editProfileController(req: Request, res: Response) {
       email: updatedUser.email,
     });
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    logger.error(error, 'Error updating user profile');
 
     // Handle specific error for email conflict
     if ((error as Error).message === 'Email already in use') {

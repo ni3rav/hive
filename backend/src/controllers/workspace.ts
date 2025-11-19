@@ -20,6 +20,7 @@ import {
   notFound,
   forbidden,
 } from '../utils/responses';
+import logger from '../logger';
 
 export async function createWorkspaceController(req: Request, res: Response) {
   const { workspaceName, workspaceSlug } = req.body;
@@ -66,7 +67,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
       slug: workspace.slug,
     });
   } catch (error) {
-    console.error('Error creating workspace:', error);
+    logger.error(error, 'Error creating workspace');
     return serverError(res, 'Failed to create workspace');
   }
 }
@@ -111,7 +112,7 @@ export async function verifyWorkspaceAccessController(
       role: workspaceRole,
     });
   } catch (error) {
-    console.error('Error verifying workspace access:', error);
+    logger.error(error, 'Error verifying workspace access');
     return serverError(res, 'Failed to verify workspace access');
   }
 }
@@ -138,7 +139,7 @@ export async function updateWorkspaceController(req: Request, res: Response) {
     if ((error as Error).message === 'workspace not found') {
       return notFound(res, 'Workspace not found');
     }
-    console.error('Error updating workspace:', error);
+    logger.error(error, 'Error updating workspace');
     return serverError(res, 'Failed to update workspace');
   }
 
@@ -172,7 +173,7 @@ export async function deleteWorkspaceController(req: Request, res: Response) {
     ) {
       return notFound(res, 'Workspace not found');
     }
-    console.error('Error deleting workspace:', error);
+    logger.error(error, 'Error deleting workspace');
     return serverError(res, 'Failed to delete workspace');
   }
 
