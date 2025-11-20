@@ -87,7 +87,7 @@ export function WorkspaceManagementPage() {
   ];
 
   return (
-    <div className='min-h-screen w-full bg-background flex flex-col items-center justify-center px-6'>
+    <div className='min-h-screen w-full bg-background flex flex-col items-center justify-center p-4'>
       {/* Title */}
       <h1 className='text-3xl md:text-4xl text-foreground mb-12'>
         Select a workspace
@@ -191,9 +191,9 @@ export function WorkspaceManagementPage() {
         onClick={() => {
           // go back in the navigation stack if possible, otherwise fallback
           if (window.history.length > 1) {
-        navigate(-1);
+            navigate(-1);
           } else {
-        navigate('/');
+            navigate('/');
           }
         }}
         variant='outline'

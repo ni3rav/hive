@@ -23,7 +23,7 @@ export function NavMain({
           <SidebarMenuItem key={item.title}>
             <NavLink to={item.url} end className='w-full'>
               {({ isActive }) => (
-                <SidebarMenuButton isActive={isActive} className='w-full'>
+                <SidebarMenuButton isActive={isActive} className='w-full px-4'>
                   <item.icon />
                   <span>{item.title}</span>
                 </SidebarMenuButton>

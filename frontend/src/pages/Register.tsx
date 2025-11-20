@@ -51,7 +51,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className='w-screen h-screen grid place-items-center'>
+    <div className='w-screen h-screen grid place-items-center p-4'>
       <RegisterForm
         onRegSubmit={handleRegister}
         onLoginClick={() => navigate('/login')}

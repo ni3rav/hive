@@ -30,13 +30,15 @@ export default function LoginPage() {
         },
         onError: (error: unknown) => {
           const apiError = error as { response?: { status?: number } };
-          
+
           // Handle email not verified (403)
           if (apiError.response?.status === 403) {
-            toast.error('Email not verified. Please check your email for verification link.');
+            toast.error(
+              'Email not verified. Please check your email for verification link.',
+            );
             return;
           }
-          
+
           const message = getAuthErrorMessage(error, 'login', 'Login failed');
           toast.error(message);
         },
@@ -45,7 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='w-screen h-screen grid place-items-center'>
+    <div className='w-screen h-screen grid place-items-center p-4'>
       <LoginForm
         onFormSubmit={handleLogin}
         onSignupClick={() => navigate('/register')}

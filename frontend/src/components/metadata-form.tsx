@@ -46,6 +46,7 @@ import {
 } from '@/components/editor/content-utils';
 import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const METADATA_EXPANDED_COOKIE = 'metadataExpanded';
 
@@ -352,260 +353,266 @@ export function MetadataForm({
           </div>
         </AccordionTrigger>
         <AccordionContent>
-          <div className='p-6 space-y-6'>
-            <div>
-              <Input
-                type='text'
-                placeholder='A Great Title'
-                className={cn(
-                  'w-full h-auto bg-none border-none px-4 py-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug tracking-tight shadow-none',
-                  'placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:border-none !outline-none',
-                  'caret-primary selection:bg-primary selection:text-primary-foreground',
-                  errors.title && 'border-b border-destructive',
-                )}
-                {...register('title', {
-                  onChange: handleTitleChange,
-                  onBlur: handleBlur,
-                })}
-              />
-              {errors.title && (
-                <p className='text-sm text-destructive mt-1 px-4'>
-                  {errors.title.message}
-                </p>
-              )}
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-[120px_1fr] md:items-center gap-x-6 gap-y-6 text-sm'>
-              <label className='text-muted-foreground font-medium'>Slug</label>
+          <ScrollArea className='h-96'>
+            <div className='p-6 space-y-6'>
               <div>
                 <Input
+                  type='text'
+                  placeholder='A Great Title'
                   className={cn(
-                    'h-9',
-                    formFieldClasses,
-                    errors.slug && 'border-destructive',
+                    'w-full h-auto bg-none border-none px-4 py-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-snug tracking-tight shadow-none',
+                    'placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:border-none !outline-none',
+                    'caret-primary selection:bg-primary selection:text-primary-foreground',
+                    errors.title && 'border-b border-destructive',
                   )}
-                  {...register('slug', {
-                    onChange: () => {
-                      slugManuallyEditedRef.current = true;
-                    },
-                    onBlur: () => {
-                      syncToParent();
-                      form.clearErrors('slug');
-                    },
+                  {...register('title', {
+                    onChange: handleTitleChange,
+                    onBlur: handleBlur,
                   })}
                 />
-                {errors.slug && (
-                  <p className='text-sm text-destructive mt-1'>
-                    {errors.slug.message}
+                {errors.title && (
+                  <p className='text-sm text-destructive mt-1 px-4'>
+                    {errors.title.message}
                   </p>
                 )}
               </div>
 
-              <label className='text-muted-foreground font-medium'>
-                Author
-              </label>
-              <Controller
-                control={control}
-                name='authorId'
-                render={({ field }) => (
-                  <AuthorSelect
-                    value={field.value ?? null}
-                    onChange={(authorId) => {
-                      field.onChange(authorId || undefined);
-                      syncToParent();
-                    }}
-                    placeholder='Select author...'
-                    allowCreate
+              <div className='grid grid-cols-1 md:grid-cols-[120px_1fr] md:items-center gap-x-6 gap-y-6 text-sm'>
+                <label className='text-muted-foreground font-medium'>
+                  Slug
+                </label>
+                <div>
+                  <Input
+                    className={cn(
+                      'h-9',
+                      formFieldClasses,
+                      errors.slug && 'border-destructive',
+                    )}
+                    {...register('slug', {
+                      onChange: () => {
+                        slugManuallyEditedRef.current = true;
+                      },
+                      onBlur: () => {
+                        syncToParent();
+                        form.clearErrors('slug');
+                      },
+                    })}
                   />
-                )}
-              />
+                  {errors.slug && (
+                    <p className='text-sm text-destructive mt-1'>
+                      {errors.slug.message}
+                    </p>
+                  )}
+                </div>
 
-              <label className='text-muted-foreground font-medium'>
-                Published at
-              </label>
-              <div>
+                <label className='text-muted-foreground font-medium'>
+                  Author
+                </label>
                 <Controller
                   control={control}
-                  name='publishedAt'
+                  name='authorId'
                   render={({ field }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant='outline'
-                          className={cn(
-                            'w-[240px] justify-start text-left font-normal h-9 px-3',
-                            formFieldClasses,
-                            errors.publishedAt && 'border-destructive',
-                          )}
-                        >
-                          <CalendarIcon className='mr-2 h-4 w-4' />
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className='w-auto p-0' align='start'>
-                        <Calendar
-                          mode='single'
-                          selected={field.value}
-                          onSelect={(date) => {
-                            field.onChange(date || new Date());
-                            syncToParent();
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                />
-                {errors.publishedAt && (
-                  <p className='text-sm text-destructive mt-1'>
-                    {errors.publishedAt.message}
-                  </p>
-                )}
-              </div>
-
-              <label className='text-muted-foreground font-medium self-start md:pt-2'>
-                Excerpt
-              </label>
-              <div>
-                <Textarea
-                  placeholder='A short description of your post. Recommended to be 155 characters or less.'
-                  className={cn(
-                    'min-h-[80px]',
-                    formFieldClasses,
-                    errors.excerpt && 'border-destructive',
-                  )}
-                  {...register('excerpt', { onBlur: handleBlur })}
-                />
-                {errors.excerpt && (
-                  <p className='text-sm text-destructive mt-1'>
-                    {errors.excerpt.message}
-                  </p>
-                )}
-              </div>
-
-              <label className='text-muted-foreground font-medium'>
-                Category
-              </label>
-              <Controller
-                control={control}
-                name='categorySlug'
-                render={({ field }) => (
-                  <CategorySelect
-                    value={field.value ?? null}
-                    onChange={(categorySlug) => {
-                      field.onChange(categorySlug || undefined);
-                      syncToParent();
-                    }}
-                    placeholder='Select category...'
-                    allowCreate
-                  />
-                )}
-              />
-
-              <label className='text-muted-foreground font-medium'>Tags</label>
-              <Controller
-                control={control}
-                name='tagSlugs'
-                render={({ field }) => (
-                  <TagMultiSelect
-                    value={field.value || []}
-                    onChange={(tagSlugs) => {
-                      field.onChange(tagSlugs);
-                      syncToParent();
-                    }}
-                    placeholder='Select tags...'
-                    allowCreate
-                  />
-                )}
-              />
-
-              <label className='text-muted-foreground font-medium'>
-                Status
-              </label>
-              <Controller
-                control={control}
-                name='status'
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value as 'draft' | 'published');
-                      syncToParent();
-                    }}
-                  >
-                    <SelectTrigger className={cn('h-9', formFieldClasses)}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='draft'>Draft</SelectItem>
-                      <SelectItem value='published'>Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              <label className='text-muted-foreground font-medium'>
-                Visibility
-              </label>
-              <Controller
-                control={control}
-                name='visible'
-                render={({ field }) => (
-                  <div className='flex items-center gap-2'>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
+                    <AuthorSelect
+                      value={field.value ?? null}
+                      onChange={(authorId) => {
+                        field.onChange(authorId || undefined);
                         syncToParent();
                       }}
+                      placeholder='Select author...'
+                      allowCreate
                     />
-                    <span className='text-sm text-muted-foreground'>
-                      {field.value ? 'Visible' : 'Hidden'}
-                    </span>
-                  </div>
-                )}
-              />
-            </div>
-            <div className='flex items-center justify-start gap-2 pt-4 border-t border-border/40'>
-              <Button
-                onClick={handleSave}
-                disabled={isSaveDisabled}
-                size='sm'
-                className='h-8'
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className='mr-2 h-3 w-3 animate-spin' />
-                    {statusValue === 'published'
-                      ? 'Publishing...'
-                      : 'Saving...'}
-                  </>
-                ) : statusValue === 'published' ? (
-                  isEditing ? (
-                    'Update & Publish'
+                  )}
+                />
+
+                <label className='text-muted-foreground font-medium'>
+                  Published at
+                </label>
+                <div>
+                  <Controller
+                    control={control}
+                    name='publishedAt'
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant='outline'
+                            className={cn(
+                              'w-[240px] justify-start text-left font-normal h-9 px-3',
+                              formFieldClasses,
+                              errors.publishedAt && 'border-destructive',
+                            )}
+                          >
+                            <CalendarIcon className='mr-2 h-4 w-4' />
+                            {field.value ? (
+                              format(field.value, 'PPP')
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className='w-auto p-0' align='start'>
+                          <Calendar
+                            mode='single'
+                            selected={field.value}
+                            onSelect={(date) => {
+                              field.onChange(date || new Date());
+                              syncToParent();
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />
+                  {errors.publishedAt && (
+                    <p className='text-sm text-destructive mt-1'>
+                      {errors.publishedAt.message}
+                    </p>
+                  )}
+                </div>
+
+                <label className='text-muted-foreground font-medium self-start md:pt-2'>
+                  Excerpt
+                </label>
+                <div>
+                  <Textarea
+                    placeholder='A short description of your post. Recommended to be 155 characters or less.'
+                    className={cn(
+                      'min-h-[80px]',
+                      formFieldClasses,
+                      errors.excerpt && 'border-destructive',
+                    )}
+                    {...register('excerpt', { onBlur: handleBlur })}
+                  />
+                  {errors.excerpt && (
+                    <p className='text-sm text-destructive mt-1'>
+                      {errors.excerpt.message}
+                    </p>
+                  )}
+                </div>
+
+                <label className='text-muted-foreground font-medium'>
+                  Category
+                </label>
+                <Controller
+                  control={control}
+                  name='categorySlug'
+                  render={({ field }) => (
+                    <CategorySelect
+                      value={field.value ?? null}
+                      onChange={(categorySlug) => {
+                        field.onChange(categorySlug || undefined);
+                        syncToParent();
+                      }}
+                      placeholder='Select category...'
+                      allowCreate
+                    />
+                  )}
+                />
+
+                <label className='text-muted-foreground font-medium'>
+                  Tags
+                </label>
+                <Controller
+                  control={control}
+                  name='tagSlugs'
+                  render={({ field }) => (
+                    <TagMultiSelect
+                      value={field.value || []}
+                      onChange={(tagSlugs) => {
+                        field.onChange(tagSlugs);
+                        syncToParent();
+                      }}
+                      placeholder='Select tags...'
+                      allowCreate
+                    />
+                  )}
+                />
+
+                <label className='text-muted-foreground font-medium'>
+                  Status
+                </label>
+                <Controller
+                  control={control}
+                  name='status'
+                  render={({ field }) => (
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value as 'draft' | 'published');
+                        syncToParent();
+                      }}
+                    >
+                      <SelectTrigger className={cn('h-9', formFieldClasses)}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='draft'>Draft</SelectItem>
+                        <SelectItem value='published'>Published</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+
+                <label className='text-muted-foreground font-medium'>
+                  Visibility
+                </label>
+                <Controller
+                  control={control}
+                  name='visible'
+                  render={({ field }) => (
+                    <div className='flex items-center gap-2'>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          syncToParent();
+                        }}
+                      />
+                      <span className='text-sm text-muted-foreground'>
+                        {field.value ? 'Visible' : 'Hidden'}
+                      </span>
+                    </div>
+                  )}
+                />
+              </div>
+              <div className='flex items-center justify-start gap-2 pt-4 border-t border-border/40'>
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaveDisabled}
+                  size='sm'
+                  className='h-8'
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className='mr-2 h-3 w-3 animate-spin' />
+                      {statusValue === 'published'
+                        ? 'Publishing...'
+                        : 'Saving...'}
+                    </>
+                  ) : statusValue === 'published' ? (
+                    isEditing ? (
+                      'Update & Publish'
+                    ) : (
+                      'Publish'
+                    )
+                  ) : isEditing ? (
+                    'Update Draft'
                   ) : (
-                    'Publish'
-                  )
-                ) : isEditing ? (
-                  'Update Draft'
-                ) : (
-                  'Save Draft'
-                )}
-              </Button>
-              <Button
-                onClick={handleClear}
-                variant='outline'
-                size='sm'
-                className='h-8'
-                disabled={isSaving}
-              >
-                Clear
-              </Button>
+                    'Save Draft'
+                  )}
+                </Button>
+                <Button
+                  onClick={handleClear}
+                  variant='outline'
+                  size='sm'
+                  className='h-8'
+                  disabled={isSaving}
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

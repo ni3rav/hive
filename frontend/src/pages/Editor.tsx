@@ -75,7 +75,7 @@ export default function Editor() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full p-6 flex flex-col'>
+      <div className='h-full flex flex-col'>
         <MetadataForm
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}

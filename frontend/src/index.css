@@ -44,7 +44,7 @@
     'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --radius: 0.4rem;
+  --radius: 0.8rem;
   --shadow-2xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-xs: 0px 1px 4px 0px hsl(0 0% 0% / 0.03);
   --shadow-sm:
