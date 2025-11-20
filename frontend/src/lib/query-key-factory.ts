@@ -132,6 +132,10 @@ export class QueryKeys {
     settings() {
       return [...this.base, 'settings'];
     },
+
+    dashboardStats(workspaceSlug: string) {
+      return [...this.base, 'dashboard', workspaceSlug];
+    },
   };
 
   public static userKeys() {
