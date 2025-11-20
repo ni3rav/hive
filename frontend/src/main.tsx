@@ -18,6 +18,7 @@ import { Spinner } from './components/ui/spinner';
 import CategoriesManager from './components/Category/CategoryManager';
 import MemberManager from './components/Member/MemberManager';
 import InviteMemberPage from './components/Member/InviteMemberPage';
+import { ThemeProvider } from '@/contexts/theme-context';
 
 const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
@@ -138,18 +139,20 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <Toaster position='top-right' richColors />
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <Suspense
-        fallback={
-          <div className='flex h-screen w-screen items-center justify-center'>
-            <Spinner className='size-5' />
-          </div>
-        }
-      >
-        <RouterProvider router={router} />
-      </Suspense>
-    </ErrorBoundary>
-  </QueryClientProvider>,
+  <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <Toaster position='top-right' richColors />
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense
+          fallback={
+            <div className='flex h-screen w-screen items-center justify-center'>
+              <Spinner className='size-5' />
+            </div>
+          }
+        >
+          <RouterProvider router={router} />
+        </Suspense>
+      </ErrorBoundary>
+    </QueryClientProvider>
+  </ThemeProvider>,
 );
