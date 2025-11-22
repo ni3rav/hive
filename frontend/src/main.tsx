@@ -39,6 +39,8 @@ const TagsPage = lazyPage('/src/pages/Tag.tsx');
 const PostPage = lazyPage('/src/pages/Post.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const AcceptInvitePage = lazyPage('/src/pages/AcceptInvitePage.tsx');
+const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx', 'ApiKeysPage');
+
 const router = createBrowserRouter([
   // --- Public Routes ---
   {
@@ -126,6 +128,10 @@ const router = createBrowserRouter([
           {
             path: 'members',
             element: <MemberManager />,
+          },
+          {
+            path: 'keys',
+            element: <ApiKeysPage />,
           },
           { path: '*', element: <NotFound /> },
         ],
