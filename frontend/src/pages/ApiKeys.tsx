@@ -8,7 +8,7 @@ export function ApiKeysPage() {
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>API Keys</h1>
           <p className='text-muted-foreground text-sm'>
-            Manage your API keys for accessing the Marble API.
+            Manage your API keys for accessing the API.
           </p>
         </div>
         <Button>
