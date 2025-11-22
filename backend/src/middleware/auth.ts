@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getUserIdbySession } from '../utils/sessions';
 import { unauthorized } from '../utils/responses';
+import { env } from '../env';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -13,6 +14,15 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
+  if (env.isDevelopment && env.DMA) {
+    if (!env.DEV_USER_ID) {
+      return unauthorized(res, 'DEV_USER_ID not configured');
+    }
+    req.userId = env.DEV_USER_ID;
+    next();
+    return;
+  }
+
   const sessionId: string = req.cookies['session_id'];
 
   if (!sessionId) {
