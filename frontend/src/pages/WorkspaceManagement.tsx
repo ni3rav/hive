@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useDeleteWorkspace, useUserWorkspaces } from '@/hooks/useWorkspace';
 import { CreateWorkspaceDialog } from '@/components/Workspace/CreateWorkspaceDialog';
 import { UpdateWorkspaceDialog } from '@/components/Workspace/UpdateWorkspaceDialog';
@@ -35,13 +35,30 @@ export function WorkspaceManagementPage() {
     name: string;
   } | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
   const { current: lastUsedSlug } = getLastWorkspaceSlugs();
   const deleteWorkspace = useDeleteWorkspace();
 
+  // Extract the current route path after the workspace slug
+  const getCurrentRoutePath = () => {
+    if (!workspaceSlug) return '';
+    const basePath = `/dashboard/${workspaceSlug}`;
+    if (location.pathname.startsWith(basePath)) {
+      const remainingPath = location.pathname.slice(basePath.length);
+      return remainingPath || '';
+    }
+    return '';
+  };
+
   const handleNavigateToWorkspace = (slug: string) => {
     updateLastWorkspaceCookie(slug);
-    navigate(`/dashboard/${slug}`);
+    const currentRoutePath = getCurrentRoutePath();
+    const targetPath = currentRoutePath
+      ? `/dashboard/${slug}${currentRoutePath}`
+      : `/dashboard/${slug}`;
+    navigate(targetPath);
   };
 
   const handleDeleteWorkspace = (

@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, type Location } from 'react-router-dom';
 import { toast } from 'sonner';
 import { LoginForm } from '@/components/login.tsx';
 import { useLogin } from '@/hooks/useAuth';
@@ -7,7 +7,14 @@ import { getAuthErrorMessage } from '@/lib/error-utils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { mutate: login, isPending } = useLogin();
+
+  const from =
+    (location.state as { from?: Location })?.from?.pathname &&
+    (location.state as { from?: Location })?.from?.pathname !== '/login'
+      ? (location.state as { from?: Location })?.from?.pathname
+      : '/dashboard';
 
   const handleLogin = (email: string, password: string) => {
     const validatedData = loginSchema.safeParse({
@@ -26,7 +33,7 @@ export default function LoginPage() {
       {
         onSuccess: () => {
           toast.success('Login successful! Welcome back.');
-          navigate('/dashboard');
+          navigate(from, { replace: true });
         },
         onError: (error: unknown) => {
           const apiError = error as { response?: { status?: number } };

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useUserWorkspaces } from '@/hooks/useWorkspace';
 import { Settings, ChevronsUpDown } from 'lucide-react';
 import {
@@ -29,9 +29,21 @@ function RoleBadge({ role }: { role: string }) {
 export function WorkspaceSwitcher() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
   const { previous: lastUsedSlug } = getLastWorkspaceSlugs();
+
+  // Extract the current route path after the workspace slug
+  const getCurrentRoutePath = () => {
+    if (!workspaceSlug) return '';
+    const basePath = `/dashboard/${workspaceSlug}`;
+    if (location.pathname.startsWith(basePath)) {
+      const remainingPath = location.pathname.slice(basePath.length);
+      return remainingPath || '';
+    }
+    return '';
+  };
 
   const currentWorkspace = useMemo(() => {
     if (!workspaceSlug) return null;
@@ -104,15 +116,21 @@ export function WorkspaceSwitcher() {
             <DropdownMenuContent align='start' className='w-[280px]'>
               <DropdownMenuLabel>Your Workspaces</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {workspaces.map((workspace) => (
-                <DropdownMenuItem
-                  key={workspace.id}
-                  onClick={() => {
-                    setOpen(false);
-                    navigate(`/dashboard/${workspace.slug}`);
-                  }}
-                  className='flex flex-col items-start gap-1.5 min-w-0'
-                >
+              {workspaces.map((workspace) => {
+                const currentRoutePath = getCurrentRoutePath();
+                const targetPath = currentRoutePath
+                  ? `/dashboard/${workspace.slug}${currentRoutePath}`
+                  : `/dashboard/${workspace.slug}`;
+
+                return (
+                  <DropdownMenuItem
+                    key={workspace.id}
+                    onClick={() => {
+                      setOpen(false);
+                      navigate(targetPath);
+                    }}
+                    className='flex flex-col items-start gap-1.5 min-w-0'
+                  >
                   <div className='flex items-center gap-2 w-full min-w-0'>
                     <span className='truncate text-sm font-medium'>
                       {workspace.name}
@@ -128,7 +146,8 @@ export function WorkspaceSwitcher() {
                     {workspace.slug}
                   </span>
                 </DropdownMenuItem>
-              ))}
+                );
+              })}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onSelect={() => {
@@ -198,6 +217,10 @@ export function WorkspaceSwitcher() {
               );
               const wsColor = getWorkspaceColor(wsIndex);
               const isActive = workspace.id === currentWorkspace.id;
+              const currentRoutePath = getCurrentRoutePath();
+              const targetPath = currentRoutePath
+                ? `/dashboard/${workspace.slug}${currentRoutePath}`
+                : `/dashboard/${workspace.slug}`;
 
               return (
                 <DropdownMenuItem
@@ -206,7 +229,7 @@ export function WorkspaceSwitcher() {
                     if (!isActive) {
                       setOpen(false);
                       updateLastWorkspaceCookie(workspace.slug);
-                      navigate(`/dashboard/${workspace.slug}`);
+                      navigate(targetPath);
                     }
                   }}
                   className='gap-2 p-2'
