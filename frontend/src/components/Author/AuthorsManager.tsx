@@ -129,21 +129,25 @@ export default function AuthorsManager() {
   if (isError) {
     if (view === 'create') {
       return (
-        <AuthorForm
-          initialData={null}
-          onSave={handleSaveAuthor}
-          onCancel={handleCancel}
-          isSubmitting={createAuthorMutation.isPending}
-        />
+        <div className='p-6'>
+          <AuthorForm
+            initialData={null}
+            onSave={handleSaveAuthor}
+            onCancel={handleCancel}
+            isSubmitting={createAuthorMutation.isPending}
+          />
+        </div>
       );
     }
     return (
-      <AuthorList
-        authors={[]}
-        onAddAuthor={handleAddAuthor}
-        onEditAuthor={handleEditAuthor}
-        onDeleteAuthor={onDeleteAuthor}
-      />
+      <div className='p-6'>
+        <AuthorList
+          authors={[]}
+          onAddAuthor={handleAddAuthor}
+          onEditAuthor={handleEditAuthor}
+          onDeleteAuthor={onDeleteAuthor}
+        />
+      </div>
     );
   }
 

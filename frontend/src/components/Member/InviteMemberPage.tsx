@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, UserPlus, Shield, Crown, Users } from 'lucide-react';
@@ -12,6 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { inviteMemberSchema } from '@/lib/validations/member';
 import { useInviteMember } from '@/hooks/useMember';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
@@ -30,6 +37,7 @@ export default function InviteMemberPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     watch,
     reset,
@@ -43,9 +51,7 @@ export default function InviteMemberPage() {
 
   const availableRoles: MemberRole[] = (
     ['owner', 'admin', 'member'] as MemberRole[]
-  ).filter(
-    (role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole],
-  );
+  ).filter((role) => ROLE_HIERARCHY[role] < ROLE_HIERARCHY[currentUserRole]);
 
   const onFormSubmit = handleSubmit((data) => {
     inviteMemberMutation.mutate(data, {
@@ -136,17 +142,36 @@ export default function InviteMemberPage() {
             <div className='space-y-2'>
               <Label htmlFor='role'>Role</Label>
               <div className='space-y-2'>
-                <select
-                  id='role'
-                  {...register('role')}
-                  className='flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-                >
-                  {availableRoles.map((role) => (
-                    <option key={role} value={role}>
-                      {role.charAt(0).toUpperCase() + role.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  name='role'
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        id='role'
+                        className={
+                          errors.role
+                            ? 'border-destructive focus-visible:ring-destructive w-full'
+                            : 'w-full'
+                        }
+                      >
+                        <SelectValue placeholder='Select a role' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRoles.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            <div className='flex items-center gap-2'>
+                              {getRoleIcon(role)}
+                              <span>
+                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
                 {watch('role') && (
                   <div className='flex items-start gap-2 rounded-md border bg-muted/50 p-3 text-sm'>
                     <div className='mt-0.5 text-muted-foreground'>
@@ -195,4 +220,3 @@ export default function InviteMemberPage() {
     </div>
   );
 }
-
