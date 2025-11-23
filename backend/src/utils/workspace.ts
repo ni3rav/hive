@@ -209,9 +209,10 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
       throw new Error('workspace not found');
     }
 
-    const fifteenDaysAgo = new Date();
-    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
-    fifteenDaysAgo.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const fifteenDaysAgo = new Date(today);
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 14);
 
     const [postsResult, authorsResult, categoriesResult, tagsResult] =
       await Promise.allSettled([
