@@ -210,15 +210,25 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const fifteenDaysAgo = new Date(today);
-    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 14);
+    const todayUTC = new Date(
+      Date.UTC(
+        today.getUTCFullYear(),
+        today.getUTCMonth(),
+        today.getUTCDate(),
+        0,
+        0,
+        0,
+        0,
+      ),
+    );
+    const fifteenDaysAgo = new Date(todayUTC);
+    fifteenDaysAgo.setUTCDate(fifteenDaysAgo.getUTCDate() - 14);
 
     const [postsResult, authorsResult, categoriesResult, tagsResult] =
       await Promise.allSettled([
         db
           .select({
-            date: sql<string>`to_char(${postsTable.createdAt}, 'YYYY-MM-DD')`,
+            date: sql<string>`to_char(date_trunc('day', ${postsTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
             count: sql<number>`count(*)::int`,
           })
           .from(postsTable)
@@ -228,10 +238,12 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
               gte(postsTable.createdAt, fifteenDaysAgo),
             ),
           )
-          .groupBy(sql`to_char(${postsTable.createdAt}, 'YYYY-MM-DD')`),
+          .groupBy(
+            sql`to_char(date_trunc('day', ${postsTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
+          ),
         db
           .select({
-            date: sql<string>`to_char(${authorTable.createdAt}, 'YYYY-MM-DD')`,
+            date: sql<string>`to_char(date_trunc('day', ${authorTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
             count: sql<number>`count(*)::int`,
           })
           .from(authorTable)
@@ -241,10 +253,12 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
               gte(authorTable.createdAt, fifteenDaysAgo),
             ),
           )
-          .groupBy(sql`to_char(${authorTable.createdAt}, 'YYYY-MM-DD')`),
+          .groupBy(
+            sql`to_char(date_trunc('day', ${authorTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
+          ),
         db
           .select({
-            date: sql<string>`to_char(${categoryTable.createdAt}, 'YYYY-MM-DD')`,
+            date: sql<string>`to_char(date_trunc('day', ${categoryTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
             count: sql<number>`count(*)::int`,
           })
           .from(categoryTable)
@@ -254,10 +268,12 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
               gte(categoryTable.createdAt, fifteenDaysAgo),
             ),
           )
-          .groupBy(sql`to_char(${categoryTable.createdAt}, 'YYYY-MM-DD')`),
+          .groupBy(
+            sql`to_char(date_trunc('day', ${categoryTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
+          ),
         db
           .select({
-            date: sql<string>`to_char(${tagTable.createdAt}, 'YYYY-MM-DD')`,
+            date: sql<string>`to_char(date_trunc('day', ${tagTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
             count: sql<number>`count(*)::int`,
           })
           .from(tagTable)
@@ -267,7 +283,9 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
               gte(tagTable.createdAt, fifteenDaysAgo),
             ),
           )
-          .groupBy(sql`to_char(${tagTable.createdAt}, 'YYYY-MM-DD')`),
+          .groupBy(
+            sql`to_char(date_trunc('day', ${tagTable.createdAt} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`,
+          ),
       ]);
 
     const postsData =
@@ -278,24 +296,10 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
       categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
     const tagsData = tagsResult.status === 'fulfilled' ? tagsResult.value : [];
 
-    const dateMap = new Map<string, number>();
-
-    const addToMap = (items: Array<{ date: string; count: number }>) => {
-      for (const item of items) {
-        const existing = dateMap.get(item.date) || 0;
-        dateMap.set(item.date, existing + item.count);
-      }
-    };
-
-    addToMap(postsData);
-    addToMap(authorsData);
-    addToMap(categoriesData);
-    addToMap(tagsData);
-
     const allDates: string[] = [];
     for (let i = 0; i < 15; i++) {
       const date = new Date(fifteenDaysAgo);
-      date.setDate(date.getDate() + i);
+      date.setUTCDate(fifteenDaysAgo.getUTCDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       allDates.push(dateStr);
     }
@@ -340,17 +344,10 @@ export async function getDashboardHeatmap(workspaceSlug: string) {
       };
     });
 
-    const totalActivity = heatmap.reduce((sum, item) => sum + item.activity, 0);
-    const activitySummary =
-      totalActivity > 0
-        ? `${totalActivity} items created in the last 15 days`
-        : 'No activity in the last 15 days';
-
     return [
       null,
       {
         heatmap,
-        activitySummary,
       },
     ] as const;
   } catch (error) {

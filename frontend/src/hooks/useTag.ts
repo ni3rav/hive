@@ -27,8 +27,13 @@ export function useCreateTag(workspaceSlug: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateTagData) => apiCreateTag(workspaceSlug, data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Tag created');
+
+      const queryKey = QueryKeys.tagKeys().list(workspaceSlug);
+      queryClient.setQueryData<Tag[]>(queryKey, (old) =>
+        old ? [data, ...old] : [data],
+      );
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
@@ -45,19 +50,22 @@ export function useCreateTag(workspaceSlug: string) {
 
       const heatmapKey =
         QueryKeys.workspaceKeys().dashboardHeatmap(workspaceSlug);
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date();
+      const todayDay = today.toLocaleDateString('en-US', {
+        weekday: 'short',
+      });
       queryClient.setQueryData<DashboardHeatmapPayload>(
         heatmapKey,
         (oldData) => {
           if (!oldData) return oldData;
           const existingPointIndex = oldData.heatmap.findIndex(
-            (point) => point.day === today,
+            (point) => point.day === todayDay,
           );
           if (existingPointIndex >= 0) {
             return {
               ...oldData,
               heatmap: oldData.heatmap.map((point) =>
-                point.day === today
+                point.day === todayDay
                   ? {
                       ...point,
                       tags: point.tags + 1,
@@ -72,7 +80,7 @@ export function useCreateTag(workspaceSlug: string) {
               heatmap: [
                 ...oldData.heatmap,
                 {
-                  day: today,
+                  day: todayDay,
                   activity: 1,
                   posts: 0,
                   authors: 0,

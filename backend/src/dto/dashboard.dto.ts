@@ -29,7 +29,6 @@ export interface DashboardHeatmapPointDto {
 
 export interface DashboardHeatmapResponseDto {
   heatmap: DashboardHeatmapPointDto[];
-  activitySummary: string;
 }
 
 export function toDashboardStatsResponseDto(data: {
@@ -70,7 +69,6 @@ export function toDashboardHeatmapResponseDto(data: {
     categories: number;
     tags: number;
   }>;
-  activitySummary: string;
 }): DashboardHeatmapResponseDto {
   return {
     heatmap: data.heatmap.map((point) => ({
@@ -81,7 +79,6 @@ export function toDashboardHeatmapResponseDto(data: {
       categories: point.categories,
       tags: point.tags,
     })),
-    activitySummary: data.activitySummary,
   };
 }
 

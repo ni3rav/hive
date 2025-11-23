@@ -12,6 +12,16 @@ import { cn } from '@/lib/utils';
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
 
+  const getIcon = () => {
+    if (theme === 'system') {
+      return <Monitor className='h-4 w-4' />;
+    }
+    if (theme === 'dark') {
+      return <Moon className='h-4 w-4' />;
+    }
+    return <Sun className='h-4 w-4' />;
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,40 +31,39 @@ export function ThemeToggle({ className }: { className?: string }) {
           className={cn('h-9 w-9', className)}
           aria-label='Toggle theme'
         >
-          <Sun className='h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0' />
-          <Moon className='absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100' />
+          {getIcon()}
           <span className='sr-only'>Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='min-w-[140px]'>
+      <DropdownMenuContent align='end' className='min-w-[160px] p-1.5'>
         <DropdownMenuItem
           onClick={() => setTheme('light')}
           className={cn(
-            'cursor-pointer',
+            'cursor-pointer gap-3 px-3 py-2.5',
             theme === 'light' && 'bg-accent text-accent-foreground',
           )}
         >
-          <Sun className='mr-2 h-4 w-4' />
+          <Sun className='h-4 w-4' />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('dark')}
           className={cn(
-            'cursor-pointer',
+            'cursor-pointer gap-3 px-3 py-2.5',
             theme === 'dark' && 'bg-accent text-accent-foreground',
           )}
         >
-          <Moon className='mr-2 h-4 w-4' />
+          <Moon className='h-4 w-4' />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('system')}
           className={cn(
-            'cursor-pointer',
+            'cursor-pointer gap-3 px-3 py-2.5',
             theme === 'system' && 'bg-accent text-accent-foreground',
           )}
         >
-          <Monitor className='mr-2 h-4 w-4' />
+          <Monitor className='h-4 w-4' />
           <span>System</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

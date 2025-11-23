@@ -30,5 +30,4 @@ export interface DashboardStatsPayload {
 
 export interface DashboardHeatmapPayload {
   heatmap: DashboardHeatmapPoint[];
-  activitySummary: string;
 }

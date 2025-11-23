@@ -74,9 +74,12 @@ export function DashboardPage() {
   const username = user?.name ?? '';
   const stats = data?.stats ?? [];
   const recentPosts = data?.recentPosts ?? [];
-  const activitySummary =
-    heatmapData?.activitySummary ?? 'Heatmap component placeholder';
   const heatmap = heatmapData?.heatmap ?? [];
+  const totalActivity = heatmap.reduce((sum, item) => sum + item.activity, 0);
+  const activitySummary =
+    totalActivity > 0
+      ? `${totalActivity} items created in the last 15 days`
+      : 'No activity in the last 15 days';
 
   const renderRecentPost = (post: DashboardRecentPost) => (
     <div key={post.id ?? post.title} className='py-6 space-y-2'>
@@ -148,9 +151,6 @@ export function DashboardPage() {
         </section>
 
         <section className='space-y-4 px-4'>
-          <p className='text-sm font-medium text-muted-foreground'>
-            Activity heatmap of {workspaceName}:
-          </p>
           {heatmapLoading ? (
             <HeatmapSkeleton />
           ) : (
