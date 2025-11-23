@@ -7,6 +7,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useDashboardHeatmap } from '@/hooks/useDashboardHeatmap';
 import type { DashboardRecentPost } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useAuth';
+import { PingingDotChart } from '@/components/ui/pinging-dot-chart';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -153,24 +154,12 @@ export function DashboardPage() {
           {heatmapLoading ? (
             <HeatmapSkeleton />
           ) : (
-            <div className='rounded-md border border-dashed border-border/50 bg-background/80 px-8 py-16 text-center text-sm text-muted-foreground shadow-sm space-y-4'>
-              <p>{activitySummary}</p>
-              {heatmap.length === 0 ? (
-                <p className='text-xs text-muted-foreground'>
-                  Heatmap data will appear once activity starts rolling in.
-                </p>
-              ) : (
-                <div className='flex flex-wrap gap-2 justify-center'>
-                  {heatmap.map((point) => (
-                    <div
-                      key={point.day}
-                      className='size-6 rounded-md bg-primary/20 text-[10px] flex items-center justify-center text-primary'
-                    >
-                      {point.activity}
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className='rounded-md border border-border/50 bg-background/80 p-1 shadow-sm'>
+              <PingingDotChart
+                data={heatmap}
+                title={`Activity in ${workspaceName}`}
+                description={activitySummary}
+              />
             </div>
           )}
         </section>
