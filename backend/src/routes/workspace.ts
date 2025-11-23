@@ -6,6 +6,8 @@ import {
   updateWorkspaceController,
   deleteWorkspaceController,
   checkSlugAvailabilityController,
+  getDashboardStatsController,
+  getDashboardHeatmapController,
 } from '../controllers/workspace';
 import { verifyWorkspaceMembership } from '../middleware/workspace';
 import {
@@ -27,6 +29,16 @@ router.get(
   '/verify/:workspaceSlug',
   verifyWorkspaceMembership,
   verifyWorkspaceAccessController,
+);
+router.get(
+  '/:workspaceSlug/dashboard-stats',
+  verifyWorkspaceMembership,
+  getDashboardStatsController,
+);
+router.get(
+  '/:workspaceSlug/dashboard-heatmap',
+  verifyWorkspaceMembership,
+  getDashboardHeatmapController,
 );
 router.patch(
   '/:workspaceSlug',

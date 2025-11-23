@@ -5,7 +5,10 @@ import type {
   CreateWorkspaceData,
   VerifiedWorkspace,
 } from '@/types/workspace';
-import type { DashboardStatsPayload } from '@/types/dashboard';
+import type {
+  DashboardStatsPayload,
+  DashboardHeatmapPayload,
+} from '@/types/dashboard';
 
 export async function apiVerifyWorkspace(
   workspaceSlug: string,
@@ -46,8 +49,15 @@ export async function apiCheckSlugAvailability(
 export async function apiGetDashboardStats(
   workspaceSlug: string,
 ): Promise<DashboardStatsPayload> {
-  const query = new URLSearchParams({ workspaceSlug }).toString();
   return apiGet<DashboardStatsPayload>(
-    `/api/workspace/dashboard-stats?${query}`,
+    `/api/workspace/${workspaceSlug}/dashboard-stats`,
+  );
+}
+
+export async function apiGetDashboardHeatmap(
+  workspaceSlug: string,
+): Promise<DashboardHeatmapPayload> {
+  return apiGet<DashboardHeatmapPayload>(
+    `/api/workspace/${workspaceSlug}/dashboard-heatmap`,
   );
 }

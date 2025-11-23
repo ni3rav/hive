@@ -13,15 +13,22 @@ export type DashboardRecentPost = {
 };
 
 export type DashboardHeatmapPoint = {
-  date: string;
-  count: number;
+  day: string;
+  activity: number;
+  posts: number;
+  authors: number;
+  categories: number;
+  tags: number;
 };
 
 export interface DashboardStatsPayload {
   workspaceName: string;
   userDisplayName: string;
   stats: DashboardStatSummary[];
-  heatmap: DashboardHeatmapPoint[];
   recentPosts: DashboardRecentPost[];
-  activitySummary?: string;
+}
+
+export interface DashboardHeatmapPayload {
+  heatmap: DashboardHeatmapPoint[];
+  activitySummary: string;
 }

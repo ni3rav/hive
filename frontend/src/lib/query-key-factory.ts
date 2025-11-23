@@ -136,6 +136,10 @@ export class QueryKeys {
     dashboardStats(workspaceSlug: string) {
       return [...this.base, 'dashboard', workspaceSlug];
     },
+
+    dashboardHeatmap(workspaceSlug: string) {
+      return [...this.base, 'dashboard-heatmap', workspaceSlug];
+    },
   };
 
   public static userKeys() {

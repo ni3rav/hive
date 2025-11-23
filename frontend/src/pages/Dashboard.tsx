@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useDashboardHeatmap } from '@/hooks/useDashboardHeatmap';
 import type { DashboardRecentPost } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -65,14 +66,16 @@ export function DashboardPage() {
   const workspaceSlug = useWorkspaceSlug();
   const { data: user, isLoading: userLoading } = useAuth();
   const { data, isLoading } = useDashboardStats(workspaceSlug);
+  const { data: heatmapData, isLoading: heatmapLoading } =
+    useDashboardHeatmap(workspaceSlug);
 
   const workspaceName = data?.workspaceName ?? 'workspace';
   const username = user?.name ?? '';
   const stats = data?.stats ?? [];
   const recentPosts = data?.recentPosts ?? [];
   const activitySummary =
-    data?.activitySummary ?? 'Heatmap component placeholder';
-  const heatmap = data?.heatmap ?? [];
+    heatmapData?.activitySummary ?? 'Heatmap component placeholder';
+  const heatmap = heatmapData?.heatmap ?? [];
 
   const renderRecentPost = (post: DashboardRecentPost) => (
     <div key={post.id ?? post.title} className='py-6 space-y-2'>
@@ -147,7 +150,7 @@ export function DashboardPage() {
           <p className='text-sm font-medium text-muted-foreground'>
             Activity heatmap of {workspaceName}:
           </p>
-          {isLoading ? (
+          {heatmapLoading ? (
             <HeatmapSkeleton />
           ) : (
             <div className='rounded-md border border-dashed border-border/50 bg-background/80 px-8 py-16 text-center text-sm text-muted-foreground shadow-sm space-y-4'>
@@ -160,10 +163,10 @@ export function DashboardPage() {
                 <div className='flex flex-wrap gap-2 justify-center'>
                   {heatmap.map((point) => (
                     <div
-                      key={point.date}
+                      key={point.day}
                       className='size-6 rounded-md bg-primary/20 text-[10px] flex items-center justify-center text-primary'
                     >
-                      {point.count}
+                      {point.activity}
                     </div>
                   ))}
                 </div>
