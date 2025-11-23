@@ -234,7 +234,7 @@ export default function EditPost() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full p-6 flex flex-col overflow-y-scroll'>
+      <div className='h-full flex flex-col overflow-y-scroll'>
         <MetadataForm
           isExpanded={isExpanded}
           setIsExpanded={setIsExpanded}

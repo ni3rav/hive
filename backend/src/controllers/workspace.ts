@@ -6,13 +6,15 @@ import {
   checkSlugAvailabilitySchema,
 } from '../utils/validations/workspace';
 import { db } from '../db';
-import { workspacesTable, workspaceUsersTable } from '../db/schema';
+import { workspacesTable, workspaceUsersTable, usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import {
   getUserWorkspaces,
   updateWorkspace,
   deleteWorkspace,
   checkSlugExists,
+  getDashboardStats,
+  getDashboardHeatmap,
 } from '../utils/workspace';
 import {
   validationError,
@@ -22,6 +24,10 @@ import {
   notFound,
   forbidden,
 } from '../utils/responses';
+import {
+  toDashboardStatsResponseDto,
+  toDashboardHeatmapResponseDto,
+} from '../dto/dashboard.dto';
 import logger from '../logger';
 
 export async function createWorkspaceController(req: Request, res: Response) {
@@ -211,4 +217,55 @@ export async function checkSlugAvailabilityController(
     logger.error(error, 'Error checking slug availability');
     return serverError(res, 'Failed to check slug availability');
   }
+}
+
+export async function getDashboardStatsController(req: Request, res: Response) {
+  const workspaceSlug = req.workspaceSlug!;
+  const userId = req.userId!;
+
+  const [error, dashboardData] = await getDashboardStats(workspaceSlug);
+
+  if (error) {
+    if ((error as Error).message === 'workspace not found') {
+      return notFound(res, 'Workspace not found');
+    }
+    logger.error(error, 'Error fetching dashboard stats');
+    return serverError(res, 'Failed to fetch dashboard stats');
+  }
+
+  const user = await db.query.usersTable.findFirst({
+    where: eq(usersTable.id, userId),
+  });
+
+  return ok(
+    res,
+    'Dashboard stats retrieved successfully',
+    toDashboardStatsResponseDto({
+      ...dashboardData!,
+      userDisplayName: user?.name ?? '',
+    }),
+  );
+}
+
+export async function getDashboardHeatmapController(
+  req: Request,
+  res: Response,
+) {
+  const workspaceSlug = req.workspaceSlug!;
+
+  const [error, heatmapData] = await getDashboardHeatmap(workspaceSlug);
+
+  if (error) {
+    if ((error as Error).message === 'workspace not found') {
+      return notFound(res, 'Workspace not found');
+    }
+    logger.error(error, 'Error fetching dashboard heatmap');
+    return serverError(res, 'Failed to fetch dashboard heatmap');
+  }
+
+  return ok(
+    res,
+    'Dashboard heatmap retrieved successfully',
+    toDashboardHeatmapResponseDto(heatmapData!),
+  );
 }

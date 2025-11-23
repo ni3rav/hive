@@ -9,6 +9,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
 import { QueryKeys } from '@/lib/query-key-factory';
+import type {
+  DashboardStatsPayload,
+  DashboardHeatmapPayload,
+} from '@/types/dashboard';
 
 export function useWorkspaceTags(workspaceSlug: string) {
   return useQuery({
@@ -25,9 +29,61 @@ export function useCreateTag(workspaceSlug: string) {
     mutationFn: (data: CreateTagData) => apiCreateTag(workspaceSlug, data),
     onSuccess: () => {
       toast.success('Tag created');
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.tagKeys().list(workspaceSlug),
+
+      const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
+      queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          stats: oldData.stats.map((stat) =>
+            stat.label.toLowerCase() === 'tags'
+              ? { ...stat, value: stat.value + 1 }
+              : stat,
+          ),
+        };
       });
+
+      const heatmapKey =
+        QueryKeys.workspaceKeys().dashboardHeatmap(workspaceSlug);
+      const today = new Date().toISOString().split('T')[0];
+      queryClient.setQueryData<DashboardHeatmapPayload>(
+        heatmapKey,
+        (oldData) => {
+          if (!oldData) return oldData;
+          const existingPointIndex = oldData.heatmap.findIndex(
+            (point) => point.day === today,
+          );
+          if (existingPointIndex >= 0) {
+            return {
+              ...oldData,
+              heatmap: oldData.heatmap.map((point) =>
+                point.day === today
+                  ? {
+                      ...point,
+                      tags: point.tags + 1,
+                      activity: point.activity + 1,
+                    }
+                  : point,
+              ),
+            };
+          } else {
+            return {
+              ...oldData,
+              heatmap: [
+                ...oldData.heatmap,
+                {
+                  day: today,
+                  activity: 1,
+                  posts: 0,
+                  authors: 0,
+                  categories: 0,
+                  tags: 1,
+                },
+              ],
+            };
+          }
+        },
+      );
     },
     onError: (error) => {
       const apiError = error as { response?: { status?: number } };
@@ -87,6 +143,47 @@ export function useDeleteTag(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Tag deleted');
+
+      const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
+      queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          stats: oldData.stats.map((stat) =>
+            stat.label.toLowerCase() === 'tags' && stat.value > 0
+              ? { ...stat, value: stat.value - 1 }
+              : stat,
+          ),
+        };
+      });
+
+      const heatmapKey =
+        QueryKeys.workspaceKeys().dashboardHeatmap(workspaceSlug);
+      const today = new Date().toISOString().split('T')[0];
+      queryClient.setQueryData<DashboardHeatmapPayload>(
+        heatmapKey,
+        (oldData) => {
+          if (!oldData) return oldData;
+          const existingPointIndex = oldData.heatmap.findIndex(
+            (point) => point.day === today,
+          );
+          if (existingPointIndex >= 0) {
+            return {
+              ...oldData,
+              heatmap: oldData.heatmap.map((point) =>
+                point.day === today
+                  ? {
+                      ...point,
+                      tags: Math.max(0, point.tags - 1),
+                      activity: Math.max(0, point.activity - 1),
+                    }
+                  : point,
+              ),
+            };
+          }
+          return oldData;
+        },
+      );
     },
     onError: (error, _variables, context) => {
       const message = getErrorMessage(error, 'Failed to delete tag');
@@ -98,11 +195,5 @@ export function useDeleteTag(workspaceSlug: string) {
         );
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.tagKeys().list(workspaceSlug),
-      });
-    },
   });
 }
-

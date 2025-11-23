@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className='w-screen h-screen grid place-items-center'>
+    <div className='w-screen h-screen grid place-items-center p-4'>
       <ForgotPasswordForm
         onFormSubmit={handleForgotPassword}
         onBackToLogin={() => navigate('/login')}

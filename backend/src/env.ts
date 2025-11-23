@@ -1,4 +1,4 @@
-import { cleanEnv, str, port } from 'envalid';
+import { cleanEnv, str, port, bool } from 'envalid';
 
 const validatedEnv = cleanEnv(process.env, {
   DATABASE_URL: str(),
@@ -6,6 +6,8 @@ const validatedEnv = cleanEnv(process.env, {
   NODE_ENV: str(),
   FRONTEND_URL: str(),
   RESEND_API_KEY: str(),
+  DMA: bool({ default: false }),
+  DEV_USER_ID: str({ default: '' }),
 });
 
 export const env = {

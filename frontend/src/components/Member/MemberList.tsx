@@ -172,7 +172,6 @@ export default function MemberList({
                       </div>
                     </div>
                     <div className='flex items-center gap-3'>
-                      <RoleBadge role={member.role} />
                       {(canEdit || canDelete) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -201,6 +200,7 @@ export default function MemberList({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
+                      <RoleBadge role={member.role} />
                     </div>
                   </div>
                 );

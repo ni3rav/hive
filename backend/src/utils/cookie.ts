@@ -13,7 +13,7 @@ function getSessionCookieOptions(expiresAt: Date) {
     partitioned?: boolean;
   } = {
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: env.isProduction ? 'none' : 'lax',
     secure: env.isProduction,
     expires: expiresAt,
     path: '/',
@@ -26,7 +26,7 @@ function getSessionCookieOptions(expiresAt: Date) {
 function getCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: 'none' as 'strict' | 'lax' | 'none',
+    sameSite: (env.isProduction ? 'none' : 'lax') as 'strict' | 'lax' | 'none',
     secure: env.isProduction,
     path: '/',
     ...(env.isProduction && { partitioned: true }),

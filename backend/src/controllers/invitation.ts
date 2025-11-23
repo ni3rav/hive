@@ -10,6 +10,10 @@ import {
   conflict,
 } from '../utils/responses';
 import logger from '../logger';
+import {
+  toInvitationDetailsResponseDto,
+  toAcceptInvitationResponseDto,
+} from '../dto/invitation.dto';
 
 export async function getInvitationDetailsController(
   req: Request,
@@ -41,15 +45,18 @@ export async function getInvitationDetailsController(
       return serverError(res, 'Failed to fetch invitation details');
     }
 
-    return ok(res, 'Invitation details fetched', {
+    const invitationDetails = toInvitationDetailsResponseDto({
       workspaceName: invitation.workspace.name,
       inviterEmail: invitation.invitedByUser.email,
       inviterName:
         invitation.invitedByUser.name || invitation.invitedByUser.email,
+      inviteeEmail: invitation.email,
       role: invitation.role,
       workspaceSlug: invitation.workspace.slug,
-      expiresAt: invitation.expiresAt?.toISOString(),
+      expiresAt: invitation.expiresAt,
     });
+
+    return ok(res, 'Invitation details fetched', invitationDetails);
   } catch (error) {
     logger.error(error, 'Error fetching invitation details');
     return serverError(res, 'Failed to fetch invitation details');
@@ -94,7 +101,13 @@ export async function acceptInvitationController(req: Request, res: Response) {
       return serverError(res, 'Failed to accept invitation');
     }
 
-    return ok(res, 'Invitation accepted', result);
+    if (!result) {
+      return serverError(res, 'Failed to accept invitation');
+    }
+
+    const acceptInvitationResponse = toAcceptInvitationResponseDto(result);
+
+    return ok(res, 'Invitation accepted', acceptInvitationResponse);
   } catch (error) {
     logger.error(error, 'Error accepting invitation');
     return serverError(res, 'Failed to accept invitation');

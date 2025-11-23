@@ -20,7 +20,6 @@ export function useEditProfile() {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.userKeys().profile(),
       });
-      queryClient.invalidateQueries({ queryKey: QueryKeys.userKeys().me() });
     },
     onError: (_err, _vars, context) => {
       const key = QueryKeys.userKeys().me();

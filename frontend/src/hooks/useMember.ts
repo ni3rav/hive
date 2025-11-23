@@ -71,11 +71,21 @@ export function useUpdateMemberRole(workspaceSlug: string | undefined) {
       }
       return apiUpdateMemberRole(workspaceSlug, userId, data);
     },
-    onSuccess: () => {
+    onSuccess: (updatedMember) => {
       toast.success('Member role updated');
       if (workspaceSlug) {
-        queryClient.invalidateQueries({
-          queryKey: QueryKeys.workspaceKeys().members(workspaceSlug),
+        const queryKey = QueryKeys.workspaceKeys().members(workspaceSlug);
+        queryClient.setQueryData<{
+          members: Member[];
+          invitations: PendingInvitation[];
+        }>(queryKey, (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            members: oldData.members.map((m) =>
+              m.userId === updatedMember.userId ? updatedMember : m,
+            ),
+          };
         });
       }
     },
@@ -131,13 +141,6 @@ export function useRemoveMember(workspaceSlug: string | undefined) {
         );
       }
     },
-    onSettled: () => {
-      if (workspaceSlug) {
-        queryClient.invalidateQueries({
-          queryKey: QueryKeys.workspaceKeys().members(workspaceSlug),
-        });
-      }
-    },
   });
 }
 
@@ -185,13 +188,6 @@ export function useRevokeInvitation(workspaceSlug: string | undefined) {
           QueryKeys.workspaceKeys().members(workspaceSlug),
           context.previous,
         );
-      }
-    },
-    onSettled: () => {
-      if (workspaceSlug) {
-        queryClient.invalidateQueries({
-          queryKey: QueryKeys.workspaceKeys().members(workspaceSlug),
-        });
       }
     },
   });

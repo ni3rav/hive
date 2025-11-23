@@ -9,6 +9,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/error-utils';
 import { QueryKeys } from '@/lib/query-key-factory';
+import type {
+  DashboardStatsPayload,
+  DashboardHeatmapPayload,
+} from '@/types/dashboard';
 
 const authorsKey = (workspaceSlug: string) =>
   [...QueryKeys.authorKeys().base, workspaceSlug] as const;
@@ -46,16 +50,67 @@ export function useCreateAuthor(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Author created');
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
+
+      const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
+      queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          stats: oldData.stats.map((stat) =>
+            stat.label.toLowerCase() === 'authors'
+              ? { ...stat, value: stat.value + 1 }
+              : stat,
+          ),
+        };
+      });
+
+      const heatmapKey =
+        QueryKeys.workspaceKeys().dashboardHeatmap(workspaceSlug);
+      const today = new Date().toISOString().split('T')[0];
+      queryClient.setQueryData<DashboardHeatmapPayload>(
+        heatmapKey,
+        (oldData) => {
+          if (!oldData) return oldData;
+          const existingPointIndex = oldData.heatmap.findIndex(
+            (point) => point.day === today,
+          );
+          if (existingPointIndex >= 0) {
+            return {
+              ...oldData,
+              heatmap: oldData.heatmap.map((point) =>
+                point.day === today
+                  ? {
+                      ...point,
+                      authors: point.authors + 1,
+                      activity: point.activity + 1,
+                    }
+                  : point,
+              ),
+            };
+          } else {
+            return {
+              ...oldData,
+              heatmap: [
+                ...oldData.heatmap,
+                {
+                  day: today,
+                  activity: 1,
+                  posts: 0,
+                  authors: 1,
+                  categories: 0,
+                  tags: 0,
+                },
+              ],
+            };
+          }
+        },
+      );
     },
     onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to create author');
       toast.error(message);
       if (ctx?.previous)
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
@@ -88,16 +143,12 @@ export function useUpdateAuthor(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Author updated');
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
     onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to update author');
       toast.error(message);
       if (ctx?.previous)
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
@@ -121,6 +172,47 @@ export function useDeleteAuthor(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Author deleted');
+
+      const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
+      queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          stats: oldData.stats.map((stat) =>
+            stat.label.toLowerCase() === 'authors' && stat.value > 0
+              ? { ...stat, value: stat.value - 1 }
+              : stat,
+          ),
+        };
+      });
+
+      const heatmapKey =
+        QueryKeys.workspaceKeys().dashboardHeatmap(workspaceSlug);
+      const today = new Date().toISOString().split('T')[0];
+      queryClient.setQueryData<DashboardHeatmapPayload>(
+        heatmapKey,
+        (oldData) => {
+          if (!oldData) return oldData;
+          const existingPointIndex = oldData.heatmap.findIndex(
+            (point) => point.day === today,
+          );
+          if (existingPointIndex >= 0) {
+            return {
+              ...oldData,
+              heatmap: oldData.heatmap.map((point) =>
+                point.day === today
+                  ? {
+                      ...point,
+                      authors: Math.max(0, point.authors - 1),
+                      activity: Math.max(0, point.activity - 1),
+                    }
+                  : point,
+              ),
+            };
+          }
+          return oldData;
+        },
+      );
     },
     onError: (error, _authorId, ctx) => {
       const message = getErrorMessage(error, 'Failed to delete author');
@@ -128,9 +220,6 @@ export function useDeleteAuthor(workspaceSlug: string) {
       if (ctx?.previous) {
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }

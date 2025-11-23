@@ -14,9 +14,43 @@
   <meta name="theme-color" content="#151718" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hive</title>
+  <script>
+    (function() {
+      function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split('; ') : [];
+        for (const cookie of cookies) {
+          const [k, v] = cookie.split('=');
+          if (k === name) {
+            return decodeURIComponent(v ?? '');
+          }
+        }
+        return undefined;
+      }
+      
+      function getSystemTheme() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+      }
+      
+      function applyTheme(theme) {
+        const root = document.documentElement;
+        if (theme === 'dark') {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+      }
+      
+      const stored = getCookie('theme');
+      const theme = stored === 'light' || stored === 'dark' ? stored : 'system';
+      const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+      applyTheme(resolvedTheme);
+    })();
+  </script>
 </head>
 
-<body class="dark">
+<body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
