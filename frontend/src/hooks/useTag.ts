@@ -29,9 +29,6 @@ export function useCreateTag(workspaceSlug: string) {
     mutationFn: (data: CreateTagData) => apiCreateTag(workspaceSlug, data),
     onSuccess: () => {
       toast.success('Tag created');
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.tagKeys().list(workspaceSlug),
-      });
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
@@ -197,11 +194,6 @@ export function useDeleteTag(workspaceSlug: string) {
           context.previous,
         );
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.tagKeys().list(workspaceSlug),
-      });
     },
   });
 }

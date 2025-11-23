@@ -33,7 +33,7 @@ export default function LoginPage() {
       {
         onSuccess: () => {
           toast.success('Login successful! Welcome back.');
-          navigate(from, { replace: true });
+          navigate(from ?? '/dashboard', { replace: true });
         },
         onError: (error: unknown) => {
           const apiError = error as { response?: { status?: number } };

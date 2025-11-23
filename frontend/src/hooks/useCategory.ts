@@ -24,11 +24,12 @@ export function useCreateCategory(workspaceSlug: string) {
     mutationFn: (data: CreateCategoryData) => {
       return apiCreateCategory(workspaceSlug, data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Category created');
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
-      });
+      const queryKey = QueryKeys.categoryKeys().list(workspaceSlug);
+      queryClient.setQueryData<Category[]>(queryKey, (old) =>
+        old ? [data, ...old] : [data],
+      );
     },
     onError: (error) => {
       const apiError = error as { response?: { status?: number } };
@@ -42,7 +43,7 @@ export function useCreateCategory(workspaceSlug: string) {
 
 export function useUpdateCategory(workspaceSlug: string) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({
       categorySlug,
@@ -56,11 +57,12 @@ export function useUpdateCategory(workspaceSlug: string) {
       }
       return apiUpdateCategory(workspaceSlug, categorySlug, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
-      });
+    onSuccess: (data) => {
       toast.success('Category updated');
+      const queryKey = QueryKeys.categoryKeys().list(workspaceSlug);
+      queryClient.setQueryData<Category[]>(queryKey, (old) =>
+        old ? old.map((c) => (c.slug === data.slug ? data : c)) : [data],
+      );
     },
     onError: (error) => {
       const apiError = error as { response?: { status?: number } };
@@ -82,10 +84,8 @@ export function useDeleteCategory(workspaceSlug: string) {
       await queryClient.cancelQueries({ queryKey });
       const previous = queryClient.getQueryData<Category[]>(queryKey);
 
-      queryClient.setQueryData(
-        queryKey,
-        (old: Category[] | undefined) =>
-          (old || []).filter((c) => c.slug !== categorySlug),
+      queryClient.setQueryData(queryKey, (old: Category[] | undefined) =>
+        (old || []).filter((c) => c.slug !== categorySlug),
       );
       return { previous };
     },
@@ -101,11 +101,6 @@ export function useDeleteCategory(workspaceSlug: string) {
           context.previous,
         );
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.categoryKeys().list(workspaceSlug),
-      });
     },
   });
 }

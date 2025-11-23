@@ -92,11 +92,6 @@ export function useCreateWorkspace() {
       }
       toast.error('Failed to create workspace');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.workspaceKeys().list(),
-      });
-    },
   });
 }
 
@@ -142,11 +137,6 @@ export function useUpdateWorkspace() {
         );
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.workspaceKeys().list(),
-      });
-    },
   });
 }
 
@@ -182,11 +172,6 @@ export function useDeleteWorkspace() {
           ctx.previous,
         );
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.workspaceKeys().list(),
-      });
     },
   });
 }

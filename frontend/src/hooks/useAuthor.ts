@@ -50,7 +50,6 @@ export function useCreateAuthor(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Author created');
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
@@ -113,9 +112,6 @@ export function useCreateAuthor(workspaceSlug: string) {
       if (ctx?.previous)
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
-    },
   });
 }
 
@@ -147,16 +143,12 @@ export function useUpdateAuthor(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Author updated');
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
     onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to update author');
       toast.error(message);
       if (ctx?.previous)
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }
@@ -228,9 +220,6 @@ export function useDeleteAuthor(workspaceSlug: string) {
       if (ctx?.previous) {
         queryClient.setQueryData(authorsKey(workspaceSlug), ctx.previous);
       }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: authorsKey(workspaceSlug) });
     },
   });
 }

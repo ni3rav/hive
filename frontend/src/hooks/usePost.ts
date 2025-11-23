@@ -76,7 +76,6 @@ export function useCreatePost(workspaceSlug: string) {
     },
     onSuccess: (data) => {
       toast.success('Post created successfully');
-      queryClient.invalidateQueries({ queryKey: postsKey(workspaceSlug) });
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
@@ -151,9 +150,6 @@ export function useCreatePost(workspaceSlug: string) {
       if (ctx?.previous)
         queryClient.setQueryData(postsKey(workspaceSlug), ctx.previous);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: postsKey(workspaceSlug) });
-    },
   });
 }
 
@@ -181,9 +177,6 @@ export function useUpdatePost(workspaceSlug: string, postSlug: string) {
     onSuccess: () => {
       toast.success('Post updated successfully');
       queryClient.invalidateQueries({
-        queryKey: postsKey(workspaceSlug),
-      });
-      queryClient.invalidateQueries({
         queryKey: QueryKeys.postKeys().post(workspaceSlug, postSlug),
       });
     },
@@ -192,11 +185,6 @@ export function useUpdatePost(workspaceSlug: string, postSlug: string) {
       toast.error(message);
       if (ctx?.previous)
         queryClient.setQueryData(postsKey(workspaceSlug), ctx.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: postsKey(workspaceSlug),
-      });
     },
   });
 }
@@ -221,7 +209,6 @@ export function useDeletePost(workspaceSlug: string) {
     },
     onSuccess: () => {
       toast.success('Post deleted successfully');
-      queryClient.invalidateQueries({ queryKey: postsKey(workspaceSlug) });
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {
@@ -269,9 +256,6 @@ export function useDeletePost(workspaceSlug: string) {
       toast.error(message);
       if (ctx?.previous)
         queryClient.setQueryData(postsKey(workspaceSlug), ctx.previous);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: postsKey(workspaceSlug) });
     },
   });
 }
