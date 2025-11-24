@@ -5,6 +5,7 @@ import {
   timestamp,
   char,
   index,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { workspacesTable } from './workspace';
@@ -29,6 +30,7 @@ export const workspaceApiKeysTable = pgTable(
   (table) => [
     index('idx_workspace_api_keys_workspace_id').on(table.workspaceId),
     index('idx_workspace_api_keys_created_by').on(table.createdByUserId),
+    uniqueIndex('uq_workspace_api_keys_hashed_key').on(table.hashedKey),
   ],
 );
 
@@ -45,4 +47,3 @@ export const workspaceApiKeysRelations = relations(
     }),
   }),
 );
-

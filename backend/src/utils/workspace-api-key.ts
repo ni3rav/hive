@@ -12,6 +12,12 @@ const MAX_KEYS_PER_WORKSPACE = 3;
 type WorkspaceApiKey = typeof workspaceApiKeysTable.$inferSelect;
 
 export type WorkspaceApiKeyMetadata = Omit<WorkspaceApiKey, 'hashedKey'>;
+export type WorkspaceApiKeyWithWorkspace = WorkspaceApiKeyMetadata & {
+  workspace: {
+    id: string;
+    slug: string;
+  };
+};
 
 export async function listWorkspaceApiKeys(
   workspaceId: string,
@@ -122,6 +128,67 @@ export async function deleteWorkspaceApiKey({
   } catch (error) {
     logger.error(error, 'Error deleting workspace API key');
     return [error as Error, null];
+  }
+}
+
+export async function findWorkspaceApiKeyByValue(
+  apiKey: string,
+): Promise<[Error | null, WorkspaceApiKeyWithWorkspace | null]> {
+  try {
+    const hashedKey = hashWorkspaceApiKey(apiKey);
+    const record = await db.query.workspaceApiKeysTable.findFirst({
+      where: eq(workspaceApiKeysTable.hashedKey, hashedKey),
+      columns: {
+        id: true,
+        workspaceId: true,
+        description: true,
+        createdByUserId: true,
+        createdAt: true,
+        lastUsedAt: true,
+        lastUsedIp: true,
+      },
+      with: {
+        workspace: {
+          columns: {
+            id: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!record) {
+      return [null, null];
+    }
+
+    return [
+      null,
+      {
+        ...record,
+        workspace: record.workspace,
+      },
+    ];
+  } catch (error) {
+    logger.error(error, 'Error finding workspace API key by value');
+    return [error as Error, null];
+  }
+}
+
+export async function updateWorkspaceApiKeyUsage(
+  apiKeyId: string,
+  ipAddress?: string | null,
+): Promise<void> {
+  try {
+    const now = new Date();
+    await db
+      .update(workspaceApiKeysTable)
+      .set({
+        lastUsedAt: now,
+        lastUsedIp: ipAddress ?? null,
+      })
+      .where(eq(workspaceApiKeysTable.id, apiKeyId));
+  } catch (error) {
+    logger.error(error, 'Error updating workspace API key usage');
   }
 }
 
