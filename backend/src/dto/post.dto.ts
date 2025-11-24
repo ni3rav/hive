@@ -9,9 +9,9 @@ export interface PostMetadataResponseDto {
   excerpt: string;
   status: string;
   visible: boolean;
-  createdAt: Date;
-  publishedAt: Date | null;
-  updatedAt: Date;
+  createdAt: string;
+  publishedAt: string | null;
+  updatedAt: string;
   author?: {
     id: string;
     name: string;
@@ -82,9 +82,9 @@ export function toPostMetadataResponseDto(
     excerpt: post.excerpt,
     status: post.status,
     visible: post.visible,
-    createdAt: post.createdAt,
-    publishedAt: post.publishedAt,
-    updatedAt: post.updatedAt,
+    createdAt: post.createdAt.toISOString(),
+    publishedAt: post.publishedAt?.toISOString() ?? null,
+    updatedAt: post.updatedAt.toISOString(),
     author: post.author
       ? {
           id: post.author.id,

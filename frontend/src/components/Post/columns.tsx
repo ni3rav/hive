@@ -1,7 +1,14 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,7 +31,6 @@ export const createColumns = ({
   onEdit,
   onDelete,
 }: ColumnsProps = {}): ColumnDef<Post>[] => [
-
   {
     accessorKey: 'title',
     header: ({ column }) => {
@@ -82,7 +88,11 @@ export const createColumns = ({
       const author = row.original.author;
       return (
         <div className='text-sm'>
-          {author ? author.name : <span className='text-muted-foreground'>—</span>}
+          {author ? (
+            author.name
+          ) : (
+            <span className='text-muted-foreground'>—</span>
+          )}
         </div>
       );
     },
@@ -149,8 +159,10 @@ export const createColumns = ({
       );
     },
     cell: ({ row }) => {
-      const date = row.getValue('createdAt') as Date;
-      return <div className='text-sm'>{format(new Date(date), 'MMM d, yyyy')}</div>;
+      const date = row.getValue('createdAt') as string;
+      return (
+        <div className='text-sm'>{format(new Date(date), 'MMM d, yyyy')}</div>
+      );
     },
   },
   {
@@ -175,10 +187,14 @@ export const createColumns = ({
       );
     },
     cell: ({ row }) => {
-      const date = row.getValue('publishedAt') as Date | null;
+      const date = row.getValue('publishedAt') as string | null;
       return (
         <div className='text-sm'>
-          {date ? format(new Date(date), 'MMM d, yyyy') : <span className='text-muted-foreground'>—</span>}
+          {date ? (
+            format(new Date(date), 'MMM d, yyyy')
+          ) : (
+            <span className='text-muted-foreground'>—</span>
+          )}
         </div>
       );
     },
@@ -227,4 +243,3 @@ export const createColumns = ({
 ];
 
 export const columns = createColumns();
-

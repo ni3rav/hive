@@ -47,7 +47,20 @@ export const createPostSchema = z.object({
         message: 'publishedAt is required and must be a valid date',
       },
     )
-    .transform((val) => (val instanceof Date ? val : new Date(val))),
+    .transform((val) => {
+      const date = val instanceof Date ? val : new Date(val);
+      return new Date(
+        Date.UTC(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate(),
+          date.getUTCHours(),
+          date.getUTCMinutes(),
+          date.getUTCSeconds(),
+          date.getUTCMilliseconds(),
+        ),
+      );
+    }),
 });
 
 export const updatePostSchema = z.object({
@@ -112,7 +125,18 @@ export const updatePostSchema = z.object({
         )
         .transform((val) => {
           if (val === undefined) return undefined;
-          return val instanceof Date ? val : new Date(val);
+          const date = val instanceof Date ? val : new Date(val);
+          return new Date(
+            Date.UTC(
+              date.getUTCFullYear(),
+              date.getUTCMonth(),
+              date.getUTCDate(),
+              date.getUTCHours(),
+              date.getUTCMinutes(),
+              date.getUTCSeconds(),
+              date.getUTCMilliseconds(),
+            ),
+          );
         }),
     })
     .refine(

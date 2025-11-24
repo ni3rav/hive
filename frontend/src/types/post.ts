@@ -8,9 +8,9 @@ export interface Post {
   excerpt: string;
   status: 'draft' | 'published';
   visible: boolean;
-  createdAt: Date;
-  publishedAt: Date | null;
-  updatedAt: Date;
+  createdAt: string;
+  publishedAt: string | null;
+  updatedAt: string;
   author?: {
     id: string;
     name: string;

@@ -357,11 +357,23 @@ export async function updatePost(
     let result;
     try {
       result = await db.transaction(async (tx) => {
+        const now = new Date();
+        const nowUTC = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            now.getUTCHours(),
+            now.getUTCMinutes(),
+            now.getUTCSeconds(),
+            now.getUTCMilliseconds(),
+          ),
+        );
         const [updatedPost] = await tx
           .update(postsTable)
           .set({
             ...data,
-            updatedAt: new Date(),
+            updatedAt: nowUTC,
           })
           .where(
             and(
