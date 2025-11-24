@@ -280,7 +280,30 @@ export async function verifyController(req: Request, res: Response) {
       return notFound(res, 'Verification link not found');
     }
 
-    if (new Date() > new Date(verificationLink.expiresAt)) {
+    const now = new Date();
+    const nowUTC = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds(),
+        now.getUTCMilliseconds(),
+      ),
+    );
+    const expiresAtUTC = new Date(
+      Date.UTC(
+        new Date(verificationLink.expiresAt).getUTCFullYear(),
+        new Date(verificationLink.expiresAt).getUTCMonth(),
+        new Date(verificationLink.expiresAt).getUTCDate(),
+        new Date(verificationLink.expiresAt).getUTCHours(),
+        new Date(verificationLink.expiresAt).getUTCMinutes(),
+        new Date(verificationLink.expiresAt).getUTCSeconds(),
+        new Date(verificationLink.expiresAt).getUTCMilliseconds(),
+      ),
+    );
+    if (nowUTC > expiresAtUTC) {
       // !lazy deletion on check
       await db
         .delete(verificationLinksTable)
@@ -393,7 +416,23 @@ export async function resetPasswordController(req: Request, res: Response) {
       where: and(
         eq(passwordResetLinksTable.email, email),
         eq(passwordResetLinksTable.token, token),
-        gt(passwordResetLinksTable.expiresAt, new Date()),
+        gt(
+          passwordResetLinksTable.expiresAt,
+          (() => {
+            const now = new Date();
+            return new Date(
+              Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                now.getUTCHours(),
+                now.getUTCMinutes(),
+                now.getUTCSeconds(),
+                now.getUTCMilliseconds(),
+              ),
+            );
+          })(),
+        ),
       ),
     });
     if (!link) {
@@ -435,7 +474,23 @@ export async function resetPasswordController(req: Request, res: Response) {
           and(
             eq(passwordResetLinksTable.email, email),
             eq(passwordResetLinksTable.token, token),
-            gt(passwordResetLinksTable.expiresAt, new Date()),
+            gt(
+          passwordResetLinksTable.expiresAt,
+          (() => {
+            const now = new Date();
+            return new Date(
+              Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate(),
+                now.getUTCHours(),
+                now.getUTCMinutes(),
+                now.getUTCSeconds(),
+                now.getUTCMilliseconds(),
+              ),
+            );
+          })(),
+        ),
           ),
         );
       await tx

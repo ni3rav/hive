@@ -43,13 +43,25 @@ export async function createResetPasswordLink(
   email: string,
 ): Promise<[Error, null] | [null, ResetLink]> {
   try {
+    const expiresAtDate = new Date(Date.now() + RESET_PASSWORD_LINK_AGE);
+    const expiresAt = new Date(
+      Date.UTC(
+        expiresAtDate.getUTCFullYear(),
+        expiresAtDate.getUTCMonth(),
+        expiresAtDate.getUTCDate(),
+        expiresAtDate.getUTCHours(),
+        expiresAtDate.getUTCMinutes(),
+        expiresAtDate.getUTCSeconds(),
+        expiresAtDate.getUTCMilliseconds(),
+      ),
+    );
     const [link] = await db
       .insert(passwordResetLinksTable)
       .values({
         userId: id,
         email,
         token: generateResetToken(),
-        expiresAt: new Date(Date.now() + RESET_PASSWORD_LINK_AGE),
+        expiresAt,
       })
       .returning();
     return [null, link];

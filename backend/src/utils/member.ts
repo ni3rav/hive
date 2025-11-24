@@ -88,7 +88,18 @@ export async function inviteMember(
     }
 
     const token = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const expiresAtDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const expiresAt = new Date(
+      Date.UTC(
+        expiresAtDate.getUTCFullYear(),
+        expiresAtDate.getUTCMonth(),
+        expiresAtDate.getUTCDate(),
+        expiresAtDate.getUTCHours(),
+        expiresAtDate.getUTCMinutes(),
+        expiresAtDate.getUTCSeconds(),
+        expiresAtDate.getUTCMilliseconds(),
+      ),
+    );
 
     const [invitation] = await db
       .insert(workspaceInvitationsTable)
@@ -348,7 +359,31 @@ export async function getInvitationByToken(token: string) {
       throw new Error('invitation not pending');
     }
 
-    if (invitation.expiresAt && invitation.expiresAt < new Date()) {
+    if (invitation.expiresAt) {
+      const now = new Date();
+      const nowUTC = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          now.getUTCHours(),
+          now.getUTCMinutes(),
+          now.getUTCSeconds(),
+          now.getUTCMilliseconds(),
+        ),
+      );
+      const expiresAtUTC = new Date(
+        Date.UTC(
+          new Date(invitation.expiresAt).getUTCFullYear(),
+          new Date(invitation.expiresAt).getUTCMonth(),
+          new Date(invitation.expiresAt).getUTCDate(),
+          new Date(invitation.expiresAt).getUTCHours(),
+          new Date(invitation.expiresAt).getUTCMinutes(),
+          new Date(invitation.expiresAt).getUTCSeconds(),
+          new Date(invitation.expiresAt).getUTCMilliseconds(),
+        ),
+      );
+      if (expiresAtUTC < nowUTC) {
       await db
         .update(workspaceInvitationsTable)
         .set({ status: 'expired' })
@@ -376,7 +411,31 @@ export async function acceptInvitation(token: string, userId: string) {
       throw new Error('invitation not pending');
     }
 
-    if (invitation.expiresAt && invitation.expiresAt < new Date()) {
+    if (invitation.expiresAt) {
+      const now = new Date();
+      const nowUTC = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          now.getUTCHours(),
+          now.getUTCMinutes(),
+          now.getUTCSeconds(),
+          now.getUTCMilliseconds(),
+        ),
+      );
+      const expiresAtUTC = new Date(
+        Date.UTC(
+          new Date(invitation.expiresAt).getUTCFullYear(),
+          new Date(invitation.expiresAt).getUTCMonth(),
+          new Date(invitation.expiresAt).getUTCDate(),
+          new Date(invitation.expiresAt).getUTCHours(),
+          new Date(invitation.expiresAt).getUTCMinutes(),
+          new Date(invitation.expiresAt).getUTCSeconds(),
+          new Date(invitation.expiresAt).getUTCMilliseconds(),
+        ),
+      );
+      if (expiresAtUTC < nowUTC) {
       await db
         .update(workspaceInvitationsTable)
         .set({ status: 'expired' })
