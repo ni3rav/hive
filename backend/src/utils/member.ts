@@ -384,11 +384,12 @@ export async function getInvitationByToken(token: string) {
         ),
       );
       if (expiresAtUTC < nowUTC) {
-      await db
-        .update(workspaceInvitationsTable)
-        .set({ status: 'expired' })
-        .where(eq(workspaceInvitationsTable.id, invitation.id));
-      throw new Error('invitation expired');
+        await db
+          .update(workspaceInvitationsTable)
+          .set({ status: 'expired' })
+          .where(eq(workspaceInvitationsTable.id, invitation.id));
+        throw new Error('invitation expired');
+      }
     }
 
     return [null, invitation] as const;
@@ -436,11 +437,12 @@ export async function acceptInvitation(token: string, userId: string) {
         ),
       );
       if (expiresAtUTC < nowUTC) {
-      await db
-        .update(workspaceInvitationsTable)
-        .set({ status: 'expired' })
-        .where(eq(workspaceInvitationsTable.id, invitation.id));
-      throw new Error('invitation expired');
+        await db
+          .update(workspaceInvitationsTable)
+          .set({ status: 'expired' })
+          .where(eq(workspaceInvitationsTable.id, invitation.id));
+        throw new Error('invitation expired');
+      }
     }
 
     const user = await db.query.usersTable.findFirst({
