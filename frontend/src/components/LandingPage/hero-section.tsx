@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 
 export default function HeroSection() {
@@ -25,7 +26,7 @@ export default function HeroSection() {
 
   return (
     <section
-      className='relative overflow-hidden pt-40 pb-28'
+      className='relative flex min-h-screen items-center overflow-hidden pt-32 pb-24'
       style={{
         background:
           'radial-gradient(140% 90% at 15% 10%,rgba(255,255,255,.06) 0%,rgba(255,255,255,0) 65%),radial-gradient(110% 80% at 85% 25%,rgba(255,255,255,.05) 0%,rgba(255,255,255,0) 70%)',
@@ -42,37 +43,51 @@ export default function HeroSection() {
             'linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,.85) 55%,transparent 95%)',
         }}
       />
-      <div className='mx-auto max-w-6xl px-6'>
+      <div className='mx-auto flex w-full max-w-6xl px-6 justify-center'>
         <AnimatedGroup
           preset='blur-slide'
           stagger={100}
-          className='flex flex-col gap-8 max-w-3xl'
+          className='w-full flex flex-col items-center'
         >
-          <h1
-            ref={headingRef}
-            className='ag-item hero-heading text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight'
-          >
-            Build and Ship 10x Faster with Hive
-          </h1>
-          <p className='ag-item text-lg text-muted-foreground leading-relaxed'>
-            Plan, write, optimize and publish with clarity. A focused toolkit
-            that removes operational friction from your content workflow.
-          </p>
-          <div className='ag-item flex flex-wrap items-center gap-6 pt-2'>
-            <Button
-              size='lg'
-              className='rounded-xl px-8 h-14 text-base font-medium bg-primary text-primary-foreground hover:brightness-95'
-              onClick={() => navigate('/login')}
-            >
-              Start Building
-            </Button>
-            <button
-              onClick={() => navigate('/login')}
-              // Change: Using secondary color on hover
-              className='text-sm font-medium tracking-wide text-muted-foreground hover:text-secondary transition'
-            >
-              Request a demo
-            </button>
+          <div className='ag-item w-full'>
+            <div className='container mx-auto flex flex-col items-center'>
+              <div className='flex gap-8 py-16 md:py-20 lg:py-28 items-center justify-center flex-col'>
+                <div>
+                  <Badge variant='secondary'>We&apos;re live!</Badge>
+                </div>
+                <div className='flex gap-4 flex-col items-center'>
+                  <h1
+                    ref={headingRef}
+                    className='hero-heading justify-center text-4xl md:text-6xl lg:text-7xl max-w-2xl tracking-tighter text-center font-semibold leading-10'
+                  >
+                    A simple CMS <br />
+                    for your next project
+                  </h1>
+                  <p className='text-base md:text-lg lg:text-xl leading-relaxed tracking-tight text-muted-foreground max-w-xl text-center mt-6'>
+                    Write content in one place and fetch it from any frontend
+                    with a straightforward API, so your team can focus on what
+                    to say instead of how to wire it up
+                  </p>
+                </div>
+                <div className='flex flex-row flex-wrap gap-3 justify-center'>
+                  <Button
+                    size='lg'
+                    className='cursor-pointer'
+                    variant='outline'
+                    onClick={() => navigate('/workspaces')}
+                  >
+                    Get Started
+                  </Button>
+                  <Button
+                    size='lg'
+                    className='gap-2'
+                    onClick={() => navigate('/register')}
+                  >
+                    Documentation
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </AnimatedGroup>
       </div>

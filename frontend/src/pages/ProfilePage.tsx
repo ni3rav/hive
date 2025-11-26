@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { EditProfileForm } from '@/components/EditProfileForm';
 import { useState } from 'react';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 function ProfileActionRow({
   label,
@@ -46,6 +48,14 @@ export function ProfilePage() {
   const { data: user, isLoading, isError } = useAuth();
   const logoutMutation = useLogout();
   const [isEditing, setIsEditing] = useState(false);
+
+  useHead(
+    createSEOMetadata({
+      title: 'Profile',
+      description: 'Manage your profile and account settings',
+      noindex: true,
+    }),
+  );
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {

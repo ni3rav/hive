@@ -8,6 +8,9 @@ import {
   checkSlugAvailabilityController,
   getDashboardStatsController,
   getDashboardHeatmapController,
+  listWorkspaceApiKeysController,
+  createWorkspaceApiKeyController,
+  deleteWorkspaceApiKeyController,
 } from '../controllers/workspace';
 import { verifyWorkspaceMembership } from '../middleware/workspace';
 import {
@@ -39,6 +42,24 @@ router.get(
   '/:workspaceSlug/dashboard-heatmap',
   verifyWorkspaceMembership,
   getDashboardHeatmapController,
+);
+router.get(
+  '/:workspaceSlug/api-keys',
+  verifyWorkspaceMembership,
+  requireMinRole('admin'),
+  listWorkspaceApiKeysController,
+);
+router.post(
+  '/:workspaceSlug/api-keys',
+  verifyWorkspaceMembership,
+  requireMinRole('admin'),
+  createWorkspaceApiKeyController,
+);
+router.delete(
+  '/:workspaceSlug/api-keys/:apiKeyId',
+  verifyWorkspaceMembership,
+  requireMinRole('admin'),
+  deleteWorkspaceApiKeyController,
 );
 router.patch(
   '/:workspaceSlug',

@@ -5,6 +5,10 @@ import {
   deleteWorkspaceSchema,
   checkSlugAvailabilitySchema,
 } from '../utils/validations/workspace';
+import {
+  createWorkspaceApiKeySchema,
+  deleteWorkspaceApiKeySchema,
+} from '../utils/validations/workspace-api-key';
 import { db } from '../db';
 import { workspacesTable, workspaceUsersTable, usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
@@ -16,6 +20,11 @@ import {
   getDashboardStats,
   getDashboardHeatmap,
 } from '../utils/workspace';
+import {
+  listWorkspaceApiKeys,
+  createWorkspaceApiKey,
+  deleteWorkspaceApiKey,
+} from '../utils/workspace-api-key';
 import {
   validationError,
   created,
@@ -29,6 +38,10 @@ import {
   toDashboardHeatmapResponseDto,
 } from '../dto/dashboard.dto';
 import logger from '../logger';
+import {
+  toWorkspaceApiKeyListResponseDto,
+  toWorkspaceApiKeyResponseDto,
+} from '../dto/workspace-api-key.dto';
 
 export async function createWorkspaceController(req: Request, res: Response) {
   const { workspaceName, workspaceSlug } = req.body;
@@ -268,4 +281,122 @@ export async function getDashboardHeatmapController(
     'Dashboard heatmap retrieved successfully',
     toDashboardHeatmapResponseDto(heatmapData!),
   );
+}
+
+export async function listWorkspaceApiKeysController(
+  req: Request,
+  res: Response,
+) {
+  const workspaceId = req.workspaceId;
+
+  if (!workspaceId) {
+    return serverError(res, 'Workspace ID missing');
+  }
+
+  const [error, keys] = await listWorkspaceApiKeys(workspaceId);
+
+  if (error || !keys) {
+    logger.error(error, 'Error fetching workspace API keys');
+    return serverError(res, 'Failed to fetch workspace API keys');
+  }
+
+  return ok(
+    res,
+    'Workspace API keys fetched successfully',
+    toWorkspaceApiKeyListResponseDto(keys),
+  );
+}
+
+export async function createWorkspaceApiKeyController(
+  req: Request,
+  res: Response,
+) {
+  const workspaceId = req.workspaceId;
+  const workspaceSlug = req.workspaceSlug || req.params.workspaceSlug;
+  const userId = req.userId;
+
+  const validated = createWorkspaceApiKeySchema.safeParse({
+    workspaceSlug: req.params.workspaceSlug,
+    description: req.body?.description,
+  });
+
+  if (!validated.success) {
+    return validationError(
+      res,
+      'Invalid request data',
+      validated.error.issues,
+    );
+  }
+
+  if (!workspaceId || !workspaceSlug || !userId) {
+    return serverError(res, 'Workspace context missing');
+  }
+
+  const [error, result] = await createWorkspaceApiKey({
+    workspaceId,
+    workspaceSlug,
+    description: validated.data.description,
+    createdByUserId: userId,
+  });
+
+  if (error || !result) {
+    if (
+      (error as Error | undefined)?.message ===
+      'workspace already has maximum number of API keys'
+    ) {
+      return validationError(res, 'API key limit reached', [
+        {
+          path: ['description'],
+          message: 'Workspace already has 3 API keys',
+          code: 'custom',
+        },
+      ]);
+    }
+    logger.error(error, 'Error creating workspace API key');
+    return serverError(res, 'Failed to create workspace API key');
+  }
+
+  return created(res, 'Workspace API key created successfully', {
+    apiKey: result.apiKey,
+    metadata: toWorkspaceApiKeyResponseDto(result.metadata),
+  });
+}
+
+export async function deleteWorkspaceApiKeyController(
+  req: Request,
+  res: Response,
+) {
+  const workspaceId = req.workspaceId;
+
+  const validated = deleteWorkspaceApiKeySchema.safeParse({
+    workspaceSlug: req.params.workspaceSlug,
+    apiKeyId: req.params.apiKeyId,
+  });
+
+  if (!validated.success) {
+    return validationError(
+      res,
+      'Invalid request data',
+      validated.error.issues,
+    );
+  }
+
+  if (!workspaceId) {
+    return serverError(res, 'Workspace ID missing');
+  }
+
+  const [error] = await deleteWorkspaceApiKey({
+    workspaceId,
+    apiKeyId: validated.data.apiKeyId,
+  });
+
+  if (error) {
+    if ((error as Error).message === 'api key not found') {
+      return notFound(res, 'API key not found');
+    }
+    logger.error(error, 'Error deleting workspace API key');
+    return serverError(res, 'Failed to delete workspace API key');
+  }
+
+  return ok(res, 'Workspace API key deleted successfully');
 }

@@ -19,6 +19,7 @@ import CategoriesManager from './components/Category/CategoryManager';
 import MemberManager from './components/Member/MemberManager';
 import InviteMemberPage from './components/Member/InviteMemberPage';
 import { ThemeProvider } from '@/contexts/theme-context';
+import { UnheadProvider } from '@unhead/react/client';
 
 const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
@@ -39,7 +40,7 @@ const TagsPage = lazyPage('/src/pages/Tag.tsx');
 const PostPage = lazyPage('/src/pages/Post.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const AcceptInvitePage = lazyPage('/src/pages/AcceptInvitePage.tsx');
-const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx', 'ApiKeysPage');
+const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx');
 
 const router = createBrowserRouter([
   // --- Public Routes ---
@@ -145,20 +146,22 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')!).render(
-  <ThemeProvider>
-    <QueryClientProvider client={queryClient}>
-      <Toaster position='top-right' richColors />
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense
-          fallback={
-            <div className='flex h-screen w-screen items-center justify-center'>
-              <Spinner className='size-5' />
-            </div>
-          }
-        >
-          <RouterProvider router={router} />
-        </Suspense>
-      </ErrorBoundary>
-    </QueryClientProvider>
-  </ThemeProvider>,
+  <UnheadProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <Toaster position='top-right' richColors />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Suspense
+            fallback={
+              <div className='flex h-screen w-screen items-center justify-center'>
+                <Spinner className='size-5' />
+              </div>
+            }
+          >
+            <RouterProvider router={router} />
+          </Suspense>
+        </ErrorBoundary>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </UnheadProvider>,
 );

@@ -20,6 +20,8 @@ import {
   getLastWorkspaceSlugs,
   updateLastWorkspaceCookie,
 } from '@/lib/utils';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 export function WorkspaceManagementPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -40,6 +42,14 @@ export function WorkspaceManagementPage() {
   const { data: workspaces = [], isLoading } = useUserWorkspaces();
   const { current: lastUsedSlug } = getLastWorkspaceSlugs();
   const deleteWorkspace = useDeleteWorkspace();
+
+  useHead(
+    createSEOMetadata({
+      title: 'Workspaces',
+      description: 'Manage your workspaces',
+      noindex: true,
+    }),
+  );
 
   // Extract the current route path after the workspace slug
   const getCurrentRoutePath = () => {

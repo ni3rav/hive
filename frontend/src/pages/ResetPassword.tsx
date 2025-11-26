@@ -4,8 +4,11 @@ import { useResetPassword } from '@/hooks/useAuth';
 import { resetPasswordSchema } from '@/lib/validations/auth';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useHead } from '@unhead/react';
+import { createAuthPageSEOMetadata } from '@/lib/seo';
 
 export default function ResetPasswordPage() {
+  useHead(createAuthPageSEOMetadata('reset-password'));
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { mutate: resetPassword, isPending } = useResetPassword();

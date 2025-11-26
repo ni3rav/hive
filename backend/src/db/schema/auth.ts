@@ -10,6 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { workspaceUsersTable, workspacesTable } from './workspace';
 import { postsTable } from './post';
+import { workspaceApiKeysTable } from './workspace-api-key';
 
 export const usersTable = pgTable(
   'users',
@@ -73,4 +74,5 @@ export const usersRelations = relations(usersTable, ({ many }) => ({
   workspaceUsers: many(workspaceUsersTable),
   ownedWorkspaces: many(workspacesTable),
   createdPosts: many(postsTable),
+  createdApiKeys: many(workspaceApiKeysTable),
 }));

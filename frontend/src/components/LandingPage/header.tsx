@@ -6,18 +6,16 @@ import { Logo } from '@/components/logo';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '../ui/skeleton';
 
-const nav = [
+const nav: { label: string; href: string }[] = [
   { label: 'Features', href: '#features' },
   { label: 'Solution', href: '#solution' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'About', href: '#about' },
+  { label: 'Docs', href: '/docs' },
 ];
 
 export function HeroHeader() {
   const [scrollY, setScrollY] = React.useState(0);
   const navigate = useNavigate();
   const { data: user, isLoading } = useAuth(); // Get user auth state
-
 
   React.useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
@@ -51,12 +49,13 @@ export function HeroHeader() {
             <a href='/' className='flex shrink-0 items-center gap-2'>
               <Logo />
             </a>
-            <nav className='hidden md:flex gap-7 text-sm'>
+            <nav className='hidden md:flex items-center gap-7 text-sm'>
               {nav.map((i) => (
                 <a
                   key={i.label}
                   href={i.href}
-                  className='text-muted-foreground transition hover:text-foreground'
+                  // className='inline-flex h-8 items-center text-muted-foreground transition hover:text-foreground'
+                  className='hidden h-8 items-center text-muted-foreground transition hover:text-foreground' //hidden for now
                 >
                   {i.label}
                 </a>
