@@ -43,6 +43,15 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
+app.use(
+  '/api/public',
+  cors({
+    origin: '*',
+    methods: ['GET'],
+    credentials: false,
+    allowedHeaders: [],
+  }),
+);
 
 app.use(cookieParser());
 app.use(express.json());

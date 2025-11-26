@@ -82,6 +82,21 @@ export const createColumns = ({
     },
   },
   {
+    accessorKey: 'visible',
+    header: 'Visibility',
+    cell: ({ row }) => {
+      const visible = row.getValue('visible') as boolean;
+      return (
+        <Badge
+          variant={visible ? 'default' : 'secondary'}
+          className='capitalize'
+        >
+          {visible ? 'visible' : 'hidden'}
+        </Badge>
+      );
+    },
+  },
+  {
     accessorKey: 'author',
     header: 'Author',
     cell: ({ row }) => {
