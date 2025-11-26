@@ -3,8 +3,11 @@ import { ForgotPasswordForm } from '@/components/forgot-password-form';
 import { useForgotPassword } from '@/hooks/useAuth';
 import { forgotPasswordSchema } from '@/lib/validations/auth';
 import { toast } from 'sonner';
+import { useHead } from '@unhead/react';
+import { createAuthPageSEOMetadata } from '@/lib/seo';
 
 export default function ForgotPasswordPage() {
+  useHead(createAuthPageSEOMetadata('forgot-password'));
   const navigate = useNavigate();
   const { mutate: forgotPassword, isPending } = useForgotPassword();
 

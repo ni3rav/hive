@@ -1,8 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 export default function NotFound({ className }: { className?: string }) {
+  useHead(
+    createSEOMetadata({
+      title: 'Page Not Found',
+      description: 'The page you are looking for does not exist',
+      noindex: true,
+    }),
+  );
   return (
     <div
       className={cn(

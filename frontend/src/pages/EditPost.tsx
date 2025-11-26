@@ -28,6 +28,8 @@ import {
 import { AlertCircle } from 'lucide-react';
 import { getErrorMessage } from '@/lib/error-utils';
 import NotFound from '@/pages/NotFound';
+import { useHead } from '@unhead/react';
+import { createPostSEOMetadata, createSEOMetadata } from '@/lib/seo';
 
 export default function EditPost() {
   const workspaceSlug = useWorkspaceSlug();
@@ -80,6 +82,28 @@ export default function EditPost() {
       }
     }
   }, [post]);
+
+  // SEO metadata for the post
+  useHead(
+    post && workspaceSlug
+      ? createPostSEOMetadata(
+          {
+            title: post.title,
+            excerpt: post.excerpt,
+            slug: post.slug,
+            publishedAt: post.publishedAt,
+            updatedAt: post.updatedAt,
+            author: post.author,
+            tags: post.tags,
+          },
+          workspaceSlug,
+        )
+      : createSEOMetadata({
+          title: 'Edit Post',
+          description: 'Create or edit your post',
+          noindex: true,
+        }),
+  );
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMetadata((prev) => {

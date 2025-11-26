@@ -19,11 +19,21 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useInviteDetails, useAcceptInvite } from '@/hooks/useMember';
 import { getErrorMessage } from '@/lib/error-utils';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 export default function AcceptInvitePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+
+  useHead(
+    createSEOMetadata({
+      title: 'Accept Invitation',
+      description: 'Accept workspace invitation',
+      noindex: true,
+    }),
+  );
 
   // Use mock hooks or replace with real hooks from useMember.ts
   const {

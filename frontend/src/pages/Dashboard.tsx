@@ -8,6 +8,8 @@ import { useDashboardHeatmap } from '@/hooks/useDashboardHeatmap';
 import type { DashboardRecentPost } from '@/types/dashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { PingingDotChart } from '@/components/ui/pinging-dot-chart';
+import { useHead } from '@unhead/react';
+import { createDashboardSEOMetadata } from '@/lib/seo';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -71,6 +73,8 @@ export function DashboardPage() {
     useDashboardHeatmap(workspaceSlug);
 
   const workspaceName = data?.workspaceName ?? 'workspace';
+  
+  useHead(createDashboardSEOMetadata(workspaceName));
   const username = user?.name ?? '';
   const stats = data?.stats ?? [];
   const recentPosts = data?.recentPosts ?? [];

@@ -6,6 +6,8 @@ import { type PostMetadata } from '@/types/editor';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
 import { Tiptap, type TiptapHandle } from '@/components/editor/Tiptap';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
@@ -25,6 +27,14 @@ export default function Editor() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
   const editorRef = useRef<TiptapHandle>(null);
+
+  useHead(
+    createSEOMetadata({
+      title: 'Create New Post',
+      description: 'Create a new post in your workspace',
+      noindex: true,
+    }),
+  );
 
   // Load saved draft metadata on mount
   useEffect(() => {

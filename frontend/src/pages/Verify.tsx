@@ -16,6 +16,8 @@ import { verifyEmailSchema } from '@/lib/validations/auth';
 import { useNavigate } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useHead } from '@unhead/react';
+import { createSEOMetadata } from '@/lib/seo';
 
 export function VerifyPage() {
   const [searchParams] = useSearchParams();
@@ -24,6 +26,14 @@ export function VerifyPage() {
   const userId = searchParams.get('userId') ?? '';
   const validatedData = verifyEmailSchema.safeParse({ token, userId });
   const isParamsValid = validatedData.success;
+
+  useHead(
+    createSEOMetadata({
+      title: 'Verify Email',
+      description: 'Verify your email address to activate your account',
+      noindex: true,
+    }),
+  );
 
   const {
     mutate: verifyEmail,
@@ -139,6 +149,14 @@ export function VerifyPage() {
 export default function Verify() {
   const [searchParams] = useSearchParams();
   const email = searchParams.get('email');
+
+  useHead(
+    createSEOMetadata({
+      title: 'Verify Email',
+      description: 'Verify your email address to activate your account',
+      noindex: true,
+    }),
+  );
 
   return (
     <div className='w-full min-h-screen flex items-center justify-center p-4'>

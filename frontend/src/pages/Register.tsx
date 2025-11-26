@@ -4,8 +4,11 @@ import { RegisterForm } from '@/components/register';
 import { useRegister } from '@/hooks/useAuth';
 import { registerSchema } from '@/lib/validations/auth';
 import { getAuthErrorMessage } from '@/lib/error-utils';
+import { useHead } from '@unhead/react';
+import { createAuthPageSEOMetadata } from '@/lib/seo';
 
 export default function RegisterPage() {
+  useHead(createAuthPageSEOMetadata('register'));
   const navigate = useNavigate();
   const { mutate: register, isPending } = useRegister();
 

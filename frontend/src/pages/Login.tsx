@@ -4,8 +4,11 @@ import { LoginForm } from '@/components/login.tsx';
 import { useLogin } from '@/hooks/useAuth';
 import { loginSchema } from '@/lib/validations/auth';
 import { getAuthErrorMessage } from '@/lib/error-utils';
+import { useHead } from '@unhead/react';
+import { createAuthPageSEOMetadata } from '@/lib/seo';
 
 export default function LoginPage() {
+  useHead(createAuthPageSEOMetadata('login'));
   const navigate = useNavigate();
   const location = useLocation();
   const { mutate: login, isPending } = useLogin();

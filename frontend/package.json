@@ -47,6 +47,7 @@
     "@tiptap/react": "^3.10.3",
     "@tiptap/starter-kit": "^3.10.3",
     "@udecode/cn": "^49.0.15",
+    "@unhead/react": "^2.0.19",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
