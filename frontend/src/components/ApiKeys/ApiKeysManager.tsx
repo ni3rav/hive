@@ -1,16 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Plus, Trash2, Copy, Download, KeyRound } from 'lucide-react';
+import { Plus, Copy, Download, KeyRound, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -132,6 +125,19 @@ export default function ApiKeysManager() {
 
   const hasReachedLimit = apiKeys.length >= 3;
 
+  const handleCreateButtonPress = () => {
+    if (hasReachedLimit || !workspaceSlug) {
+      if (hasReachedLimit) {
+        toast.error(
+          'Workspace already has 3 API keys. Delete and existing key to create a new one.',
+        );
+      }
+      return;
+    }
+
+    setCreateDialogOpen(true);
+  };
+
   return (
     <div className='px-4 py-4 sm:px-6 sm:py-6'>
       <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
@@ -142,13 +148,19 @@ export default function ApiKeysManager() {
               Issue workspace-scoped keys for accessing the Content
             </p>
           </div>
-          <Button
-            onClick={() => setCreateDialogOpen(true)}
-            disabled={hasReachedLimit || !workspaceSlug}
+          <div
+            className='inline-flex'
+            role='presentation'
+            onClick={handleCreateButtonPress}
           >
-            <Plus className='mr-2 h-4 w-4' />
-            Create API Key
-          </Button>
+            <Button
+              disabled={hasReachedLimit || !workspaceSlug}
+              className={hasReachedLimit ? 'pointer-events-none' : undefined}
+            >
+              <Plus className='size-4' />
+              Create API Key
+            </Button>
+          </div>
         </div>
 
         <Alert variant='default' className='border-dashed'>
@@ -159,15 +171,6 @@ export default function ApiKeysManager() {
             workspace permissions of the creator and can be revoked at any time.
           </AlertDescription>
         </Alert>
-
-        {hasReachedLimit && (
-          <Alert variant='destructive'>
-            <AlertTitle>Key limit reached</AlertTitle>
-            <AlertDescription>
-              Delete an existing key before creating a new one.
-            </AlertDescription>
-          </Alert>
-        )}
 
         {isLoading ? (
           <div className='flex min-h-[320px] items-center justify-center rounded-lg border'>
@@ -192,56 +195,56 @@ export default function ApiKeysManager() {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button
-                variant='outline'
-                onClick={() => setCreateDialogOpen(true)}
-                disabled={hasReachedLimit || !workspaceSlug}
+              <div
+                className='inline-flex'
+                role='presentation'
+                onClick={handleCreateButtonPress}
               >
-                Create API Key
-              </Button>
+                <Button
+                  variant='outline'
+                  disabled={hasReachedLimit || !workspaceSlug}
+                  className={
+                    hasReachedLimit ? 'pointer-events-none' : undefined
+                  }
+                >
+                  Create API Key
+                </Button>
+              </div>
             </EmptyContent>
           </Empty>
         ) : (
-          <div className='rounded-md border-border overflow-hidden'>
-            <Table>
-              <TableHeader>
-                <TableRow className='bg-muted/40'>
-                  <TableHead className='text-left'    >Description</TableHead>
-                  <TableHead className='text-left'>Created At</TableHead>
-                  <TableHead className='text-left'>Created By</TableHead>
-                  <TableHead className='text-center'>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {apiKeys.map((key) => (
-                  <TableRow key={key.id}>
-                    <TableCell className='text-left'>
-                      <div className='font-medium text-foreground'>
+          <div className='rounded-md bg-card/30 p-1'>
+            <div className='flex flex-col'>
+              {apiKeys.map((key, index) => (
+                <div key={key.id}>
+                  <div className='flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+                    <div className='space-y-1'>
+                      <p className='text-base font-medium text-foreground'>
                         {key.description || 'Untitled key'}
-                      </div>
-                    </TableCell>
-                    <TableCell className='text-left'>{formatDate(key.createdAt)}</TableCell>
-                    <TableCell className='text-left'>
-                      {memberLookup.get(key.createdByUserId) ?? 'Unknown member'}
-                    </TableCell>
-                    <TableCell className='text-center'>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        className='text-destructive hover:bg-destructive/10'
-                        onClick={() => handleDeleteRequest(key)}
-                        disabled={
-                          deleteKey.isPending && keyPendingDelete?.id === key.id
-                        }
-                      >
-                        <Trash2 className='h-4 w-4' />
-                        <span className='sr-only'>Delete key</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </p>
+                      <p className='text-sm text-muted-foreground'>
+                        Created {formatDate(key.createdAt)} by{' '}
+                        {memberLookup.get(key.createdByUserId) ??
+                          'Unknown member'}
+                      </p>
+                    </div>
+                    <Button
+                      variant='destructive'
+                      onClick={() => handleDeleteRequest(key)}
+                      disabled={
+                        deleteKey.isPending && keyPendingDelete?.id === key.id
+                      }
+                    >
+                      <Trash2 className='size-4' />
+                      Delete
+                    </Button>
+                  </div>
+                  {index < apiKeys.length - 1 && (
+                    <Separator className='text-border/60 bg-accent/50' />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -389,4 +392,3 @@ function formatDate(value: string | Date) {
     timeStyle: 'short',
   });
 }
-
