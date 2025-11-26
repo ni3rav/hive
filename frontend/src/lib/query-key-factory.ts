@@ -142,6 +142,14 @@ export class QueryKeys {
     },
   };
 
+  private static apiKeys = {
+    base: ['apiKeys'] as const,
+
+    list(workspaceSlug: string) {
+      return [...this.base, 'list', workspaceSlug] as const;
+    },
+  };
+
   public static userKeys() {
     return this.user;
   }
@@ -166,6 +174,10 @@ export class QueryKeys {
     return this.workspace;
   }
 
+  public static apiKeyKeys() {
+    return this.apiKeys;
+  }
+
   public static allKeys() {
     return {
       user: this.user.base,
@@ -174,6 +186,7 @@ export class QueryKeys {
       categories: this.categories.base,
       tags: this.tags.base,
       workspace: this.workspace.base,
+      apiKeys: this.apiKeys.base,
     };
   }
 }
