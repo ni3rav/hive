@@ -47,6 +47,7 @@ export function useCreatePost(workspaceSlug: string) {
       const previous = queryClient.getQueryData<Post[]>(
         postsKey(workspaceSlug),
       );
+      const now = new Date().toISOString();
       const optimistic: Post = {
         id: `optimistic-${Date.now()}`,
         workspaceId: '',
@@ -55,9 +56,11 @@ export function useCreatePost(workspaceSlug: string) {
         excerpt: newPost.excerpt,
         status: newPost.status,
         visible: newPost.visible,
-        createdAt: new Date(),
-        publishedAt: newPost.publishedAt || null,
-        updatedAt: new Date(),
+        createdAt: now,
+        publishedAt: newPost.publishedAt
+          ? newPost.publishedAt.toISOString()
+          : null,
+        updatedAt: now,
         author: null,
         category: null,
         creator: {
