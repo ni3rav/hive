@@ -31,7 +31,7 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className='min-h-dvh flex items-center justify-center py-16'>
+    <section className='py-16 md:py-24'>
       <div className='container mx-auto px-4 flex flex-col items-center justify-center gap-9 max-w-2xl w-full'>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}

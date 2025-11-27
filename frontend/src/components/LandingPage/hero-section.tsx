@@ -5,7 +5,7 @@ import { env } from '@/lib/env';
 
 export function HeroSection() {
   return (
-    <section className='min-h-dvh flex items-center justify-center'>
+    <section className='min-h-svh flex items-center justify-center'>
       <div className='container mx-auto px-4 flex flex-col items-center justify-center'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -28,7 +28,11 @@ export function HeroSection() {
             <Link to='/workspaces'>
               <Button size='lg'>Get Started</Button>
             </Link>
-            <a href={env.VITE_DOCS_URL} target='_blank' rel='noopener noreferrer'>
+            <a
+              href={env.VITE_DOCS_URL}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
               <Button size='lg' variant='outline'>
                 Docs
               </Button>
