@@ -120,5 +120,6 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
 });
 
 app.use((req, res) => {
+  logger.info(`Request from ${req.ip} to unknown route: ${req.originalUrl}`);
   return notFound(res, 'Route not found', { path: req.originalUrl });
 });
