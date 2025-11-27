@@ -32,12 +32,12 @@ export function NavUser({
   return (
     <SidebarMenu>
       {/* Theme toggle - above avatar in collapsed state */}
-      <SidebarMenuItem className='group-data-[state=collapsed]:block group-data-[state=expanded]:hidden'>
+      <SidebarMenuItem className='hidden group-data-[state=collapsed]:block'>
         <div className='flex justify-center'>
           <ThemeToggle />
         </div>
       </SidebarMenuItem>
-      
+
       {/* User info */}
       <SidebarMenuItem>
         <div className='flex w-full items-center gap-2 group-data-[state=expanded]:gap-2'>
@@ -60,7 +60,7 @@ export function NavUser({
             </div>
           </SidebarMenuButton>
           {/* Theme toggle - right side in expanded state */}
-          <div className='group-data-[state=collapsed]:hidden'>
+          <div className='hidden group-data-[state=expanded]:block'>
             <ThemeToggle />
           </div>
         </div>
