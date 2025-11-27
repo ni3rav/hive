@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '**'
+      - 'backend/**'
       - '.github/workflows/hive-backend-AutoDeployTrigger-b188c563-acb1-47ed-a789-f65fa7c36e92.yml'
 
   workflow_dispatch:
@@ -30,8 +30,11 @@ jobs:
       - name: Build & Deploy Container App
         uses: azure/container-apps-deploy-action@v2
         with:
+          # Your backend folder in the repo
           appSourcePath: backend
-          dockerfilePath: backend/Dockerfile
+
+          # IMPORTANT: relative to appSourcePath — so just "Dockerfile"
+          dockerfilePath: Dockerfile
 
           registryUrl: hiveacr3.azurecr.io
           registryUsername: ${{ secrets.HIVEBACKEND_REGISTRY_USERNAME }}
@@ -40,9 +43,10 @@ jobs:
           containerAppName: hive-backend
           resourceGroup: hive-rg
 
+          # Build & deploy the same tag
           imageToBuild: hiveacr3.azurecr.io/hive-backend:${{ github.sha }}
           imageToDeploy: hiveacr3.azurecr.io/hive-backend:${{ github.sha }}
 
-          # optional
+          # Optional
           buildArguments: |
             NODE_ENV=production
