@@ -1,13 +1,19 @@
-import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
-export function Logo({ className = '' }: { className?: string }) {
+interface LogoProps {
+  image: string;
+}
+
+export function Logo({ image }: LogoProps) {
   return (
-    <img
-      src='/hive.png'
-      alt='Hive logo'
-      className={cn('h-8 w-8 rounded-md aspect-square', className)}
-      width={32}
-      height={32}
-    />
+    <Link to='/' className='flex items-center justify-center'>
+      <div className='relative size-8 flex items-center justify-center'>
+        <img
+          src={image || '/placeholder.svg'}
+          alt='Logo'
+          className='size-full object-contain aspect-square'
+        />
+      </div>
+    </Link>
   );
 }

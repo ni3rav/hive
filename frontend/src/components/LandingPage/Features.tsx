@@ -1,96 +1,70 @@
-import { LayoutDashboard, Code2, Users, Edit3 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { PenTool, Type, Users, Code2 } from 'lucide-react';
+import { motion } from 'motion/react';
 
-export function Features() {
+const features = [
+  {
+    icon: PenTool,
+    title: 'Intuitive UI for easy author, category, tags, and post management',
+    color: 'text-orange-500',
+    span: 'md:col-span-1',
+  },
+  {
+    icon: Type,
+    title: 'Smooth writing experience with just the right tools of formatting',
+    color: 'text-blue-500',
+    span: 'md:col-span-1',
+  },
+  {
+    icon: Users,
+    title: 'Seamless workspace-based collaboration',
+    color: 'text-purple-500',
+    span: 'md:col-span-1',
+  },
+  {
+    icon: Code2,
+    title:
+      'Straightforward API access that works with any framework: Next, Astro, Express, etc.',
+    color: 'text-emerald-500',
+    span: 'md:col-span-1',
+  },
+];
+
+export function FeaturesSection() {
   return (
-    <section
-      id='features'
-      className='relative bg-background min-h-screen flex items-center py-24'
-    >
-      <div className='mx-auto w-full max-w-6xl px-6'>
-        <div className='flex flex-col items-center text-center gap-3'>
-          <h2 className='text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase'>
-            Features
-          </h2>
-          <p className='text-base md:text-lg text-muted-foreground'>
-            Everything you need to manage your content
-          </p>
-        </div>
-
-        <div className='mt-10 grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2'>
-          {/* Intuitive interface & metadata */}
-          <div className='feature-tile-hover rounded-2xl border border-border/70 bg-background/80 px-6 py-6 md:px-8 md:py-8 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md hover:border-secondary/50 hover:bg-secondary/5'>
-            <div className='mb-6 flex items-center justify-between'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 ring-1 ring-secondary/30'>
-                <LayoutDashboard className='h-5 w-5 text-chart-1' />
-              </div>
-            </div>
-            <div className='space-y-2'>
-              <h3 className='text-base md:text-lg font-medium tracking-tight'>
-                Intuitive User Interface
-              </h3>
-              <p className='text-sm md:text-[0.95rem] leading-relaxed text-muted-foreground'>
-                Manage posts, SEO metadata, and previews in one clean, focused
-                interface so content and structure always stay in sync.
-              </p>
-            </div>
-          </div>
-
-          {/* Simple editor */}
-          <div className='feature-tile-hover rounded-2xl border border-border/70 bg-background/80 px-6 py-6 md:px-8 md:py-8 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md hover:border-secondary/50 hover:bg-secondary/5'>
-            <div className='mb-6 flex items-center justify-between'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 ring-1 ring-secondary/30'>
-                <Edit3 className='h-5 w-5 text-chart-2' />
-              </div>
-            </div>
-            <div className='space-y-2'>
-              <h3 className='text-base md:text-lg font-medium tracking-tight'>
-                Simple editor
-              </h3>
-              <p className='text-sm md:text-[0.95rem] leading-relaxed text-muted-foreground'>
-                A distraction-free, smooth writing experience that lets you
-                focus on content, not tooling, with sensible formatting built
-                in.
-              </p>
-            </div>
-          </div>
-
-          {/* Collaborative workspaces */}
-          <div className='feature-tile-hover rounded-2xl border border-border/70 bg-background/80 px-6 py-6 md:px-8 md:py-8 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md hover:border-secondary/50 hover:bg-secondary/5'>
-            <div className='mb-6 flex items-center justify-between'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 ring-1 ring-secondary/30'>
-                <Users className='h-5 w-5 text-chart-3' />
-              </div>
-            </div>
-            <div className='space-y-2'>
-              <h3 className='text-base md:text-lg font-medium tracking-tight'>
-                Collaborative workspaces
-              </h3>
-              <p className='text-sm md:text-[0.95rem] leading-relaxed text-muted-foreground'>
-                Invite your team into shared workspaces so writers, editors, and
-                developers can collaborate on the same content pipeline.
-              </p>
-            </div>
-          </div>
-
-          {/* API access */}
-          <div className='feature-tile-hover rounded-2xl border border-border/70 bg-background/80 px-6 py-6 md:px-8 md:py-8 flex flex-col justify-between h-full transition-all duration-200 hover:shadow-md hover:border-secondary/50 hover:bg-secondary/5'>
-            <div className='mb-6 flex items-center justify-between'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 ring-1 ring-secondary/30'>
-                <Code2 className='h-5 w-5 text-chart-4' />
-              </div>
-            </div>
-            <div className='space-y-2 max-w-2xl'>
-              <h3 className='text-base md:text-lg font-medium tracking-tight'>
-                Straightforward API access
-              </h3>
-              <p className='text-sm md:text-[0.95rem] leading-relaxed text-muted-foreground'>
-                Pull content via API into any framework. Works seamlessly with
-                Next.js, Astro, Nuxt, and more—without custom plumbing or
-                brittle integrations.
-              </p>
-            </div>
-          </div>
-        </div>
+    <section className='min-h-dvh flex items-center justify-center py-16'>
+      <div className='container mx-auto px-4 flex flex-col items-center justify-center'>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className='text-4xl md:text-5xl font-bold text-foreground mb-16 text-balance'
+        >
+          Powerful Features
+        </motion.h2>
+        <ul className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7 w-full max-w-6xl'>
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className={feature.span}
+              >
+                <Card className='p-7 h-full flex flex-col gap-5 bg-card border-border rounded-lg'>
+                  <Icon className={`w-8 h-8 ${feature.color} flex-shrink-0`} />
+                  <p className='text-base text-card-foreground font-medium'>
+                    {feature.title}
+                  </p>
+                </Card>
+              </motion.li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
