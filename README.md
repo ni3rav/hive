@@ -54,15 +54,15 @@ Full-stack content collaboration platform composed of an Express/Drizzle API (`b
 
 ### Backend (`backend/.env`)
 
-| Variable         | Required | Description                                          |
-| ---------------- | -------- | ---------------------------------------------------- |
-| `DATABASE_URL`   | ✅       | Full Postgres connection string                      |
-| `PORT`           | ✅       | API port (e.g., `3000`)                              |
-| `NODE_ENV`       | ✅       | `development` / `production`                         |
-| `FRONTEND_URL`   | ✅       | Allowed origin for CORS + auth links                 |
-| `RESEND_API_KEY` | ✅       | API key for Resend transactional emails              |
-| `DMA`            | optional | Enable DMA-specific safeguards (defaults to `false`) |
-| `DEV_USER_ID`    | optional | Seeded ID used for local fixtures                    |
+| Variable         | Required | Description                                                           |
+| ---------------- | -------- | --------------------------------------------------------------------- |
+| `DATABASE_URL`   | ✅       | Full Postgres connection string                                       |
+| `PORT`           | ✅       | API port (e.g., `3000`)                                               |
+| `NODE_ENV`       | ✅       | `development` / `production`                                          |
+| `FRONTEND_URL`   | ✅       | Allowed origin for CORS + auth links                                  |
+| `RESEND_API_KEY` | ✅       | API key for Resend transactional emails                               |
+| `DMA`            | optional | Enable DMA-specific safeguards (defaults to `false`)                  |
+| `DEV_USER_ID`    | optional | Seeded ID used for local fixtures                                     |
 | `EMAIL_DOMAIN`   | optional | Domain used for transactional senders (`emails.ni3rav.me` by default) |
 
 Example:

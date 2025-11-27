@@ -1,3 +1,4 @@
+import { env } from '@/lib/env';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
@@ -39,15 +40,19 @@ export function Footer() {
             >
               GitHub
             </Link>
-            <Link
-              to='/docs'
+            <a
+              href={env.VITE_DOCS_URL}
+              target='_blank'
+              rel='noopener noreferrer'
               className='text-sm text-muted-foreground hover:text-foreground transition-colors'
             >
               Docs
-            </Link>
+            </a>
             <a
               href='mailto:niravv1405@gmail.com'
               className='text-sm text-muted-foreground hover:text-foreground transition-colors'
+              target='_blank'
+              rel='noopener noreferrer'
             >
               Contact
             </a>

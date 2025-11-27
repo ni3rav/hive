@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { env } from '@/lib/env';
 
 export function HeroSection() {
   return (
@@ -27,11 +28,11 @@ export function HeroSection() {
             <Link to='/workspaces'>
               <Button size='lg'>Get Started</Button>
             </Link>
-            <Link to='/docs'>
+            <a href={env.VITE_DOCS_URL} target='_blank' rel='noopener noreferrer'>
               <Button size='lg' variant='outline'>
                 Docs
               </Button>
-            </Link>
+            </a>
           </div>
         </motion.div>
       </div>
