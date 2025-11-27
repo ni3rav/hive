@@ -1,3 +1,4 @@
+import { env } from '../env';
 import { baseTemplate } from './base-template';
 import {
   headingStyles,
@@ -15,7 +16,7 @@ interface WorkspaceInvitationEmailProps {
   invitationLink: string;
 }
 
-export const EMAIL_FROM = 'Hive <noreply@emails.ni3rav.me>';
+export const EMAIL_FROM = `Hive <noreply@${env.EMAIL_DOMAIN}>`;
 
 export const workspaceInvitationEmail = ({
   workspaceName,

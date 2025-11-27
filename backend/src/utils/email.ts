@@ -11,13 +11,10 @@ interface SendEmailOptions {
   from?: string;
 }
 
+const defaultFrom = `Hive <noreply@${env.EMAIL_DOMAIN}>`;
+
 export const sendEmail = async (options: SendEmailOptions) => {
-  const {
-    to,
-    subject,
-    html,
-    from = 'Hive <noreply@emails.ni3rav.me>',
-  } = options;
+  const { to, subject, html, from = defaultFrom } = options;
 
   try {
     const { data, error } = await resend.emails.send({

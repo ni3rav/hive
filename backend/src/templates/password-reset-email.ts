@@ -1,3 +1,4 @@
+import { env } from '../env';
 import { baseTemplate } from './base-template';
 import {
   headingStyles,
@@ -12,7 +13,7 @@ interface PasswordResetEmailProps {
   resetLink: string;
 }
 
-export const EMAIL_FROM = 'Hive Security <security@emails.ni3rav.me>';
+export const EMAIL_FROM = `Hive Security <security@${env.EMAIL_DOMAIN}>`;
 
 export const passwordResetEmail = ({
   name,

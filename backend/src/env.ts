@@ -6,6 +6,7 @@ const validatedEnv = cleanEnv(process.env, {
   NODE_ENV: str(),
   FRONTEND_URL: str(),
   RESEND_API_KEY: str(),
+  EMAIL_DOMAIN: str(),
   DMA: bool({ default: false }),
   DEV_USER_ID: str({ default: '' }),
 });
