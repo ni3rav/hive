@@ -26,12 +26,14 @@ import { Spinner } from '@/components/ui/spinner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
+import { useWorkspaceVerification } from '@/hooks/useWorkspace';
 import {
   useCreateWorkspaceApiKey,
   useDeleteWorkspaceApiKey,
   useWorkspaceApiKeys,
 } from '@/hooks/useApiKeys';
 import { useMembers } from '@/hooks/useMember';
+import type { MemberRole } from '@/types/member';
 import type {
   WorkspaceApiKey,
   CreateWorkspaceApiKeyResponse,
@@ -39,6 +41,7 @@ import type {
 
 export default function ApiKeysManager() {
   const workspaceSlug = useWorkspaceSlug();
+  const { data: workspace } = useWorkspaceVerification(workspaceSlug);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -57,6 +60,10 @@ export default function ApiKeysManager() {
 
   const createKey = useCreateWorkspaceApiKey(workspaceSlug);
   const deleteKey = useDeleteWorkspaceApiKey(workspaceSlug);
+
+  const currentUserRole = (workspace?.role || 'member') as MemberRole;
+  const canManageApiKeys =
+    currentUserRole === 'owner' || currentUserRole === 'admin';
 
   const memberLookup = useMemo(() => {
     const map = new Map<string, string>();
@@ -126,6 +133,11 @@ export default function ApiKeysManager() {
   const hasReachedLimit = apiKeys.length >= 3;
 
   const handleCreateButtonPress = () => {
+    if (!canManageApiKeys) {
+      toast.error('Only workspace admins can create API keys.');
+      return;
+    }
+
     if (hasReachedLimit || !workspaceSlug) {
       if (hasReachedLimit) {
         toast.error(
@@ -154,8 +166,12 @@ export default function ApiKeysManager() {
             onClick={handleCreateButtonPress}
           >
             <Button
-              disabled={hasReachedLimit || !workspaceSlug}
-              className={hasReachedLimit ? 'pointer-events-none' : undefined}
+              disabled={hasReachedLimit || !workspaceSlug || !canManageApiKeys}
+              className={
+                hasReachedLimit || !canManageApiKeys
+                  ? 'pointer-events-none'
+                  : undefined
+              }
             >
               <Plus className='size-4' />
               Create API Key
@@ -169,6 +185,8 @@ export default function ApiKeysManager() {
           <AlertDescription>
             Each workspace can have up to three API keys. Keys inherit the
             workspace permissions of the creator and can be revoked at any time.
+            Only workspace owners and admins can create or delete keys; members
+            can view existing keys.
           </AlertDescription>
         </Alert>
 
@@ -202,9 +220,13 @@ export default function ApiKeysManager() {
               >
                 <Button
                   variant='outline'
-                  disabled={hasReachedLimit || !workspaceSlug}
+                  disabled={
+                    hasReachedLimit || !workspaceSlug || !canManageApiKeys
+                  }
                   className={
-                    hasReachedLimit ? 'pointer-events-none' : undefined
+                    hasReachedLimit || !canManageApiKeys
+                      ? 'pointer-events-none'
+                      : undefined
                   }
                 >
                   Create API Key
@@ -228,16 +250,18 @@ export default function ApiKeysManager() {
                           'Unknown member'}
                       </p>
                     </div>
-                    <Button
-                      variant='destructive'
-                      onClick={() => handleDeleteRequest(key)}
-                      disabled={
-                        deleteKey.isPending && keyPendingDelete?.id === key.id
-                      }
-                    >
-                      <Trash2 className='size-4' />
-                      Delete
-                    </Button>
+                    {canManageApiKeys && (
+                      <Button
+                        variant='destructive'
+                        onClick={() => handleDeleteRequest(key)}
+                        disabled={
+                          deleteKey.isPending && keyPendingDelete?.id === key.id
+                        }
+                      >
+                        <Trash2 className='size-4' />
+                        Delete
+                      </Button>
+                    )}
                   </div>
                   {index < apiKeys.length - 1 && (
                     <Separator className='text-border/60 bg-accent/50' />
