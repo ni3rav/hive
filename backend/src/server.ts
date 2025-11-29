@@ -52,15 +52,6 @@ app.use(
     allowedHeaders: [],
   }),
 );
-app.use(
-  '/api/auth/me',
-  cors({
-    origin: [env.FRONTEND_URL, env.LANDING_PAGE_URL].filter(Boolean),
-    credentials: true,
-    methods: ['GET'],
-    allowedHeaders: ['Content-Type'],
-  }),
-);
 
 app.use(cookieParser());
 app.use(express.json());
