@@ -1,0 +1,20 @@
+{
+  "name": "Hive CMS",
+  "short_name": "Hive",
+  "description": "Write content in one place and fetch it from any frontend with a straightforward API",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "development"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
