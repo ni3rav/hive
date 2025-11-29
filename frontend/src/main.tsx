@@ -13,13 +13,16 @@ import { ErrorFallback } from './components/ErrorFallback';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 import { lazyPage } from '@/components/editor/lazy';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Spinner } from './components/ui/spinner';
 import CategoriesManager from './components/Category/CategoryManager';
 import MemberManager from './components/Member/MemberManager';
 import InviteMemberPage from './components/Member/InviteMemberPage';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { UnheadProvider } from '@unhead/react/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
 const LoginPage = lazyPage('/src/pages/Login.tsx');
 const Verify = lazyPage('/src/pages/Verify.tsx', 'VerifyPage');
@@ -40,8 +43,35 @@ const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const AcceptInvitePage = lazyPage('/src/pages/AcceptInvitePage.tsx');
 const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx');
 
+function RootRedirect() {
+  const { data: user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (user) {
+      toast.info('Redirected to your workspaces');
+      navigate('/workspaces', { replace: true });
+    } else {
+      toast.info('Please log in to continue');
+      navigate('/login', { replace: true });
+    }
+  }, [user, isLoading, navigate]);
+
+  return (
+    <div className='flex h-screen w-screen items-center justify-center'>
+      <Spinner className='size-5' />
+    </div>
+  );
+}
+
 const router = createBrowserRouter([
   // --- Public Routes ---
+  {
+    path: '/',
+    element: <RootRedirect />,
+  },
   {
     path: '/login',
     element: <LoginPage />,

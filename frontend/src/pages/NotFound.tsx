@@ -15,7 +15,7 @@ export default function NotFound({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex h-full flex-col items-center justify-center gap-4 p-8 text-center',
+        'size-full flex flex-col items-center justify-center gap-4 p-8 text-center',
         className,
       )}
     >
