@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: `${baseUrl}/hive.png`,
+        url: `${baseUrl}/og.png`,
         width: 1200,
         height: 630,
         alt: "Hive - A simple CMS for your next project",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     title: "Hive | A simple CMS for your next project",
     description:
       "Write content in one place and fetch it from any frontend with a straightforward API, so your team can focus on what to say instead of how to wire it up.",
-    images: [`${baseUrl}/hive.png`],
+    images: [`${baseUrl}/og.png`],
     creator: "@ni3rav",
     site: "@ni3rav",
   },

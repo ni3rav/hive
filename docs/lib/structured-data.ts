@@ -42,7 +42,7 @@ export function generateOrganizationData() {
     "@type": "Organization",
     name: "Hive",
     url: baseUrl,
-    logo: `${baseUrl}/hive.png`,
+    logo: `${baseUrl}/og.png`,
     sameAs: ["https://twitter.com/ni3rav", "https://github.com/ni3rav/hive"],
     contactPoint: {
       "@type": "ContactPoint",
@@ -117,7 +117,7 @@ export function generateArticleData(params: {
       url: "https://hivecms.online",
       logo: {
         "@type": "ImageObject",
-        url: "https://hivecms.online/hive.png",
+        url: "https://hivecms.online/og.png",
       },
     },
     inLanguage: "en-US",

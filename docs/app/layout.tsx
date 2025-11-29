@@ -20,7 +20,7 @@ const siteConfig = {
   description:
     "Write content in one place and fetch it from any frontend with a straightforward API, so your team can focus on what to say instead of how to wire it up.",
   url: baseUrl,
-  ogImage: `${baseUrl}/hive.png`,
+  ogImage: `${baseUrl}/og.png`,
   links: {
     twitter: "https://twitter.com/ni3rav",
     github: "https://github.com/ni3rav/hive",
