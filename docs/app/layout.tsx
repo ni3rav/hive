@@ -1,4 +1,5 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
+import { ThemeProvider } from "next-themes";
 import "./global.css";
 import { Geist } from "next/font/google";
 import type { Metadata } from "next";
@@ -56,7 +57,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={geist.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <RootProvider>{children}</RootProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <RootProvider>{children}</RootProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@ import FAQ from "@/components/faq";
 import Features from "@/components/features";
 import Footer from "@/components/footer";
 import Hero from "@/components/hero";
+import Navbar from "@/components/navbar";
 
 export const metadata = {
   description:
@@ -12,6 +13,7 @@ export const metadata = {
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <Navbar />
       <Hero badgeText="Just released v1! 🎉" />
       <Features />
       <FAQ />
