@@ -30,7 +30,7 @@ const faq = [
 
 const FAQ = () => {
   return (
-    <div className="flex items-center justify-center px-6 py-48">
+    <div id="faq" className="flex items-center justify-center px-6 py-48">
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-start gap-x-12 gap-y-6">
         <h2 className="text-4xl lg:text-5xl leading-[1.15]! font-semibold tracking-[-0.035em]">
           Frequently Asked <br /> Questions

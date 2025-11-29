@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, BookOpen, CirclePlay } from "lucide-react";
+import { ArrowUpRight, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero({ badgeText }: { badgeText: string }) {
@@ -38,11 +38,16 @@ export default function Hero({ badgeText }: { badgeText: string }) {
           </Button>
         </div>
       </div>
-      <div className="relative w-full max-w-(--breakpoint-xl) mx-auto aspect-video rounded-xl overflow-hidden border border-foreground/5 shadow-[0_0_40px_0_rgba(0,0,0,0.1)] shadow-primary/10">
+      <div className="relative w-full max-w-(--breakpoint-xl) mx-auto aspect-video rounded-xl overflow-hidden border border-foreground/10 shadow-[0_0_40px_0_rgba(0,0,0,0.1)] shadow-primary/15">
         <img
           src="/hive-dashboard.png"
-          alt="Hive Dashboard"
-          className="object-cover w-full h-full"
+          alt="Hive Dashboard Dark"
+          className="hidden dark:block object-cover w-full h-full"
+        />
+        <img
+          src="/hive-dashboard-light.png"
+          alt="Hive Dashboard Light"
+          className="block dark:hidden object-cover w-full h-full"
         />
       </div>
     </div>
