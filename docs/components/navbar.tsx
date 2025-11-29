@@ -9,11 +9,11 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 h-16 bg-background/80 backdrop-blur-md border-b">
       <div className="h-full flex items-center justify-between max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-12">
-          <div className="flex items-center justify-center bg-muted/50 rounded-md p-2">
+          <div className="flex items-center justify-center p-2">
             <img
               src="/hive.png"
               alt="Hive Logo"
-              className="size-6 object-contain"
+              className="size-8 object-contain"
             />
           </div>
 
