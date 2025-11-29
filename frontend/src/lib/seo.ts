@@ -156,20 +156,6 @@ export function createPostSEOMetadata(
 }
 
 /**
- * Helper to create SEO metadata for the landing page
- */
-export function createLandingPageSEOMetadata(): UseHeadInput {
-  return createSEOMetadata({
-    title: 'A simple CMS for your next project',
-    description:
-      'Write content in one place and fetch it from any frontend with a straightforward API, so your team can focus on what to say instead of how to wire it up',
-    url: '/',
-    type: 'website',
-    image: '/hive.png',
-  });
-}
-
-/**
  * Helper to create SEO metadata for auth pages
  */
 export function createAuthPageSEOMetadata(

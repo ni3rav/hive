@@ -90,12 +90,6 @@ router.patch(
   updateMemberRoleController,
 );
 router.delete(
-  '/:workspaceSlug/members/:userId',
-  verifyWorkspaceMembership,
-  requireMinRole('admin'),
-  removeMemberController,
-);
-router.delete(
   '/:workspaceSlug/members/invitations/:invitationId',
   verifyWorkspaceMembership,
   requireMinRole('admin'),
@@ -105,4 +99,10 @@ router.delete(
   '/:workspaceSlug/members/leave',
   verifyWorkspaceMembership,
   leaveWorkspaceController,
+);
+router.delete(
+  '/:workspaceSlug/members/:userId',
+  verifyWorkspaceMembership,
+  requireMinRole('admin'),
+  removeMemberController,
 );

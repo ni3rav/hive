@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   BookOpen,
   SquareTerminal,
-  Settings2,
+  // Settings2,
   Users,
   FileText,
   Layers,
@@ -60,11 +60,11 @@ const navItems = [
     url: 'editor',
     icon: BookOpen,
   },
-  {
-    title: 'Settings',
-    url: 'settings',
-    icon: Settings2,
-  },
+  // {
+  //   title: 'Settings',
+  //   url: 'settings',
+  //   icon: Settings2,
+  // },
 ];
 
 const developerItems = [

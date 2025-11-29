@@ -1,0 +1,142 @@
+---
+title: Response Shapes
+description: TypeScript type definitions for all API responses
+---
+
+This page provides TypeScript type definitions for all API responses. Use these as a reference when wiring data into your site.
+
+## Posts
+
+### PostSummary
+
+Used in post lists and includes basic post information.
+
+```ts
+type PostSummary = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  publishedAt: string | null; // ISO timestamp
+  updatedAt: string | null; // ISO timestamp
+  category: { name: string; slug: string } | null;
+  tags: Array<{ name: string; slug: string }>;
+  author: { id: string; name: string } | null;
+};
+```
+
+### PostDetail
+
+Used when fetching a single post. Includes all fields from `PostSummary` plus the full HTML content.
+
+```ts
+type PostDetail = PostSummary & { htmlContent: string };
+```
+
+### PostListResponse
+
+Response shape for post list endpoints.
+
+```ts
+type PostListResponse = {
+  data: PostSummary[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+```
+
+## Tags & Categories
+
+### Tag
+
+```ts
+type Tag = { name: string; slug: string };
+```
+
+### Category
+
+```ts
+type Category = { name: string; slug: string };
+```
+
+### TagCategoryResponse
+
+Response shape for tags and categories endpoints.
+
+```ts
+type TagCategoryResponse = { data: Tag[] }; // or Category[]
+```
+
+## Authors
+
+### Author
+
+```ts
+type Author = {
+  id: string;
+  name: string;
+  about: string;
+  socialLinks: Record<string, unknown>;
+};
+```
+
+### AuthorResponse
+
+Response shape for authors endpoint.
+
+```ts
+type AuthorResponse = { data: Author[] };
+```
+
+## Workspace Stats
+
+### Stats
+
+```ts
+type Stats = {
+  totalPosts: number;
+  totalAuthors: number;
+  totalCategories: number;
+  totalTags: number;
+};
+```
+
+## Error Responses
+
+All error responses follow this format:
+
+```ts
+type ErrorResponse = {
+  message: string;
+};
+```
+
+Common status codes:
+- `401` - Invalid or missing API key
+- `404` - Resource not found
+- `500` - Server error
+
+## Example Usage
+
+Here's how you might use these types in TypeScript:
+
+```ts
+// Fetch posts
+const response = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/posts'
+);
+const data: PostListResponse = await response.json();
+
+// Fetch a single post
+const postResponse = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/posts/my-post-slug'
+);
+const post: PostDetail = await postResponse.json();
+
+// Fetch tags
+const tagsResponse = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/tags'
+);
+const tags: TagCategoryResponse = await tagsResponse.json();
+```
+

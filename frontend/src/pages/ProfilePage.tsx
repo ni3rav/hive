@@ -10,38 +10,11 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-  LogOut,
-  KeyRound,
-  BarChart,
-  History,
-  ChevronRight,
-  Edit,
-} from 'lucide-react';
+import { LogOut, Edit, ArrowLeft } from 'lucide-react';
 import { EditProfileForm } from '@/components/EditProfileForm';
 import { useState } from 'react';
 import { useHead } from '@unhead/react';
 import { createSEOMetadata } from '@/lib/seo';
-
-function ProfileActionRow({
-  label,
-  icon: Icon,
-}: {
-  label: string;
-  icon: React.ElementType;
-}) {
-  return (
-    <button className='group flex w-full items-center justify-between rounded-lg border bg-background p-4 text-left font-medium hover:bg-accent'>
-      <div className='flex items-center gap-3'>
-        <Icon className='h-5 w-5 text-muted-foreground transition-colors group-hover:text-accent-foreground' />
-        <span className='transition-colors group-hover:text-accent-foreground'>
-          {label}
-        </span>
-      </div>
-      <ChevronRight className='h-5 w-5 text-muted-foreground transition-colors group-hover:text-accent-foreground' />
-    </button>
-  );
-}
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -90,54 +63,60 @@ export function ProfilePage() {
           ) : (
             <Card className='w-full max-w-xl rounded-lg'>
               <CardHeader>
-                <div className='flex flex-wrap items-center justify-between gap-4'>
-                  <div className='flex items-center gap-4'>
-                    <Avatar className='h-14 w-14'>
-                      <AvatarImage src={undefined} alt={user.name} />
-                      <AvatarFallback className='bg-primary text-xl font-medium text-primary-foreground'>
-                        {user.name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className='text-lg font-semibold'>
-                        {user.name}
-                      </CardTitle>
-                      <CardDescription>{user.email}</CardDescription>
+                <div className='flex items-start justify-between gap-4'>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='mt-1'
+                    onClick={() => navigate(-1)}
+                  >
+                    <ArrowLeft className='h-4 w-4' />
+                  </Button>
+                  <div className='flex flex-1 flex-wrap items-center justify-between gap-4'>
+                    <div className='flex items-center gap-4'>
+                      <Avatar className='h-14 w-14'>
+                        <AvatarImage src={undefined} alt={user.name} />
+                        <AvatarFallback className='bg-primary text-xl font-medium text-primary-foreground'>
+                          {user.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className='text-lg font-semibold'>
+                          {user.name}
+                        </CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
+                      </div>
                     </div>
-                  </div>
-                  <div className='flex gap-2'>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Edit className='mr-2 h-4 w-4' />
-                      Edit
-                    </Button>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={handleLogout}
-                      disabled={logoutMutation.isPending}
-                    >
-                      {logoutMutation.isPending ? (
-                        'Logging out...'
-                      ) : (
-                        <>
-                          <LogOut className='mr-2 h-4 w-4' />
-                          Logout
-                        </>
-                      )}
-                    </Button>
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <Edit className='mr-2 h-4 w-4' />
+                        Edit
+                      </Button>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        onClick={handleLogout}
+                        disabled={logoutMutation.isPending}
+                      >
+                        {logoutMutation.isPending ? (
+                          'Logging out...'
+                        ) : (
+                          <>
+                            <LogOut className='mr-2 h-4 w-4' />
+                            Logout
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
 
-              <CardContent className='space-y-3'>
-                <ProfileActionRow icon={KeyRound} label='Manage API Keys' />
-                <ProfileActionRow icon={BarChart} label='Usage Statistics' />
-                <ProfileActionRow icon={History} label='Active Sessions' />
-              </CardContent>
+              <CardContent />
             </Card>
           )}
         </>
