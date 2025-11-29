@@ -20,8 +20,6 @@ import MemberManager from './components/Member/MemberManager';
 import InviteMemberPage from './components/Member/InviteMemberPage';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { UnheadProvider } from '@unhead/react/client';
-
-const LandingPage = lazyPage('/src/pages/LandingPage.tsx');
 const RegisterPage = lazyPage('/src/pages/Register.tsx');
 const LoginPage = lazyPage('/src/pages/Login.tsx');
 const Verify = lazyPage('/src/pages/Verify.tsx', 'VerifyPage');
@@ -44,10 +42,6 @@ const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx');
 
 const router = createBrowserRouter([
   // --- Public Routes ---
-  {
-    path: '/',
-    element: <LandingPage />,
-  },
   {
     path: '/login',
     element: <LoginPage />,
