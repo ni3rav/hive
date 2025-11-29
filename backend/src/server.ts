@@ -40,7 +40,7 @@ app.use(
     origin: env.FRONTEND_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type'],
   }),
 );
 app.use(
@@ -50,6 +50,15 @@ app.use(
     methods: ['GET'],
     credentials: false,
     allowedHeaders: [],
+  }),
+);
+app.use(
+  '/api/auth/me',
+  cors({
+    origin: [env.FRONTEND_URL, env.LANDING_PAGE_URL].filter(Boolean),
+    credentials: true,
+    methods: ['GET'],
+    allowedHeaders: ['Content-Type'],
   }),
 );
 
