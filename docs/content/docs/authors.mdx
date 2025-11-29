@@ -1,0 +1,114 @@
+---
+title: Authors
+description: Retrieve author information and profiles from your Hive workspace
+---
+
+The Authors API provides information about all authors in your workspace. Use this to display author bios, headshots, social links, or show content by specific authors.
+
+## Endpoint
+
+```
+GET https://api.hivecms.online/api/public/{API_KEY}/authors
+```
+
+## Example Request
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/authors"
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": "auth_01",
+      "name": "Ava Stone",
+      "about": "Editor-in-chief",
+      "socialLinks": {
+        "twitter": "https://twitter.com/avastone",
+        "linkedin": "https://linkedin.com/in/avastone"
+      }
+    },
+    {
+      "id": "auth_02",
+      "name": "John Doe",
+      "about": "Technical writer and developer",
+      "socialLinks": {
+        "github": "https://github.com/johndoe"
+      }
+    }
+  ]
+}
+```
+
+## Response Fields
+
+Each author object contains:
+
+- `id` (string): Unique identifier for the author (use this to filter posts)
+- `name` (string): The author's display name
+- `about` (string): Author biography or description
+- `socialLinks` (object): Key-value pairs of social media links (e.g., `twitter`, `linkedin`, `github`)
+
+## Use Cases
+
+- **Author Bios**: Display author information on post pages
+- **Author Pages**: Create dedicated pages for each author
+- **Social Links**: Show author social media profiles
+- **Author Filtering**: Filter posts by specific authors
+
+## Example Usage
+
+### Displaying Author Information
+
+```js
+// Fetch authors
+const response = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/authors'
+);
+const { data: authors } = await response.json();
+
+// Find a specific author
+const author = authors.find(a => a.id === 'auth_01');
+
+// Display author info
+console.log(`Author: ${author.name}`);
+console.log(`About: ${author.about}`);
+console.log(`Twitter: ${author.socialLinks.twitter}`);
+```
+
+### Filtering Posts by Author
+
+Use the author `id` to filter posts:
+
+```bash
+# Filter posts by author
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?author=auth_01"
+```
+
+### Building Author Cards
+
+```jsx
+// React example
+{authors.map(author => (
+  <div key={author.id}>
+    <h3>{author.name}</h3>
+    <p>{author.about}</p>
+    <div>
+      {Object.entries(author.socialLinks).map(([platform, url]) => (
+        <a key={platform} href={url}>
+          {platform}
+        </a>
+      ))}
+    </div>
+  </div>
+))}
+```
+
+## Related Endpoints
+
+- [Posts](/docs/posts) - Filter posts by author
+- [Workspace Stats](/docs/stats) - Get total author count
+

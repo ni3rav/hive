@@ -1,13 +1,40 @@
 ---
-title: Hello World
-description: Your first document
+title: Hive Public Content API
+description: Complete guide to integrating Hive content into your website, landing page, or newsletter
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+This handoff guide is meant for people who simply want to pull live Hive content onto a website, landing page, or newsletter. Everything runs against the production host `https://api.hivecms.online`, and every request uses your workspace's public API key.
 
-## What is Next?
+## Quick Start
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Getting Started" href="/docs/getting-started" description="Learn about authentication and base URLs" />
+  <Card title="Posts" href="/docs/posts" description="Browse and fetch individual posts" />
+  <Card title="Tags & Categories" href="/docs/tags" description="Retrieve tags and categories for filtering" />
+  <Card title="Authors" href="/docs/authors" description="Get author information and profiles" />
+  <Card title="Workspace Stats" href="/docs/stats" description="Display workspace statistics" />
+  <Card title="Response Shapes" href="/docs/response-shapes" description="TypeScript type definitions" />
 </Cards>
+
+## Base URL
+
+All API requests are made to:
+
+```
+https://api.hivecms.online/api/public
+```
+
+## Authentication
+
+Replace `{API_KEY}` in each URL with the key provided to you (or you can issue one from your workspace). Keep it private—even though it's read-only, it maps directly to your workspace.
+
+## Headers
+
+None required. The public API is configured for simple GET requests, so you can call it straight from the browser or curl without setting anything special.
+
+## What's Next?
+
+- Start with [Getting Started](/docs/getting-started) to learn about authentication
+- Explore the [Posts API](/docs/posts) to fetch content
+- Check out [Response Shapes](/docs/response-shapes) for TypeScript types
+- Review [Troubleshooting](/docs/troubleshooting) if you encounter issues

@@ -1,0 +1,168 @@
+---
+title: Posts
+description: Browse and fetch individual posts from your Hive workspace
+---
+
+The Posts API allows you to retrieve lists of posts and individual post details. Use this to display blog posts, articles, or any content published in your Hive workspace.
+
+## Browse All Posts
+
+Retrieve a paginated list of posts with optional filtering.
+
+### Endpoint
+
+```
+GET https://api.hivecms.online/api/public/{API_KEY}/posts
+```
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `limit` | number | No | Maximum number of posts to return (max: 50, default: varies) |
+| `offset` | number | No | Number of posts to skip for pagination (default: 0) |
+| `category` | string | No | Filter posts by category slug |
+| `tags` | string | No | Comma-separated tag slugs (e.g., `guides,updates`) |
+| `author` | string | No | Filter posts by author ID |
+
+### Example Request
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5&tags=guides,updates"
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "title": "Quarterly Product Update",
+      "slug": "quarterly-product-update",
+      "excerpt": "Everything we shipped in Q1.",
+      "publishedAt": "2025-02-10T12:30:00.000Z",
+      "updatedAt": "2025-02-11T08:12:01.000Z",
+      "category": { "name": "Product", "slug": "product" },
+      "tags": [{ "name": "updates", "slug": "updates" }],
+      "author": { "id": "auth_01", "name": "Ava Stone" }
+    }
+  ],
+  "total": 17,
+  "offset": 0,
+  "limit": 5
+}
+```
+
+### Use Cases
+
+- Display a blog post listing page
+- Show recent posts on a homepage
+- Filter posts by category or tags
+- Implement pagination for large post collections
+
+## Fetch a Single Post
+
+Retrieve the full details of a specific post by its slug.
+
+### Endpoint
+
+```
+GET https://api.hivecms.online/api/public/{API_KEY}/posts/{postSlug}
+```
+
+### Path Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `postSlug` | string | Yes | The slug of the post to retrieve |
+
+### Example Request
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts/welcome-to-hive"
+```
+
+### Example Response
+
+```json
+{
+  "title": "Welcome to Hive",
+  "slug": "welcome-to-hive",
+  "excerpt": "A brief introduction to Hive CMS.",
+  "publishedAt": "2025-01-15T10:00:00.000Z",
+  "updatedAt": "2025-01-15T10:00:00.000Z",
+  "category": { "name": "Announcements", "slug": "announcements" },
+  "tags": [
+    { "name": "welcome", "slug": "welcome" },
+    { "name": "getting-started", "slug": "getting-started" }
+  ],
+  "author": { "id": "auth_01", "name": "Ava Stone" },
+  "htmlContent": "<h1>Welcome to Hive</h1><p>This is the full HTML content...</p>"
+}
+```
+
+### Response Fields
+
+The single post response includes all fields from the list response, plus:
+
+- `htmlContent` (string): The full HTML content of the post
+
+### Error Handling
+
+If the post slug doesn't exist, you'll receive a `404` status with:
+
+```json
+{
+  "message": "Post not found"
+}
+```
+
+### Use Cases
+
+- Display a full blog post page
+- Show post details in a modal or detail view
+- Render post content in a newsletter
+
+## Filtering Examples
+
+### Filter by Category
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?category=product"
+```
+
+### Filter by Multiple Tags
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?tags=guides,updates"
+```
+
+### Filter by Author
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?author=auth_01"
+```
+
+### Combine Filters
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?category=product&tags=updates&limit=10"
+```
+
+## Pagination
+
+Use `limit` and `offset` to implement pagination:
+
+```bash
+# First page (posts 0-9)
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=10&offset=0"
+
+# Second page (posts 10-19)
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=10&offset=10"
+
+# Third page (posts 20-29)
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=10&offset=20"
+```
+
+The response includes `total`, `offset`, and `limit` to help you calculate pagination controls.
+

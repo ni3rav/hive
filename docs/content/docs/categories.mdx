@@ -1,0 +1,76 @@
+---
+title: Categories
+description: Retrieve all available categories from your Hive workspace
+---
+
+The Categories API provides a list of all categories used in your workspace. Use this to build navigation menus, category filters, or organize content by category.
+
+## Endpoint
+
+```
+GET https://api.hivecms.online/api/public/{API_KEY}/categories
+```
+
+## Example Request
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/categories"
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    { "name": "Announcements", "slug": "announcements" },
+    { "name": "How-To", "slug": "how-to" },
+    { "name": "Product", "slug": "product" }
+  ]
+}
+```
+
+## Response Fields
+
+Each category object contains:
+
+- `name` (string): The display name of the category
+- `slug` (string): The URL-friendly identifier for the category
+
+## Use Cases
+
+- **Navigation Menus**: Build main navigation with category links
+- **Category Filters**: Create dropdown or sidebar filters for posts
+- **Category Pages**: Display all posts in a specific category
+- **Content Organization**: Group and organize content by category
+
+## Example Usage
+
+### Building a Category Navigation
+
+```js
+// Fetch categories
+const response = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/categories'
+);
+const { data: categories } = await response.json();
+
+// Render navigation menu
+categories.forEach(category => {
+  console.log(`<a href="/category/${category.slug}">${category.name}</a>`);
+});
+```
+
+### Filtering Posts by Category
+
+Once you have the category slugs, you can use them to filter posts:
+
+```bash
+# Filter posts by category
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?category=product"
+```
+
+## Related Endpoints
+
+- [Posts](/docs/posts) - Filter posts by category
+- [Tags](/docs/tags) - Get tag information
+

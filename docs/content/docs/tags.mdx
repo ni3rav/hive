@@ -1,0 +1,79 @@
+---
+title: Tags
+description: Retrieve all available tags from your Hive workspace
+---
+
+The Tags API provides a list of all tags used in your workspace. Use this to build tag filters, tag clouds, or navigation menus.
+
+## Endpoint
+
+```
+GET https://api.hivecms.online/api/public/{API_KEY}/tags
+```
+
+## Example Request
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/tags"
+```
+
+## Example Response
+
+```json
+{
+  "data": [
+    { "name": "Guides", "slug": "guides" },
+    { "name": "Product Updates", "slug": "updates" },
+    { "name": "Tutorials", "slug": "tutorials" }
+  ]
+}
+```
+
+## Response Fields
+
+Each tag object contains:
+
+- `name` (string): The display name of the tag
+- `slug` (string): The URL-friendly identifier for the tag
+
+## Use Cases
+
+- **Tag Clouds**: Display all tags with post counts
+- **Filter Menus**: Build dropdown or checkbox filters for posts
+- **Navigation**: Create tag-based navigation links
+- **Search**: Use tags to enhance search functionality
+
+## Example Usage
+
+### Building a Tag Filter
+
+```js
+// Fetch tags
+const response = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/tags'
+);
+const { data: tags } = await response.json();
+
+// Render tag filters
+tags.forEach(tag => {
+  console.log(`<a href="/posts?tag=${tag.slug}">${tag.name}</a>`);
+});
+```
+
+### Filtering Posts by Tag
+
+Once you have the tag slugs, you can use them to filter posts:
+
+```bash
+# Filter posts by a single tag
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?tags=guides"
+
+# Filter posts by multiple tags
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?tags=guides,updates"
+```
+
+## Related Endpoints
+
+- [Posts](/docs/posts) - Filter posts by tags
+- [Categories](/docs/categories) - Get category information
+

@@ -1,0 +1,88 @@
+---
+title: Getting Started
+description: Learn how to authenticate and make your first API request
+---
+
+## Base URL
+
+All API requests are made to the following base URL:
+
+```
+https://api.hivecms.online/api/public
+```
+
+## Authentication
+
+The Hive Public Content API uses API key authentication. Your API key is included directly in the URL path.
+
+### Getting Your API Key
+
+You can obtain your API key from your Hive workspace. The key is read-only and maps directly to your workspace, so keep it private.
+
+### Using Your API Key
+
+Replace `{API_KEY}` in each endpoint URL with your actual API key. For example:
+
+```bash
+# Before
+https://api.hivecms.online/api/public/{API_KEY}/posts
+
+# After (with your actual key)
+https://api.hivecms.online/api/public/your-actual-key-here/posts
+```
+
+## Making Requests
+
+The public API is configured for simple GET requests. No special headers are required, so you can call it directly from:
+
+- **Browser**: Use `fetch()` or `XMLHttpRequest`
+- **cURL**: Use the command line examples provided in each endpoint
+- **Any HTTP client**: Standard GET requests work out of the box
+
+### Example Request
+
+Here's a simple example using cURL:
+
+```bash
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5"
+```
+
+Or using JavaScript in the browser:
+
+```js
+const response = await fetch(
+  'https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5'
+);
+const data = await response.json();
+console.log(data);
+```
+
+## Response Format
+
+All successful responses return JSON data. Error responses also use JSON with a `message` field describing the issue.
+
+### Success Response
+
+```json
+{
+  "data": [...],
+  "total": 42,
+  "offset": 0,
+  "limit": 10
+}
+```
+
+### Error Response
+
+```json
+{
+  "message": "Invalid API key"
+}
+```
+
+## Next Steps
+
+- Learn about [Response Shapes](/docs/response-shapes) to understand the data structure
+- Explore the [Posts API](/docs/posts) to fetch content
+- Check out other endpoints like [Tags](/docs/tags) and [Categories](/docs/categories)
+
