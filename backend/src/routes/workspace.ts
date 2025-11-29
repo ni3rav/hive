@@ -46,7 +46,7 @@ router.get(
 router.get(
   '/:workspaceSlug/api-keys',
   verifyWorkspaceMembership,
-  requireMinRole('admin'),
+  requireMinRole('member'),
   listWorkspaceApiKeysController,
 );
 router.post(
