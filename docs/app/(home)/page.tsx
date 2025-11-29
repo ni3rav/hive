@@ -1,3 +1,5 @@
+import FAQ from "@/components/faq";
+import Features from "@/components/features";
 import Hero from "@/components/hero";
 
 export const metadata = {
@@ -9,6 +11,8 @@ export default function HomePage() {
   return (
     <main className="dark min-h-screen bg-background text-foreground">
       <Hero badgeText="Just released v1! 🎉" />
+      <Features />
+      <FAQ />
     </main>
   );
 }

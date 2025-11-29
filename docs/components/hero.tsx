@@ -38,7 +38,7 @@ export default function Hero({ badgeText }: { badgeText: string }) {
           </Button>
         </div>
       </div>
-      <div className="relative w-full max-w-(--breakpoint-xl) mx-auto aspect-video rounded-xl overflow-hidden border border-foreground/10 shadow-[0_0_40px_0_rgba(0,0,0,0.1)] shadow-primary/20">
+      <div className="relative w-full max-w-(--breakpoint-xl) mx-auto aspect-video rounded-xl overflow-hidden border border-foreground/5 shadow-[0_0_40px_0_rgba(0,0,0,0.1)] shadow-primary/10">
         <img
           src="/hive-dashboard.png"
           alt="Hive Dashboard"
