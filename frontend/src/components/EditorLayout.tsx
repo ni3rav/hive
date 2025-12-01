@@ -32,7 +32,10 @@ const getInitialMetadata = (): PostMetadata => ({
 });
 
 export function EditorLayout() {
-  const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
+  const { workspaceSlug, postSlug } = useParams<{
+    workspaceSlug: string;
+    postSlug?: string;
+  }>();
   const navigate = useNavigate();
 
   const {
@@ -47,7 +50,7 @@ export function EditorLayout() {
 
   // Load saved draft metadata on mount
   useEffect(() => {
-    if (!workspaceSlug) return;
+    if (!workspaceSlug || postSlug) return;
 
     const savedMetadata = loadMetadata(workspaceSlug);
     if (savedMetadata) {
@@ -59,11 +62,11 @@ export function EditorLayout() {
           : new Date(),
       });
     }
-  }, [workspaceSlug]);
+  }, [workspaceSlug, postSlug]);
 
   // Save metadata for draft persistence
   useEffect(() => {
-    if (!workspaceSlug) return;
+    if (!workspaceSlug || postSlug) return;
 
     if (
       metadata.title ||
@@ -74,7 +77,7 @@ export function EditorLayout() {
     ) {
       saveMetadata(metadata, workspaceSlug);
     }
-  }, [metadata, workspaceSlug]);
+  }, [metadata, workspaceSlug, postSlug]);
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
@@ -116,13 +119,14 @@ export function EditorLayout() {
         onTitleChange,
         editorRef: editorRef as React.RefObject<TiptapHandle>,
         workspaceSlug: workspaceSlug ?? '',
-        isEditing: false,
+        postSlug,
+        isEditing: !!postSlug,
       }}
     >
       <SidebarProvider
         style={
           {
-            '--sidebar-width': '28rem',
+            '--sidebar-width': '36rem',
           } as React.CSSProperties
         }
       >

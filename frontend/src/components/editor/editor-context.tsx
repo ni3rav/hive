@@ -11,7 +11,7 @@ export type EditorContextValue = {
   editorRef: React.RefObject<TiptapHandle>;
   workspaceSlug: string;
   postSlug?: string;
-  isEditing?: boolean;
+  isEditing: boolean;
   originalPublishedAt?: Date;
   originalSlug?: string;
 };

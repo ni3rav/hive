@@ -1,13 +1,12 @@
-import { MetadataForm } from '@/components/metadata-form';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '@/components/ErrorFallback';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useBlocker } from 'react-router-dom';
 import { type PostMetadata } from '@/types/editor';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { usePost } from '@/hooks/usePost';
 import { clearContent, clearMetadata } from '@/components/editor/persistence';
-import { Tiptap, type TiptapHandle } from '@/components/editor/Tiptap';
+import { Tiptap } from '@/components/editor/Tiptap';
 import { Spinner } from '@/components/ui/spinner';
 import {
   Card,
@@ -30,23 +29,23 @@ import { getErrorMessage } from '@/lib/error-utils';
 import NotFound from '@/pages/NotFound';
 import { useHead } from '@unhead/react';
 import { createPostSEOMetadata, createSEOMetadata } from '@/lib/seo';
+import { useEditorContext } from '@/components/editor/editor-context';
 
 export default function EditPost() {
   const workspaceSlug = useWorkspaceSlug();
   const navigate = useNavigate();
   const { postSlug } = useParams<{ postSlug: string }>();
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [metadata, setMetadata] = useState<PostMetadata | null>(null);
+  const { metadata, setMetadata, editorRef } = useEditorContext();
+  const [localMetadata, setLocalMetadata] = useState<PostMetadata | null>(null);
   const [originalMetadata, setOriginalMetadata] = useState<PostMetadata | null>(
     null,
   );
   const [originalContent, setOriginalContent] = useState<string | null>(null);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<
-    (() => void) | null
-  >(null);
-  const editorRef = useRef<TiptapHandle>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(
+    null,
+  );
 
   const {
     data: post,
@@ -75,6 +74,7 @@ export default function EditPost() {
         visible: post.visible,
         status: post.status,
       };
+      setLocalMetadata(postMetadata);
       setMetadata(postMetadata);
       setOriginalMetadata(postMetadata);
       if (post.content?.contentJson) {
@@ -106,18 +106,14 @@ export default function EditPost() {
   );
 
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMetadata((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        title: e.target.value,
-      };
-    });
+    setMetadata((prev) => ({
+      ...prev,
+      title: e.target.value,
+    }));
   };
 
   const handleSetMetadata = (value: React.SetStateAction<PostMetadata>) => {
     setMetadata((prev) => {
-      if (!prev) return prev;
       if (typeof value === 'function') {
         return value(prev);
       }
@@ -126,7 +122,7 @@ export default function EditPost() {
   };
 
   const hasUnsavedChanges = useCallback(() => {
-    if (!originalMetadata || !metadata) return false;
+    if (!originalMetadata || !localMetadata) return false;
 
     const editor = editorRef.current?.editor;
     if (!editor) return false;
@@ -135,16 +131,16 @@ export default function EditPost() {
     const contentChanged = currentContent !== originalContent;
 
     const metadataChanged =
-      metadata.title !== originalMetadata.title ||
-      metadata.slug !== originalMetadata.slug ||
-      metadata.excerpt !== originalMetadata.excerpt ||
-      metadata.authorId !== originalMetadata.authorId ||
-      metadata.categorySlug !== originalMetadata.categorySlug ||
-      JSON.stringify(metadata.tagSlugs) !==
+      localMetadata.title !== originalMetadata.title ||
+      localMetadata.slug !== originalMetadata.slug ||
+      localMetadata.excerpt !== originalMetadata.excerpt ||
+      localMetadata.authorId !== originalMetadata.authorId ||
+      localMetadata.categorySlug !== originalMetadata.categorySlug ||
+      JSON.stringify(localMetadata.tagSlugs) !==
         JSON.stringify(originalMetadata.tagSlugs) ||
-      metadata.visible !== originalMetadata.visible ||
-      metadata.status !== originalMetadata.status ||
-      metadata.publishedAt?.getTime() !==
+      localMetadata.visible !== originalMetadata.visible ||
+      localMetadata.status !== originalMetadata.status ||
+      localMetadata.publishedAt?.getTime() !==
         originalMetadata.publishedAt?.getTime();
 
     return contentChanged || metadataChanged;
@@ -248,7 +244,7 @@ export default function EditPost() {
     );
   }
 
-  if (!metadata) {
+  if (!localMetadata) {
     return (
       <div className='flex h-full items-center justify-center'>
         <Spinner className='h-8 w-8' />
@@ -259,20 +255,7 @@ export default function EditPost() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <div className='h-full flex flex-col overflow-y-scroll'>
-        <MetadataForm
-          isExpanded={isExpanded}
-          setIsExpanded={setIsExpanded}
-          metadata={metadata}
-          setMetadata={handleSetMetadata}
-          onTitleChange={onTitleChange}
-          editorRef={editorRef as React.RefObject<TiptapHandle>}
-          workspaceSlug={workspaceSlug ?? ''}
-          postSlug={postSlug}
-          isEditing={true}
-          originalPublishedAt={originalMetadata?.publishedAt}
-          originalSlug={originalMetadata?.slug}
-        />
-        <div className='mt-6 flex-1 min-h-0'>
+        <div className='flex-1 min-h-0'>
           <Tiptap
             ref={editorRef}
             workspaceSlug={workspaceSlug}
