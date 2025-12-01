@@ -12,6 +12,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
+import { EditorLayout } from './components/EditorLayout';
 import { lazyPage } from '@/components/editor/lazy';
 import { Suspense, useEffect } from 'react';
 import { Spinner } from './components/ui/spinner';
@@ -123,14 +124,6 @@ const router = createBrowserRouter([
             element: <DashboardPage />,
           },
           {
-            path: 'editor/:postSlug',
-            element: <EditPost />,
-          },
-          {
-            path: 'editor',
-            element: <Editor />,
-          },
-          {
             path: 'authors',
             element: <AuthorsPage />,
           },
@@ -159,6 +152,20 @@ const router = createBrowserRouter([
             element: <ApiKeysPage />,
           },
           { path: '*', element: <NotFound /> },
+        ],
+      },
+      {
+        path: '/dashboard/:workspaceSlug/editor',
+        element: <EditorLayout />,
+        children: [
+          {
+            index: true,
+            element: <Editor />,
+          },
+          {
+            path: ':postSlug',
+            element: <EditPost />,
+          },
         ],
       },
       {
