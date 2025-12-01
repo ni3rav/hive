@@ -1,9 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, useParams, Navigate, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
   SidebarInset,
   SidebarProvider,
   SidebarRail,
@@ -15,6 +13,23 @@ import { useWorkspaceVerification } from '@/hooks/useWorkspace';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import type { PostMetadata } from '@/types/editor';
+import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
+import type { TiptapHandle } from '@/components/editor/Tiptap';
+import { EditorProvider } from '@/components/editor/editor-context';
+import { EditorSidebar } from '@/components/EditorSidebar';
+
+const getInitialMetadata = (): PostMetadata => ({
+  title: '',
+  slug: '',
+  authorId: undefined,
+  publishedAt: new Date(),
+  excerpt: '',
+  categorySlug: undefined,
+  tagSlugs: [],
+  visible: true,
+  status: 'draft',
+});
 
 export function EditorLayout() {
   const { workspaceSlug } = useParams<{ workspaceSlug: string }>();
@@ -25,6 +40,57 @@ export function EditorLayout() {
     isLoading,
     error,
   } = useWorkspaceVerification(workspaceSlug);
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
+  const editorRef = useRef<TiptapHandle>(null);
+
+  // Load saved draft metadata on mount
+  useEffect(() => {
+    if (!workspaceSlug) return;
+
+    const savedMetadata = loadMetadata(workspaceSlug);
+    if (savedMetadata) {
+      setMetadata({
+        ...getInitialMetadata(),
+        ...savedMetadata,
+        publishedAt: savedMetadata.publishedAt
+          ? new Date(savedMetadata.publishedAt as string)
+          : new Date(),
+      });
+    }
+  }, [workspaceSlug]);
+
+  // Save metadata for draft persistence
+  useEffect(() => {
+    if (!workspaceSlug) return;
+
+    if (
+      metadata.title ||
+      metadata.excerpt ||
+      metadata.categorySlug ||
+      metadata.authorId ||
+      metadata.tagSlugs?.length
+    ) {
+      saveMetadata(metadata, workspaceSlug);
+    }
+  }, [metadata, workspaceSlug]);
+
+  const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+
+    setMetadata((prev) => ({
+      ...prev,
+      title,
+      slug,
+    }));
+  };
 
   if (isLoading) {
     return (
@@ -41,45 +107,56 @@ export function EditorLayout() {
   }
 
   return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': '50rem',
-        } as React.CSSProperties
-      }
+    <EditorProvider
+      value={{
+        isExpanded,
+        setIsExpanded,
+        metadata,
+        setMetadata,
+        onTitleChange,
+        editorRef: editorRef as React.RefObject<TiptapHandle>,
+        workspaceSlug: workspaceSlug ?? '',
+        isEditing: false,
+      }}
     >
-      {/* Main content area that should fill the screen height like DashboardLayout */}
-      <SidebarInset className='flex flex-col h-screen overflow-hidden'>
-        <header className='flex h-16 shrink-0 items-center gap-2'>
-          <div className='flex w-full items-center justify-between px-4'>
-            {/* Back button (icon-only) */}
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={() => navigate(-1)}
-              className='mr-2'
-            >
-              <ArrowLeft className='size-4' />
-              <span className='sr-only'>Back</span>
-            </Button>
-            {/* Keep the expand/collapse trigger aligned with the right sidebar */}
-            <SidebarTrigger />
-          </div>
-        </header>
-        <main className='flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0 overflow-hidden'>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <Outlet />
-          </ErrorBoundary>
-        </main>
-      </SidebarInset>
+      <SidebarProvider
+        style={
+          {
+            '--sidebar-width': '28rem',
+          } as React.CSSProperties
+        }
+      >
+        {/* Main content area that should fill the screen height like DashboardLayout */}
+        <SidebarInset className='flex flex-col h-screen overflow-hidden'>
+          <header className='flex h-16 shrink-0 items-center gap-2'>
+            <div className='flex w-full items-center justify-between px-4'>
+              {/* Back button (icon-only) */}
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => navigate(-1)}
+                className='mr-2'
+              >
+                <ArrowLeft className='size-4' />
+                <span className='sr-only'>Back</span>
+              </Button>
+              {/* Keep the expand/collapse trigger aligned with the right sidebar */}
+              <SidebarTrigger />
+            </div>
+          </header>
+          <main className='flex flex-1 flex-col gap-4 p-4 pt-0 min-h-0 overflow-hidden'>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <Outlet />
+            </ErrorBoundary>
+          </main>
+        </SidebarInset>
 
-      {/* Right-side sidebar specifically for the editor */}
-      <Sidebar side='right' variant='floating' collapsible='offcanvas'>
-        <SidebarHeader />
-        <SidebarContent></SidebarContent>
-        <SidebarFooter />
-        <SidebarRail />
-      </Sidebar>
-    </SidebarProvider>
+        {/* Right-side sidebar specifically for the editor */}
+        <Sidebar side='right' variant='floating' collapsible='offcanvas'>
+          <EditorSidebar />
+          <SidebarRail />
+        </Sidebar>
+      </SidebarProvider>
+    </EditorProvider>
   );
 }

@@ -1,0 +1,41 @@
+import * as React from 'react';
+import type { PostMetadata } from '@/types/editor';
+import type { TiptapHandle } from '@/components/editor/Tiptap';
+
+export type EditorContextValue = {
+  isExpanded: boolean;
+  setIsExpanded: (value: boolean) => void;
+  metadata: PostMetadata;
+  setMetadata: React.Dispatch<React.SetStateAction<PostMetadata>>;
+  onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  editorRef: React.RefObject<TiptapHandle>;
+  workspaceSlug: string;
+  postSlug?: string;
+  isEditing?: boolean;
+  originalPublishedAt?: Date;
+  originalSlug?: string;
+};
+
+const EditorContext = React.createContext<EditorContextValue | null>(null);
+
+export function EditorProvider({
+  value,
+  children,
+}: {
+  value: EditorContextValue;
+  children: React.ReactNode;
+}) {
+  return (
+    <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
+  );
+}
+
+export function useEditorContext(): EditorContextValue {
+  const ctx = React.useContext(EditorContext);
+  if (!ctx) {
+    throw new Error('useEditorContext must be used within an EditorProvider');
+  }
+  return ctx;
+}
+
+
