@@ -25,14 +25,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import { Plus } from 'lucide-react';
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onNewPost?: () => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onNewPost,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -56,7 +60,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center py-4'>
+      <div className='flex items-center gap-2 pt-0 pb-4'>
         <Input
           placeholder='Filter posts by title...'
           value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
@@ -65,6 +69,12 @@ export function DataTable<TData, TValue>({
           }
           className='max-w-sm'
         />
+        {onNewPost && (
+          <Button onClick={onNewPost} className='whitespace-nowrap'>
+            <Plus size={16} className='mr-1' />
+            New Post
+          </Button>
+        )}
       </div>
       <div className='overflow-hidden rounded-md border'>
         <Table>
@@ -140,4 +150,3 @@ export function DataTable<TData, TValue>({
     </div>
   );
 }
-

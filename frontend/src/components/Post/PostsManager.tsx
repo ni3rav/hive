@@ -104,15 +104,11 @@ export default function PostsManager() {
     return (
       <div className='p-6'>
         <Card>
-          <CardHeader className='gap-2 sm:flex-row sm:items-center sm:justify-between'>
+          <CardHeader>
             <div>
               <CardTitle>Posts</CardTitle>
               <CardDescription>Manage your blog posts</CardDescription>
             </div>
-            <Button onClick={handleNewPost} className='whitespace-nowrap'>
-              <Plus size={16} className='mr-1' />
-              New Post
-            </Button>
           </CardHeader>
           <CardContent>
             <Empty className='border-dashed'>
@@ -138,17 +134,11 @@ export default function PostsManager() {
     <>
       <div className='p-6'>
         <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
-          <CardHeader className='gap-2 sm:flex-row sm:items-center sm:justify-between'>
+          <CardHeader>
             <div>
               <CardTitle>Posts</CardTitle>
-              <CardDescription>Manage your blog posts</CardDescription>
+              <CardDescription>Manage your posts</CardDescription>
             </div>
-            {postsArray.length > 0 && (
-              <Button onClick={handleNewPost} className='whitespace-nowrap'>
-                <Plus size={16} className='mr-1' />
-                New Post
-              </Button>
-            )}
           </CardHeader>
           <CardContent>
             {postsArray.length === 0 ? (
@@ -171,7 +161,11 @@ export default function PostsManager() {
                 </EmptyContent>
               </Empty>
             ) : (
-              <DataTable columns={tableColumns} data={postsArray} />
+              <DataTable
+                columns={tableColumns}
+                data={postsArray}
+                onNewPost={handleNewPost}
+              />
             )}
           </CardContent>
         </Card>

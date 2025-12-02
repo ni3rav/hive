@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { PingingDotChart } from '@/components/ui/pinging-dot-chart';
 import { useHead } from '@unhead/react';
 import { createDashboardSEOMetadata } from '@/lib/seo';
+import { useWorkspaceVerification } from '@/hooks/useWorkspace';
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -68,11 +69,14 @@ export function DashboardPage() {
   const greeting = getGreeting();
   const workspaceSlug = useWorkspaceSlug();
   const { data: user, isLoading: userLoading } = useAuth();
+  const { data: workspace } = useWorkspaceVerification(workspaceSlug);
   const { data, isLoading } = useDashboardStats(workspaceSlug);
   const { data: heatmapData, isLoading: heatmapLoading } =
     useDashboardHeatmap(workspaceSlug);
 
-  const workspaceName = data?.workspaceName ?? 'workspace';
+  // Use workspace name from verification (already cached by DashboardLayout) 
+  // or fallback to stats data, then to slug as last resort
+  const workspaceName = workspace?.name ?? data?.workspaceName ?? workspaceSlug ?? 'workspace';
   
   useHead(createDashboardSEOMetadata(workspaceName));
   const username = user?.name ?? '';
