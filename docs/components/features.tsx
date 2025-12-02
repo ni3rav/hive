@@ -47,7 +47,10 @@ const features = [
 
 const Features = () => {
   return (
-    <div id="features" className="flex items-center justify-center py-32">
+    <div
+      id="features"
+      className="flex items-center justify-center py-12 md:py-16 lg:py-24"
+    >
       <div>
         <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-center">
           Everything You Need

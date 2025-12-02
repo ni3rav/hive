@@ -30,7 +30,7 @@ const faq = [
 
 const FAQ = () => {
   return (
-    <div id="faq" className="flex items-center justify-center px-6 py-48">
+    <div id="faq" className="flex items-center justify-center px-6 py-12 md:py-16 lg:py-24">
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-start gap-x-12 gap-y-6">
         <h2 className="text-4xl lg:text-5xl leading-[1.15]! font-semibold tracking-[-0.035em]">
           Frequently Asked <br /> Questions
@@ -39,7 +39,6 @@ const FAQ = () => {
         <Accordion
           type="single"
           collapsible
-          defaultValue="question-0"
           className="w-full max-w-xl"
         >
           {faq.map(({ question, answer }, index) => (

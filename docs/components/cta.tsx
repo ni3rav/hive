@@ -17,7 +17,7 @@ interface CtaProps {
 
 const Cta = ({ heading, description, buttons }: CtaProps) => {
   return (
-    <section className="py-32 px-6">
+    <section className="py-12 md:py-16 lg:py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="bg-muted/50 border border-foreground/10 flex w-full flex-col gap-16 overflow-hidden rounded-lg p-8 md:rounded-xl lg:flex-row lg:items-center lg:p-12">
           <div className="flex-1">

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function Hero({ badgeText }: { badgeText: string }) {
   return (
-    <div className="min-h-screen w-full flex flex-col gap-16 items-center justify-center px-6 py-16">
+    <div className="w-full flex flex-col gap-10 md:gap-16 items-center justify-center px-6 py-12 md:py-16 lg:py-24">
       <div className="text-center max-w-3xl">
         <Badge variant="secondary" className="rounded-full py-1 border-border">
           {badgeText}
