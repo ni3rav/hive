@@ -37,6 +37,7 @@ import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
+import { useQueryParam } from '@/lib/query-params';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   postMetadataSchema,
@@ -50,6 +51,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
+import { Sparkles } from 'lucide-react';
 
 const EDITOR_SIDEBAR_EXPANDED_COOKIE = 'editorSidebarExpanded';
 
@@ -306,9 +309,81 @@ export function EditorSidebar() {
     : createPostMutation.isPending;
   const isSaveDisabled = !isValid || isSaving || !editor || editorIsEmpty;
 
+  const [activeTab, setActiveTab] = useQueryParam('tab', 'metadata');
+  const [editorText, setEditorText] = React.useState('');
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
+  // Update analysis when editor content changes
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleUpdate = () => {
+      setEditorText(editor.getText());
+    };
+
+    // Set initial text
+    setEditorText(editor.getText());
+
+    editor.on('update', handleUpdate);
+    return () => {
+      editor.off('update', handleUpdate);
+    };
+  }, [editor]);
+
+  // Calculate analysis stats
+  const analysisStats = useMemo(() => {
+    if (!editor || !editorText) {
+      return {
+        wordCount: 0,
+        sentenceCount: 0,
+        wordsPerSentence: 0,
+        readingTime: 0,
+      };
+    }
+
+    const trimmedText = editorText.trim();
+    if (!trimmedText) {
+      return {
+        wordCount: 0,
+        sentenceCount: 0,
+        wordsPerSentence: 0,
+        readingTime: 0,
+      };
+    }
+
+    // Count words (split by whitespace and filter empty strings)
+    const words = trimmedText.split(/\s+/).filter((word) => word.length > 0);
+    const wordCount = words.length;
+
+    // Count sentences (split by sentence-ending punctuation)
+    const sentences = trimmedText
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
+    const sentenceCount = sentences.length || 0;
+    const wordsPerSentence =
+      sentenceCount > 0 ? Math.round(wordCount / sentenceCount) : 0;
+
+    // Reading time: average 225 words per minute
+    const readingTime = Math.ceil(wordCount / 225) || 0;
+
+    return {
+      wordCount,
+      sentenceCount,
+      wordsPerSentence,
+      readingTime,
+    };
+  }, [editor, editorText]);
+
   return (
-    <Tabs defaultValue='metadata' className='flex h-full flex-col'>
-      <SidebarHeader>
+    <Tabs
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className='flex h-full flex-col'
+    >
+      <SidebarHeader className='px-4'>
         <TabsList className='w-full'>
           <TabsTrigger className='flex-1' value='metadata'>
             Metadata
@@ -321,7 +396,7 @@ export function EditorSidebar() {
       <SidebarContent className='flex flex-1 flex-col min-h-0 overflow-hidden'>
         <TabsContent value='metadata' className='flex-1 min-h-0'>
           <ScrollArea className='h-full pr-2 [&_[data-slot=scroll-area-thumb]]:bg-foreground/10'>
-            <div className='flex flex-col gap-4 p-4 text-sm'>
+            <div className='flex flex-col gap-4 px-6 py-4 text-sm'>
               {/* Visibility row */}
               <div className='mt-1 flex items-center justify-between'>
                 <span className='flex items-center gap-2 text-sm font-medium'>
@@ -634,15 +709,63 @@ export function EditorSidebar() {
         </TabsContent>
         <TabsContent value='analysis' className='flex-1 min-h-0'>
           <ScrollArea className='h-full pr-2 [&_[data-slot=scroll-area-thumb]]:bg-foreground/10'>
-            <div className='p-4 text-sm text-muted-foreground space-y-2'>
-              <p className='font-medium text-foreground'>Coming soon</p>
-              <p>
-                Analyze your post with AI for readability, SEO, and structure.
-              </p>
-              <p>
-                You&apos;ll be able to get suggestions to improve clarity, tone,
-                and search performance before publishing.
-              </p>
+            <div className='px-6 py-4 space-y-6'>
+              <div>
+                <h3 className='text-base font-semibold text-foreground mb-4'>
+                  Text Statistics
+                </h3>
+                <div className='grid grid-cols-2 gap-6'>
+                  <div className='space-y-1'>
+                    <div className='text-sm text-muted-foreground'>Words</div>
+                    <div className='text-lg font-semibold text-foreground'>
+                      {analysisStats.wordCount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className='space-y-1'>
+                    <div className='text-sm text-muted-foreground'>
+                      Sentences
+                    </div>
+                    <div className='text-lg font-semibold text-foreground'>
+                      {analysisStats.sentenceCount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className='space-y-1'>
+                    <div className='text-sm text-muted-foreground'>
+                      Words per Sentence
+                    </div>
+                    <div className='text-lg font-semibold text-foreground'>
+                      {analysisStats.wordsPerSentence.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className='space-y-1'>
+                    <div className='text-sm text-muted-foreground'>
+                      Reading Time
+                    </div>
+                    <div className='text-lg font-semibold text-foreground'>
+                      {analysisStats.readingTime}{' '}
+                      {analysisStats.readingTime === 1 ? 'minute' : 'minutes'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className='space-y-4'>
+                <Separator className='bg-foreground/10' />
+                <div className='space-y-2'>
+                  <div className='flex items-center gap-2'>
+                    <Sparkles className='h-4 w-4 text-primary' />
+                    <h3 className='text-base font-semibold text-foreground'>
+                      AI Analysis
+                    </h3>
+                  </div>
+                  <p className='text-xs text-muted-foreground'>Coming soon</p>
+                  <p className='text-sm text-muted-foreground'>
+                    Get AI-powered insights for readability, SEO optimization,
+                    and content structure to enhance your post before
+                    publishing.
+                  </p>
+                </div>
+              </div>
             </div>
           </ScrollArea>
         </TabsContent>

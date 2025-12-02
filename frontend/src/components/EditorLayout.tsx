@@ -126,7 +126,7 @@ export function EditorLayout() {
       <SidebarProvider
         style={
           {
-            '--sidebar-width': '36rem',
+            '--sidebar-width': '32rem',
           } as React.CSSProperties
         }
       >
