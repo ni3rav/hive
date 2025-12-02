@@ -12,7 +12,7 @@ import { ErrorFallback } from '@/components/ErrorFallback';
 import { useWorkspaceVerification } from '@/hooks/useWorkspace';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { PostMetadata } from '@/types/editor';
 import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
 import type { TiptapHandle } from '@/components/editor/Tiptap';
@@ -132,7 +132,7 @@ export function EditorLayout() {
       >
         {/* Main content area that should fill the screen height like DashboardLayout */}
         <SidebarInset className='flex flex-col h-screen overflow-hidden'>
-          <header className='flex h-16 shrink-0 items-center gap-2'>
+          <header className='flex h-12 shrink-0 items-center gap-2'>
             <div className='flex w-full items-center justify-between px-4'>
               {/* Back button (icon-only) */}
               <Button
@@ -141,7 +141,7 @@ export function EditorLayout() {
                 onClick={() => navigate(-1)}
                 className='mr-2'
               >
-                <ArrowLeft className='size-4' />
+                <X className='size-4' />
                 <span className='sr-only'>Back</span>
               </Button>
               {/* Keep the expand/collapse trigger aligned with the right sidebar */}

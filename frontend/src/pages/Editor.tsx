@@ -18,10 +18,8 @@ export default function Editor() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full flex flex-col p-6'>
-        <div className='flex-1 min-h-0'>
-          <Tiptap ref={editorRef} workspaceSlug={workspaceSlug} />
-        </div>
+      <div className='h-full w-full flex flex-col'>
+        <Tiptap ref={editorRef} workspaceSlug={workspaceSlug} />
       </div>
     </ErrorBoundary>
   );

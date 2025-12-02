@@ -238,15 +238,13 @@ export default function EditPost() {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <div className='h-full flex flex-col overflow-y-scroll'>
-        <div className='flex-1 min-h-0'>
-          <Tiptap
-            ref={editorRef}
-            workspaceSlug={workspaceSlug}
-            initialContent={post?.content?.contentJson || null}
-            disablePersistence={true}
-          />
-        </div>
+      <div className='h-full w-full flex flex-col'>
+        <Tiptap
+          ref={editorRef}
+          workspaceSlug={workspaceSlug}
+          initialContent={post?.content?.contentJson || null}
+          disablePersistence={true}
+        />
       </div>
 
       <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>

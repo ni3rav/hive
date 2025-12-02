@@ -62,11 +62,11 @@ export const Tiptap = forwardRef<TiptapHandle, TiptapProps>(
     }
 
     return (
-      <div className='h-full w-full bg-background text-foreground border-border rounded-lg overflow-hidden border flex flex-col'>
+      <div className='h-full w-full bg-background text-foreground border border-foreground/5 rounded-lg overflow-hidden flex flex-col'>
         <Toolbar editor={editor} />
-        <div className='flex-1 min-h-0'>
-          <ScrollArea className='h-full'>
-            <div className='p-4 min-h-full'>
+        <div className='flex-1 min-h-0 overflow-hidden border-t border-foreground/5'>
+          <ScrollArea className='h-full [&_[data-slot=scroll-area-thumb]]:bg-foreground/20 [&_[data-slot=scroll-area-scrollbar]]:border-l-0'>
+            <div className='p-4 min-h-full max-w-full overflow-x-hidden'>
               <EditorContent editor={editor} />
             </div>
           </ScrollArea>
