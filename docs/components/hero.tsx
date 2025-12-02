@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, BookOpen } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Hero({ badgeText }: { badgeText: string }) {
@@ -39,15 +40,17 @@ export default function Hero({ badgeText }: { badgeText: string }) {
         </div>
       </div>
       <div className="relative w-full max-w-(--breakpoint-xl) mx-auto aspect-video rounded-xl overflow-hidden border border-foreground/10 shadow-[0_0_40px_0_rgba(0,0,0,0.1)] shadow-primary/15">
-        <img
+        <Image
           src="/hive-dashboard.png"
           alt="Hive Dashboard Dark"
-          className="hidden dark:block object-cover w-full h-full"
+          className="hidden dark:block object-cover"
+          fill
         />
-        <img
+        <Image
           src="/hive-dashboard-light.png"
           alt="Hive Dashboard Light"
-          className="block dark:hidden object-cover w-full h-full"
+          className="block dark:hidden object-cover"
+          fill
         />
       </div>
     </div>

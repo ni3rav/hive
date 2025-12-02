@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { NavMenu } from "@/components/nav-menu";
 import { NavigationSheet } from "@/components/navigation-sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Image from "next/image";
 import Link from "next/link";
 
 const Navbar = () => {
@@ -10,10 +11,12 @@ const Navbar = () => {
       <div className="h-full flex items-center justify-between max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-12">
           <div className="flex items-center justify-center p-2">
-            <img
+            <Image
               src="/hive.png"
               alt="Hive Logo"
-              className="size-8 object-contain"
+              width={32}
+              height={32}
+              className="object-contain"
             />
           </div>
 
