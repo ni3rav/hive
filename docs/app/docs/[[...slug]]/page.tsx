@@ -1,4 +1,4 @@
-import { getPageImage, source } from "@/lib/source";
+import { source } from "@/lib/source";
 import {
   DocsBody,
   DocsDescription,
@@ -21,7 +21,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
   const MDX = page.data.body;
   const baseUrl = "https://hivecms.online";
-  const ogImage = getPageImage(page).url;
+  const ogImage = "/og.png";
   const url = `${baseUrl}/docs/${params.slug?.join("/") || ""}`;
 
   // Generate breadcrumb data
@@ -84,7 +84,7 @@ export async function generateMetadata(
   if (!page) notFound();
 
   const baseUrl = "https://hivecms.online";
-  const ogImage = getPageImage(page).url;
+  const ogImage = "/og.png";
   const url = `${baseUrl}/docs/${params.slug?.join("/") || ""}`;
 
   return {
