@@ -49,6 +49,12 @@ export default function CategorySelect({
     [categories, value],
   );
 
+  // Memoize categories to prevent unnecessary re-renders
+  const memoizedCategories = React.useMemo(
+    () => categories as Category[],
+    [categories],
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -89,6 +95,7 @@ export default function CategorySelect({
             <CommandGroup heading='Categories'>
               {value && (
                 <CommandItem
+                  key='__none__'
                   value='__none__'
                   onSelect={() => {
                     onChange(null, null);
@@ -102,34 +109,38 @@ export default function CategorySelect({
               )}
               {isLoading
                 ? null
-                : (categories as Category[]).map((category) => (
-                    <CommandItem
-                      key={category.id}
-                      value={category.name}
-                      onSelect={() => {
-                        if (value === category.slug) {
-                          onChange(null, null);
-                        } else {
-                          onChange(category.slug!, category);
-                        }
-                        setOpen(false);
-                      }}
-                      className='cursor-pointer'
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          value === category.slug ? 'opacity-100' : 'opacity-0',
-                        )}
-                      />
-                      <div className='flex flex-col flex-1 min-w-0'>
-                        <div className='truncate'>{category.name}</div>
-                        <div className='truncate text-xs text-muted-foreground'>
-                          {category.slug}
+                : memoizedCategories.map((category) => {
+                    const isSelected = value === category.slug;
+                    const itemValue = `${category.name}-${category.slug}`;
+                    return (
+                      <CommandItem
+                        key={itemValue}
+                        value={itemValue}
+                        onSelect={() => {
+                          if (isSelected) {
+                            onChange(null, null);
+                          } else {
+                            onChange(category.slug!, category);
+                          }
+                          setOpen(false);
+                        }}
+                        className='cursor-pointer'
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            isSelected ? 'opacity-100' : 'opacity-0',
+                          )}
+                        />
+                        <div className='flex flex-col flex-1 min-w-0'>
+                          <div className='truncate'>{category.name}</div>
+                          <div className='truncate text-xs text-muted-foreground'>
+                            {category.slug}
+                          </div>
                         </div>
-                      </div>
-                    </CommandItem>
-                  ))}
+                      </CommandItem>
+                    );
+                  })}
             </CommandGroup>
             {allowCreate && (
               <CommandGroup>

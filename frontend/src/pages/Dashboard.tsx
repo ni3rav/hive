@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -51,17 +50,22 @@ function HeatmapSkeleton() {
 
 function RecentPostsSkeleton() {
   return (
-    <Card className='border border-border/40 shadow-none rounded-md'>
-      <CardContent className='divide-y px-4'>
+    <div className='rounded-md bg-card/30 p-1'>
+      <div className='flex flex-col'>
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className='py-6 space-y-2'>
-            <Skeleton className='h-5 w-48' />
-            <Skeleton className='h-4 w-32' />
-            <Skeleton className='h-4 w-full' />
+          <div key={index}>
+            <div className='flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+              <div className='space-y-1'>
+                <Skeleton className='h-5 w-48' />
+                <Skeleton className='h-4 w-32' />
+                <Skeleton className='h-4 w-full' />
+              </div>
+            </div>
+            {index < 2 && <Separator className='text-border/60 bg-accent/50' />}
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -74,10 +78,11 @@ export function DashboardPage() {
   const { data: heatmapData, isLoading: heatmapLoading } =
     useDashboardHeatmap(workspaceSlug);
 
-  // Use workspace name from verification (already cached by DashboardLayout) 
+  // Use workspace name from verification (already cached by DashboardLayout)
   // or fallback to stats data, then to slug as last resort
-  const workspaceName = workspace?.name ?? data?.workspaceName ?? workspaceSlug ?? 'workspace';
-  
+  const workspaceName =
+    workspace?.name ?? data?.workspaceName ?? workspaceSlug ?? 'workspace';
+
   useHead(createDashboardSEOMetadata(workspaceName));
   const username = user?.name ?? '';
   const stats = data?.stats ?? [];
@@ -89,19 +94,32 @@ export function DashboardPage() {
       ? `${totalActivity} items created in the last 15 days`
       : 'No activity in the last 15 days';
 
-  const renderRecentPost = (post: DashboardRecentPost) => (
-    <div key={post.id ?? post.title} className='py-6 space-y-2'>
-      <div className='flex flex-wrap items-center gap-2 text-base font-semibold'>
-        {post.title}
-        <Separator orientation='vertical' className='h-4' />
-        <span className='text-xs uppercase tracking-wide text-muted-foreground'>
-          {post.status}
-        </span>
+  const renderRecentPost = (
+    post: DashboardRecentPost,
+    index: number,
+    total: number,
+  ) => (
+    <div key={post.id ?? post.title}>
+      <div className='flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='space-y-1'>
+          <p className='text-base font-medium text-foreground'>{post.title}</p>
+          <div className='flex flex-wrap items-center gap-2'>
+            <p className='text-sm text-muted-foreground'>{post.publishedAt}</p>
+            <Separator orientation='vertical' className='h-4' />
+            <span className='text-xs uppercase tracking-wide text-muted-foreground'>
+              {post.status}
+            </span>
+          </div>
+          {post.excerpt && (
+            <p className='text-sm leading-relaxed text-muted-foreground/80 line-clamp-2'>
+              {post.excerpt}
+            </p>
+          )}
+        </div>
       </div>
-      <p className='text-sm text-muted-foreground'>{post.publishedAt}</p>
-      <p className='text-sm leading-relaxed text-muted-foreground/80'>
-        {post.excerpt}
-      </p>
+      {index < total - 1 && (
+        <Separator className='text-border/60 bg-accent/50' />
+      )}
     </div>
   );
 
@@ -136,10 +154,11 @@ export function DashboardPage() {
             <StatsSkeleton />
           ) : (
             <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-4'>
-              {stats.map((item) => (
+              {stats.map((item, index) => (
                 <div
                   key={item.label}
-                  className='rounded-3xl border border-border/50 bg-muted/20 p-6'
+                  className='rounded-3xl border border-foreground/10 bg-muted/20 p-6 animate-in fade-in-50 zoom-in-95 duration-300'
+                  style={{ animationDelay: `${Math.min(index, 3) * 100}ms` }}
                 >
                   <div className='text-4xl font-semibold leading-tight'>
                     {item.value}
@@ -162,7 +181,7 @@ export function DashboardPage() {
           {heatmapLoading ? (
             <HeatmapSkeleton />
           ) : (
-            <div className='rounded-md border border-border/50 bg-background/80 p-1 shadow-sm'>
+            <div className='rounded-md border border-foreground/10 bg-background/80 p-1 shadow-sm animate-in fade-in-50 zoom-in-95 duration-300'>
               <PingingDotChart
                 data={heatmap}
                 title={`Activity in ${workspaceName}`}
@@ -178,17 +197,20 @@ export function DashboardPage() {
           </p>
           {isLoading ? (
             <RecentPostsSkeleton />
+          ) : recentPosts.length === 0 ? (
+            <div className='rounded-md border border-foreground/10 bg-card/30 p-1 animate-in fade-in-50 zoom-in-95 duration-300'>
+              <div className='px-5 py-6 text-sm text-muted-foreground text-center'>
+                No recent posts found.
+              </div>
+            </div>
           ) : (
-            <Card className='border border-border/50 shadow-none rounded-md'>
-              <CardContent className='divide-y px-4'>
-                {recentPosts.map((post) => renderRecentPost(post))}
-                {recentPosts.length === 0 && (
-                  <div className='py-6 text-sm text-muted-foreground text-center'>
-                    No recent posts found.
-                  </div>
+            <div className='rounded-md border border-foreground/10 bg-card/30 p-1 animate-in fade-in-50 zoom-in-95 duration-300'>
+              <div className='flex flex-col'>
+                {recentPosts.map((post, index) =>
+                  renderRecentPost(post, index, recentPosts.length),
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </section>
       </div>

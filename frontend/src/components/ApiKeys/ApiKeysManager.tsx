@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -151,35 +152,39 @@ export default function ApiKeysManager() {
   };
 
   return (
-    <div className='px-4 py-4 sm:px-6 sm:py-6'>
-      <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
-        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-          <div>
-            <h1 className='text-2xl font-semibold tracking-tight'>API Keys</h1>
-            <p className='text-muted-foreground text-sm'>
-              Issue workspace-scoped keys for accessing the Content
-            </p>
-          </div>
-          <div
-            className='inline-flex'
-            role='presentation'
-            onClick={handleCreateButtonPress}
-          >
-            <Button
-              disabled={hasReachedLimit || !workspaceSlug || !canManageApiKeys}
-              className={
-                hasReachedLimit || !canManageApiKeys
-                  ? 'pointer-events-none'
-                  : undefined
-              }
+    <>
+    <ScrollArea className='h-full p-8'>
+      <div className='flex flex-col gap-10 pb-16 pr-4'>
+        <section className='space-y-2 px-4'>
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+            <div>
+              <h1 className='text-2xl font-semibold tracking-tight'>API Keys</h1>
+              <p className='text-muted-foreground text-sm'>
+                Issue workspace-scoped keys for accessing the Content
+              </p>
+            </div>
+            <div
+              className='inline-flex'
+              role='presentation'
+              onClick={handleCreateButtonPress}
             >
-              <Plus className='size-4' />
-              Create API Key
-            </Button>
+              <Button
+                disabled={hasReachedLimit || !workspaceSlug || !canManageApiKeys}
+                className={
+                  hasReachedLimit || !canManageApiKeys
+                    ? 'pointer-events-none'
+                    : undefined
+                }
+              >
+                <Plus className='size-4' />
+                Create API Key
+              </Button>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <Alert variant='default' className='border-dashed'>
+        <section className='space-y-4 px-4'>
+          <Alert variant='default' className='border-dashed animate-in fade-in-50 zoom-in-95 duration-300'>
           <KeyRound className='text-primary' />
           <AlertTitle>Workspace access only</AlertTitle>
           <AlertDescription>
@@ -189,7 +194,9 @@ export default function ApiKeysManager() {
             can view existing keys.
           </AlertDescription>
         </Alert>
+        </section>
 
+        <section className='space-y-4 px-4'>
         {isLoading ? (
           <div className='flex min-h-[320px] items-center justify-center rounded-lg border'>
             <Spinner className='size-6 text-muted-foreground' />
@@ -202,7 +209,7 @@ export default function ApiKeysManager() {
             </AlertDescription>
           </Alert>
         ) : apiKeys.length === 0 ? (
-          <Empty className='border border-dashed'>
+          <Empty className='border border-dashed animate-in fade-in-50 zoom-in-95 duration-300'>
             <EmptyHeader>
               <EmptyMedia variant='icon'>
                 <KeyRound className='h-5 w-5' />
@@ -235,7 +242,7 @@ export default function ApiKeysManager() {
             </EmptyContent>
           </Empty>
         ) : (
-          <div className='rounded-md bg-card/30 p-1'>
+          <div className='rounded-md border border-foreground/10 bg-card/30 p-1 animate-in fade-in-50 zoom-in-95 duration-300'>
             <div className='flex flex-col'>
               {apiKeys.map((key, index) => (
                 <div key={key.id}>
@@ -271,7 +278,9 @@ export default function ApiKeysManager() {
             </div>
           </div>
         )}
+        </section>
       </div>
+    </ScrollArea>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
@@ -404,7 +413,7 @@ export default function ApiKeysManager() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 

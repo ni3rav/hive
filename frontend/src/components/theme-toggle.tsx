@@ -35,33 +35,24 @@ export function ThemeToggle({ className }: { className?: string }) {
           <span className='sr-only'>Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='min-w-[160px] p-1.5'>
+      <DropdownMenuContent align='end' className='min-w-[120px] p-1'>
         <DropdownMenuItem
           onClick={() => setTheme('light')}
-          className={cn(
-            'cursor-pointer gap-3 px-3 py-2.5',
-            theme === 'light' && 'bg-accent text-accent-foreground',
-          )}
+          className='cursor-pointer gap-2 px-2 py-1.5'
         >
           <Sun className='h-4 w-4' />
           <span>Light</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('dark')}
-          className={cn(
-            'cursor-pointer gap-3 px-3 py-2.5',
-            theme === 'dark' && 'bg-accent text-accent-foreground',
-          )}
+          className='cursor-pointer gap-2 px-2 py-1.5'
         >
           <Moon className='h-4 w-4' />
           <span>Dark</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setTheme('system')}
-          className={cn(
-            'cursor-pointer gap-3 px-3 py-2.5',
-            theme === 'system' && 'bg-accent text-accent-foreground',
-          )}
+          className='cursor-pointer gap-2 px-2 py-1.5'
         >
           <Monitor className='h-4 w-4' />
           <span>System</span>
