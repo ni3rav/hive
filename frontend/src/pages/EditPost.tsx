@@ -36,16 +36,16 @@ export default function EditPost() {
   const navigate = useNavigate();
   const { postSlug } = useParams<{ postSlug: string }>();
 
-  const { metadata, setMetadata, editorRef } = useEditorContext();
+  const { setMetadata, editorRef } = useEditorContext();
   const [localMetadata, setLocalMetadata] = useState<PostMetadata | null>(null);
   const [originalMetadata, setOriginalMetadata] = useState<PostMetadata | null>(
     null,
   );
   const [originalContent, setOriginalContent] = useState<string | null>(null);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(
-    null,
-  );
+  const [pendingNavigation, setPendingNavigation] = useState<
+    (() => void) | null
+  >(null);
 
   const {
     data: post,
@@ -81,7 +81,7 @@ export default function EditPost() {
         setOriginalContent(JSON.stringify(post.content.contentJson));
       }
     }
-  }, [post]);
+  }, [post, setMetadata]);
 
   // SEO metadata for the post
   useHead(
@@ -104,22 +104,6 @@ export default function EditPost() {
           noindex: true,
         }),
   );
-
-  const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMetadata((prev) => ({
-      ...prev,
-      title: e.target.value,
-    }));
-  };
-
-  const handleSetMetadata = (value: React.SetStateAction<PostMetadata>) => {
-    setMetadata((prev) => {
-      if (typeof value === 'function') {
-        return value(prev);
-      }
-      return value;
-    });
-  };
 
   const hasUnsavedChanges = useCallback(() => {
     if (!originalMetadata || !localMetadata) return false;
@@ -144,7 +128,7 @@ export default function EditPost() {
         originalMetadata.publishedAt?.getTime();
 
     return contentChanged || metadataChanged;
-  }, [metadata, originalMetadata, originalContent]);
+  }, [editorRef, localMetadata, originalMetadata, originalContent]);
 
   const handleGoBack = () => {
     if (hasUnsavedChanges()) {

@@ -33,9 +33,11 @@ const pages: Record<string, () => Promise<unknown>> = import.meta.glob(
 
 // Vite glob map for components - only editor-specific components to avoid conflicts
 // with statically imported UI components used throughout the app
-const components: Record<string, () => Promise<unknown>> = import.meta.glob(
-  '/src/components/editor/**/*.tsx',
-);
+const components: Record<string, () => Promise<unknown>> = {
+  ...import.meta.glob('/src/components/editor/Tiptap.tsx'),
+  ...import.meta.glob('/src/components/editor/Toolbar.tsx'),
+  // Add other editor components here as needed, but exclude editor-context.tsx
+};
 
 // Lazy from a known page path with optional named export
 export function lazyPage<TProps = unknown>(

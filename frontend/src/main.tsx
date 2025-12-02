@@ -11,14 +11,9 @@ import { Toaster } from 'sonner';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from './components/ErrorFallback';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { DashboardLayout } from './components/DashboardLayout';
-import { EditorLayout } from './components/EditorLayout';
-import { lazyPage } from '@/components/editor/lazy';
+import { lazyPage, lazyImport } from '@/components/editor/lazy';
 import { Suspense, useEffect } from 'react';
 import { Spinner } from './components/ui/spinner';
-import CategoriesManager from './components/Category/CategoryManager';
-import MemberManager from './components/Member/MemberManager';
-import InviteMemberPage from './components/Member/InviteMemberPage';
 import { ThemeProvider } from '@/contexts/theme-context';
 import { UnheadProvider } from '@unhead/react/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -43,7 +38,19 @@ const PostPage = lazyPage('/src/pages/Post.tsx');
 const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const AcceptInvitePage = lazyPage('/src/pages/AcceptInvitePage.tsx');
 const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx');
+const CategoriesPage = lazyPage('/src/pages/Category.tsx');
+const MemberPage = lazyPage('/src/pages/Member.tsx');
+const InviteMember = lazyPage('/src/pages/InviteMember.tsx');
+const DashboardLayout = lazyImport(
+  () => import('./components/DashboardLayout'),
+  'DashboardLayout',
+);
+const EditorLayout = lazyImport(
+  () => import('./components/EditorLayout'),
+  'EditorLayout',
+);
 
+// eslint-disable-next-line react-refresh/only-export-components
 function RootRedirect() {
   const { data: user, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -129,7 +136,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'categories',
-            element: <CategoriesManager />,
+            element: <CategoriesPage />,
           },
           {
             path: 'tags',
@@ -141,11 +148,11 @@ const router = createBrowserRouter([
           },
           {
             path: 'members/invite',
-            element: <InviteMemberPage />,
+            element: <InviteMember />,
           },
           {
             path: 'members',
-            element: <MemberManager />,
+            element: <MemberPage />,
           },
           {
             path: 'keys',
