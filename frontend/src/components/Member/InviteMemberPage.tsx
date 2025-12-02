@@ -26,7 +26,7 @@ import { useWorkspaceVerification } from '@/hooks/useWorkspace';
 import type { InviteMemberData, MemberRole } from '@/types/member';
 import { ROLE_HIERARCHY } from '@/types/member';
 
-export default function InviteMemberPage() {
+export default function InviteMember() {
   const workspaceSlug = useWorkspaceSlug();
   const { data: workspace } = useWorkspaceVerification(workspaceSlug);
   const navigate = useNavigate();

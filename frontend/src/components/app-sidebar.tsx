@@ -10,17 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  BookOpen,
-  SquareTerminal,
-  // Settings2,
-  Users,
-  FileText,
-  Layers,
-  Tag,
-  UserCog,
-  Key,
-} from 'lucide-react';
+import { SquareTerminal, Users, FileText, Layers, Tag, UserCog, Key } from 'lucide-react';
 import { WorkspaceSwitcher } from '@/components/Workspace/workspaceSwitcher';
 import { useParams } from 'react-router-dom';
 
@@ -55,16 +45,6 @@ const navItems = [
     url: 'members',
     icon: UserCog,
   },
-  {
-    title: 'Editor',
-    url: 'editor',
-    icon: BookOpen,
-  },
-  // {
-  //   title: 'Settings',
-  //   url: 'settings',
-  //   icon: Settings2,
-  // },
 ];
 
 const developerItems = [

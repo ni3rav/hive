@@ -3,6 +3,27 @@
   outline: none;
   font-family: var(--font-sans);
   letter-spacing: var(--tracking-normal);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Ensure ProseMirror editor wrapper handles overflow correctly */
+.ProseMirror {
+  outline: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
+}
+
+/* Ensure all content within editor wraps */
+.tiptap * {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap:focus {

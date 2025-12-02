@@ -57,12 +57,14 @@ export default function CategoryList({
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
-      <CardHeader className='gap-2 sm:flex-row sm:items-center sm:justify-between'>
+      <CardHeader>
         <div>
           <CardTitle>Categories</CardTitle>
           <CardDescription>Manage your content categories</CardDescription>
         </div>
-        <div className='flex w-full gap-2 sm:w-auto'>
+      </CardHeader>
+      <CardContent>
+        <div className='flex items-center gap-2 pt-0 pb-4'>
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -74,8 +76,6 @@ export default function CategoryList({
             Add Category
           </Button>
         </div>
-      </CardHeader>
-      <CardContent>
         {filtered.length === 0 ? (
           <Empty className='border-dashed animate-in fade-in-50'>
             {/* ... (empty state) ... */}

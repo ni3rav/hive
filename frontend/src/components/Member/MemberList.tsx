@@ -92,12 +92,14 @@ export default function MemberList({
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
-      <CardHeader className='gap-2 sm:flex-row sm:items-center sm:justify-between'>
+      <CardHeader>
         <div>
           <CardTitle>Members</CardTitle>
           <CardDescription>Manage workspace members</CardDescription>
         </div>
-        <div className='flex w-full gap-2 sm:w-auto'>
+      </CardHeader>
+      <CardContent className='space-y-6'>
+        <div className='flex items-center gap-2 pt-0 pb-4'>
           <div className='relative flex-1 sm:flex-initial'>
             <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
@@ -121,8 +123,6 @@ export default function MemberList({
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className='space-y-6'>
         <div>
           <div className='mb-3 text-sm font-medium'>Current Members</div>
           {filteredMembers.length === 0 ? (
