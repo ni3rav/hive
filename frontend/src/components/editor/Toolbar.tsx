@@ -46,6 +46,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
@@ -278,6 +285,113 @@ const ColorPicker = memo(
 );
 
 ColorPicker.displayName = 'ColorPicker';
+
+const fontOptions = [
+  {
+    label: 'Default (Sans)',
+    value: 'default',
+    fontFamily: null,
+    previewFamily: 'var(--font-sans)',
+  },
+  {
+    label: 'Serif',
+    value: 'serif',
+    fontFamily: 'Crimson Pro, serif',
+    previewFamily: '"Crimson Pro", serif',
+  },
+  {
+    label: 'Mono',
+    value: 'mono',
+    fontFamily: 'Geist Mono, monospace',
+    previewFamily: '"Geist Mono", monospace',
+  },
+] as const;
+
+type FontOptionValue = (typeof fontOptions)[number]['value'];
+
+const FontFamilySelect = ({ editor }: { editor: Editor }) => {
+  const [currentValue, setCurrentValue] = useState<FontOptionValue>('default');
+
+  useEffect(() => {
+    const syncValue = () => {
+      const activeFontFamily = (editor.getAttributes('textStyle').fontFamily ||
+        '') as string;
+
+      if (!activeFontFamily) {
+        setCurrentValue('default');
+        return;
+      }
+
+      const normalizedActive = activeFontFamily
+        .replace(/['"\s,]/g, '')
+        .toLowerCase();
+
+      const match = fontOptions.find((option) => {
+        if (!option.fontFamily) {
+          return false;
+        }
+        return (
+          option.fontFamily.replace(/['"\s,]/g, '').toLowerCase() ===
+          normalizedActive
+        );
+      });
+
+      setCurrentValue(match ? match.value : 'default');
+    };
+
+    syncValue();
+    editor.on('selectionUpdate', syncValue);
+    editor.on('transaction', syncValue);
+
+    return () => {
+      editor.off('selectionUpdate', syncValue);
+      editor.off('transaction', syncValue);
+    };
+  }, [editor]);
+
+  const handleChange = (value: FontOptionValue) => {
+    if (value === 'default') {
+      const didRun = editor.chain().focus().unsetFontFamily().run();
+      if (didRun) {
+        setCurrentValue('default');
+      }
+      return;
+    }
+
+    const option = fontOptions.find((item) => item.value === value);
+    if (option?.fontFamily) {
+      const didRun = editor
+        .chain()
+        .focus()
+        .setFontFamily(option.fontFamily)
+        .run();
+      if (didRun) {
+        setCurrentValue(value);
+      }
+    }
+  };
+
+  return (
+    <Select
+      value={currentValue}
+      onValueChange={handleChange}
+      disabled={!editor.isEditable}
+    >
+      <SelectTrigger size='sm' className='w-[9rem] justify-start'>
+        <SelectValue placeholder='Font family' />
+      </SelectTrigger>
+      <SelectContent align='start'>
+        {fontOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            <span style={{ fontFamily: option.previewFamily }}>
+              {option.label}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
 
 const TableMenu = ({ editor }: { editor: Editor }) => {
   const isTableActive = ['table', 'tableCell', 'tableHeader', 'tableRow'].some(
@@ -513,6 +627,10 @@ export function Toolbar({ editor }: ToolbarProps) {
           <Code className='w-4 h-4' />
         </ToolbarButton>
         <LinkButton editor={editor} />
+
+        <Divider />
+
+        <FontFamilySelect editor={editor} />
 
         <Divider />
 

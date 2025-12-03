@@ -4,7 +4,7 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
-import { TextStyle } from '@tiptap/extension-text-style';
+import { TextStyle, FontFamily } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { TableKit } from '@tiptap/extension-table';
 
@@ -55,6 +55,9 @@ export const getEditorExtensions = () => [
     defaultAlignment: 'left',
   }),
   TextStyle,
+  FontFamily.configure({
+    types: ['textStyle', 'paragraph', 'heading', 'listItem'],
+  }),
   Color,
   Highlight.configure({
     multicolor: true,
