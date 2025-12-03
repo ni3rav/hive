@@ -23,14 +23,29 @@ import {
   RemoveFormatting,
   Highlighter,
   Palette,
+  Table,
+  Rows3,
+  Columns3,
+  TableCellsMerge,
+  TableCellsSplit,
+  TableColumnsSplit,
+  TableRowsSplit,
+  Trash2,
 } from 'lucide-react';
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useReducer } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
@@ -264,7 +279,151 @@ const ColorPicker = memo(
 
 ColorPicker.displayName = 'ColorPicker';
 
+const TableMenu = ({ editor }: { editor: Editor }) => {
+  const isTableActive = ['table', 'tableCell', 'tableHeader', 'tableRow'].some(
+    (node) => editor.isActive(node),
+  );
+  const canInsertTable = editor
+    .can()
+    .chain()
+    .focus()
+    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+    .run();
+  const tableCommandEnabled = isTableActive;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type='button'
+          title='Table actions'
+          className={cn(
+            'p-2 rounded hover:bg-muted transition-colors',
+            isTableActive && 'bg-muted text-primary',
+          )}
+        >
+          <Table className='w-4 h-4' />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='start' className='w-56'>
+        <DropdownMenuItem
+          disabled={!canInsertTable}
+          onSelect={() =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run()
+          }
+        >
+          <Table className='w-4 h-4' />
+          <span>Create 3x3 table</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addRowBefore().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Add row above</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addRowAfter().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Add row below</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteRow().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Delete row</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addColumnBefore().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Add column left</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addColumnAfter().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Add column right</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteColumn().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Delete column</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().toggleHeaderRow().run()}
+        >
+          <TableRowsSplit className='w-4 h-4' />
+          <span>Toggle header row</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().toggleHeaderColumn().run()}
+        >
+          <TableColumnsSplit className='w-4 h-4' />
+          <span>Toggle header column</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().mergeCells().run()}
+        >
+          <TableCellsMerge className='w-4 h-4' />
+          <span>Merge cells</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().splitCell().run()}
+        >
+          <TableCellsSplit className='w-4 h-4' />
+          <span>Split cell</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteTable().run()}
+          variant='destructive'
+        >
+          <Trash2 className='w-4 h-4' />
+          <span>Delete table</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export function Toolbar({ editor }: ToolbarProps) {
+  const [, forceUpdate] = useReducer((state: number) => state + 1, 0);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => forceUpdate();
+
+    editor.on('selectionUpdate', update);
+    editor.on('transaction', update);
+
+    return () => {
+      editor.off('selectionUpdate', update);
+      editor.off('transaction', update);
+    };
+  }, [editor]);
+
   return (
     <div className='border-b border-foreground/5 bg-background sticky top-0 z-10'>
       <div className='flex items-center gap-1 p-2 flex-wrap'>
@@ -410,6 +569,10 @@ export function Toolbar({ editor }: ToolbarProps) {
         >
           <ListOrdered className='w-4 h-4' />
         </ToolbarButton>
+
+        <Divider />
+
+        <TableMenu editor={editor} />
 
         <Divider />
 

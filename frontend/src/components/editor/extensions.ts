@@ -6,6 +6,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { TableKit } from '@tiptap/extension-table';
 
 /**
  * Shared extensions list used by both the editor and HTML utilities
@@ -18,6 +19,29 @@ export const getEditorExtensions = () => [
     // Disable link and underline since we're configuring them separately below
     link: false,
     underline: false,
+  }),
+  TableKit.configure({
+    table: {
+      resizable: true,
+      HTMLAttributes: {
+        class: 'tiptap-table',
+      },
+    },
+    tableCell: {
+      HTMLAttributes: {
+        class: 'tiptap-table-cell',
+      },
+    },
+    tableHeader: {
+      HTMLAttributes: {
+        class: 'tiptap-table-header',
+      },
+    },
+    tableRow: {
+      HTMLAttributes: {
+        class: 'tiptap-table-row',
+      },
+    },
   }),
   Underline,
   Link.configure({
