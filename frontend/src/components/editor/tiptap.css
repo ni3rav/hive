@@ -150,9 +150,129 @@
   margin-bottom: 0.25rem;
 }
 
+.tiptap .tiptap-task-list {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.tiptap .tiptap-task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.tiptap .tiptap-task-item input[type='checkbox'] {
+  margin-top: 0.3rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-primary);
+}
+
+.tiptap .tiptap-task-item > div {
+  flex: 1;
+}
+
+/* Tables */
+.tiptap .tableWrapper {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.tiptap .tableWrapper:first-child {
+  margin-top: 0;
+}
+
+.tiptap .tableWrapper:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid color-mix(in srgb, var(--color-foreground) 18%, transparent);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  table-layout: fixed;
+  background-color: var(--color-background);
+}
+
+.tiptap table:first-child {
+  margin-top: 0;
+}
+
+.tiptap table:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap .tableWrapper table {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.tiptap th,
+.tiptap td {
+  border: 1px solid color-mix(in srgb, var(--color-foreground) 18%, transparent);
+  padding: 0.75rem;
+  vertical-align: top;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  position: relative;
+  background-color: var(--color-background);
+}
+
+.tiptap th {
+  font-weight: 600;
+  text-align: left;
+  background-color: color-mix(
+    in srgb,
+    var(--color-muted) 65%,
+    var(--color-background)
+  );
+}
+
+.tiptap table p {
+  margin: 0;
+}
+
+.tiptap table .selectedCell {
+  background-color: color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.tiptap table .selectedCell:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-primary) 55%, transparent);
+  pointer-events: none;
+}
+
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: var(--color-primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: col-resize;
+}
+
+.tiptap th:hover .column-resize-handle,
+.tiptap td:hover .column-resize-handle,
+.tiptap .column-resize-handle.active {
+  opacity: 0.6;
+}
+
 /* Blockquotes */
 .tiptap blockquote {
-  border-left: 4px solid var(--color-border);
+  border-left: 4px solid var(--color-accent);
   padding-left: 1rem;
   margin-top: 1rem;
   margin-bottom: 1rem;

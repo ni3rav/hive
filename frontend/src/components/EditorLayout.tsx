@@ -18,6 +18,9 @@ import { loadMetadata, saveMetadata } from '@/components/editor/persistence';
 import type { TiptapHandle } from '@/components/editor/Tiptap';
 import { EditorProvider } from '@/components/editor/editor-context';
 import { EditorSidebar } from '@/components/EditorSidebar';
+import { getCookie } from '@/lib/utils';
+
+const EDITOR_SIDEBAR_COOKIE_NAME = 'editor_sidebar_state';
 
 const getInitialMetadata = (): PostMetadata => ({
   title: '',
@@ -44,9 +47,40 @@ export function EditorLayout() {
     error,
   } = useWorkspaceVerification(workspaceSlug);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
+  const initialMetadataRef = useRef<PostMetadata>(getInitialMetadata());
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+    if (typeof document === 'undefined') {
+      return false;
+    }
+
+    const saved = getCookie(EDITOR_SIDEBAR_COOKIE_NAME);
+    if (saved === 'false') return false;
+    if (saved === 'true') return true;
+
+    return false;
+  });
+  const [metadata, setMetadata] = useState<PostMetadata>(
+    initialMetadataRef.current,
+  );
+  const [originalMetadata, setOriginalMetadata] = useState<PostMetadata | null>(
+    null,
+  );
+  const [originalContent, setOriginalContent] = useState<string | null>(null);
   const editorRef = useRef<TiptapHandle>(null);
+
+  useEffect(() => {
+    setOriginalMetadata(null);
+    setOriginalContent(null);
+  }, [workspaceSlug, postSlug]);
+
+  useEffect(() => {
+    if (postSlug || originalMetadata !== null) {
+      return;
+    }
+
+    setOriginalMetadata(initialMetadataRef.current);
+  }, [postSlug, originalMetadata, initialMetadataRef]);
 
   // Load saved draft metadata on mount
   useEffect(() => {
@@ -121,9 +155,16 @@ export function EditorLayout() {
         workspaceSlug: workspaceSlug ?? '',
         postSlug,
         isEditing: !!postSlug,
+        originalMetadata,
+        setOriginalMetadata,
+        originalContent,
+        setOriginalContent,
       }}
     >
       <SidebarProvider
+        storageKey={EDITOR_SIDEBAR_COOKIE_NAME}
+        open={isExpanded}
+        onOpenChange={setIsExpanded}
         style={
           {
             '--sidebar-width': '32rem',

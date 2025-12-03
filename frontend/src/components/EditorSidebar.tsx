@@ -43,7 +43,7 @@ import {
   postMetadataSchema,
   type PostMetadataFormData,
 } from '@/lib/validations/post';
-import { cn, getCookie, setCookie } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -54,18 +54,15 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Sparkles } from 'lucide-react';
 
-const EDITOR_SIDEBAR_EXPANDED_COOKIE = 'editorSidebarExpanded';
-
 export function EditorSidebar() {
   const {
-    isExpanded,
-    setIsExpanded,
     metadata,
     setMetadata,
     editorRef,
     workspaceSlug,
     isEditing,
     postSlug,
+    originalContent,
   } = useEditorContext();
 
   const createPostMutation = useCreatePost(workspaceSlug);
@@ -105,9 +102,16 @@ export function EditorSidebar() {
 
   const titleValue = watch('title');
   const slugValue = watch('slug');
+  const allValues = watch();
   const slugManuallyEditedRef = React.useRef(false);
+  const isSyncingRef = React.useRef(false);
+
+  const [hasContentChanged, setHasContentChanged] = React.useState(false);
+  const initialContentRef = React.useRef<string | null>(null);
+  const editor = editorRef.current?.editor;
 
   const syncToParent = useCallback(() => {
+    isSyncingRef.current = true;
     const values = getValues();
     setMetadata({
       title: values.title || '',
@@ -120,12 +124,54 @@ export function EditorSidebar() {
       visible: values.visible ?? true,
       status: values.status || 'draft',
     });
+    setTimeout(() => {
+      isSyncingRef.current = false;
+    }, 0);
   }, [getValues, setMetadata]);
 
   useEffect(() => {
+    if (isSyncingRef.current) return;
     reset(defaultValues);
     slugManuallyEditedRef.current = false;
   }, [defaultValues, reset]);
+
+  const metadataChanged = useMemo(() => {
+    const defaults = form.formState.defaultValues || defaultValues;
+
+    return (Object.keys(allValues) as Array<keyof PostMetadataFormData>).some(
+      (key) => {
+        const v1 = allValues[key];
+        const v2 = defaults[key];
+
+        if (v1 === v2) return false;
+
+        // Handle undefined/null
+        if (
+          (v1 === undefined || v1 === null) &&
+          (v2 === undefined || v2 === null)
+        )
+          return false;
+
+        // String comparison with trim
+        if (typeof v1 === 'string' && typeof v2 === 'string') {
+          return v1.trim() !== v2.trim();
+        }
+
+        // Date comparison
+        if (v1 instanceof Date && v2 instanceof Date) {
+          return v1.getTime() !== v2.getTime();
+        }
+
+        // Array comparison (for tags)
+        if (Array.isArray(v1) && Array.isArray(v2)) {
+          if (v1.length !== v2.length) return true;
+          return JSON.stringify(v1) !== JSON.stringify(v2);
+        }
+
+        return v1 !== v2;
+      },
+    );
+  }, [allValues, form.formState.defaultValues, defaultValues]);
 
   // Auto-generate slug from title when creating and slug not manually edited
   useEffect(() => {
@@ -145,19 +191,55 @@ export function EditorSidebar() {
     }
   }, [titleValue, slugValue, setValue, isEditing]);
 
-  // Expanded state cookie for editor sidebar
   useEffect(() => {
-    const savedExpanded = getCookie(EDITOR_SIDEBAR_EXPANDED_COOKIE);
-    if (savedExpanded !== undefined) {
-      setIsExpanded(savedExpanded === 'true');
+    if (!editor) {
+      return;
     }
-  }, [setIsExpanded]);
 
-  useEffect(() => {
-    setCookie(EDITOR_SIDEBAR_EXPANDED_COOKIE, String(isExpanded), {
-      maxAgeSeconds: 365 * 24 * 60 * 60,
-    });
-  }, [isExpanded]);
+    const sanitizeSnapshot = (raw: string | null) => {
+      if (!raw) return null;
+      try {
+        return JSON.stringify(JSON.parse(raw));
+      } catch (error) {
+        console.error('Failed to parse original editor content', error);
+        return raw;
+      }
+    };
+
+    initialContentRef.current = sanitizeSnapshot(originalContent);
+
+    let hasCapturedBaseline = false;
+
+    if (initialContentRef.current === null) {
+      initialContentRef.current = JSON.stringify(editor.getJSON());
+      hasCapturedBaseline = true;
+    }
+
+    setHasContentChanged(false);
+
+    const handleUpdate = () => {
+      const snapshot = JSON.stringify(editor.getJSON());
+
+      if (!hasCapturedBaseline) {
+        if (
+          initialContentRef.current === null ||
+          snapshot !== initialContentRef.current
+        ) {
+          initialContentRef.current = snapshot;
+        }
+        hasCapturedBaseline = true;
+        setHasContentChanged(false);
+        return;
+      }
+
+      setHasContentChanged(snapshot !== initialContentRef.current);
+    };
+
+    editor.on('update', handleUpdate);
+    return () => {
+      editor.off('update', handleUpdate);
+    };
+  }, [editor, originalContent, isEditing]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -302,12 +384,16 @@ export function EditorSidebar() {
     clearWorkspacePersistence(undefined);
   };
 
-  const editor = editorRef.current?.editor;
   const editorIsEmpty = editor ? checkEditorEmpty(editor) : true;
+
   const isSaving = isEditing
     ? updatePostMutation.isPending
     : createPostMutation.isPending;
-  const isSaveDisabled = !isValid || isSaving || !editor || editorIsEmpty;
+
+  const hasChanges = metadataChanged || hasContentChanged;
+
+  const isSaveDisabled =
+    !isValid || isSaving || !editor || editorIsEmpty || !hasChanges;
 
   const [activeTab, setActiveTab] = useQueryParam('tab', 'metadata');
   const [editorText, setEditorText] = React.useState('');

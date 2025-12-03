@@ -6,6 +6,8 @@ import type { ProseMirrorJSON } from './persistence';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toolbar } from './Toolbar';
 import { getEditorExtensions } from './extensions';
+import { EditorBubbleMenu } from './BubbleMenu';
+import { EditorFloatingMenu } from './FloatingMenu';
 import './tiptap.css';
 
 interface TiptapProps {
@@ -67,6 +69,8 @@ export const Tiptap = forwardRef<TiptapHandle, TiptapProps>(
         <div className='flex-1 min-h-0 overflow-hidden border-t border-foreground/5'>
           <ScrollArea className='h-full [&_[data-slot=scroll-area-thumb]]:bg-foreground/20 [&_[data-slot=scroll-area-scrollbar]]:border-l-0'>
             <div className='p-4 min-h-full max-w-full overflow-x-hidden'>
+              <EditorFloatingMenu editor={editor} />
+              <EditorBubbleMenu editor={editor} />
               <EditorContent editor={editor} />
             </div>
           </ScrollArea>

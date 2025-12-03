@@ -64,7 +64,7 @@ export default function HomePage() {
         buttons={{
           primary: {
             text: "Get Started",
-            url: "https://app.hivecms.com/login",
+            url: "https://app.hivecms.online/login",
           },
         }}
       />

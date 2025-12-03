@@ -6,6 +6,7 @@ import {
   Code,
   List,
   ListOrdered,
+  CheckSquare,
   Quote,
   Undo,
   Redo,
@@ -23,14 +24,36 @@ import {
   RemoveFormatting,
   Highlighter,
   Palette,
+  Table,
+  Rows3,
+  Columns3,
+  TableCellsMerge,
+  TableCellsSplit,
+  TableColumnsSplit,
+  TableRowsSplit,
+  Trash2,
 } from 'lucide-react';
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useReducer } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
@@ -264,7 +287,258 @@ const ColorPicker = memo(
 
 ColorPicker.displayName = 'ColorPicker';
 
+const fontOptions = [
+  {
+    label: 'Default (Sans)',
+    value: 'default',
+    fontFamily: null,
+    previewFamily: 'var(--font-sans)',
+  },
+  {
+    label: 'Serif',
+    value: 'serif',
+    fontFamily: 'Crimson Pro, serif',
+    previewFamily: '"Crimson Pro", serif',
+  },
+  {
+    label: 'Mono',
+    value: 'mono',
+    fontFamily: 'Geist Mono, monospace',
+    previewFamily: '"Geist Mono", monospace',
+  },
+] as const;
+
+type FontOptionValue = (typeof fontOptions)[number]['value'];
+
+const FontFamilySelect = ({ editor }: { editor: Editor }) => {
+  const [currentValue, setCurrentValue] = useState<FontOptionValue>('default');
+
+  useEffect(() => {
+    const syncValue = () => {
+      const activeFontFamily = (editor.getAttributes('textStyle').fontFamily ||
+        '') as string;
+
+      if (!activeFontFamily) {
+        setCurrentValue('default');
+        return;
+      }
+
+      const normalizedActive = activeFontFamily
+        .replace(/['"\s,]/g, '')
+        .toLowerCase();
+
+      const match = fontOptions.find((option) => {
+        if (!option.fontFamily) {
+          return false;
+        }
+        return (
+          option.fontFamily.replace(/['"\s,]/g, '').toLowerCase() ===
+          normalizedActive
+        );
+      });
+
+      setCurrentValue(match ? match.value : 'default');
+    };
+
+    syncValue();
+    editor.on('selectionUpdate', syncValue);
+    editor.on('transaction', syncValue);
+
+    return () => {
+      editor.off('selectionUpdate', syncValue);
+      editor.off('transaction', syncValue);
+    };
+  }, [editor]);
+
+  const handleChange = (value: FontOptionValue) => {
+    if (value === 'default') {
+      const didRun = editor.chain().focus().unsetFontFamily().run();
+      if (didRun) {
+        setCurrentValue('default');
+      }
+      return;
+    }
+
+    const option = fontOptions.find((item) => item.value === value);
+    if (option?.fontFamily) {
+      const didRun = editor
+        .chain()
+        .focus()
+        .setFontFamily(option.fontFamily)
+        .run();
+      if (didRun) {
+        setCurrentValue(value);
+      }
+    }
+  };
+
+  return (
+    <Select
+      value={currentValue}
+      onValueChange={handleChange}
+      disabled={!editor.isEditable}
+    >
+      <SelectTrigger size='sm' className='w-[9rem] justify-start'>
+        <SelectValue placeholder='Font family' />
+      </SelectTrigger>
+      <SelectContent align='start'>
+        {fontOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            <span style={{ fontFamily: option.previewFamily }}>
+              {option.label}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
+
+const TableMenu = ({ editor }: { editor: Editor }) => {
+  const isTableActive = ['table', 'tableCell', 'tableHeader', 'tableRow'].some(
+    (node) => editor.isActive(node),
+  );
+  const canInsertTable = editor
+    .can()
+    .chain()
+    .focus()
+    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+    .run();
+  const tableCommandEnabled = isTableActive;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type='button'
+          title='Table actions'
+          className={cn(
+            'p-2 rounded hover:bg-muted transition-colors',
+            isTableActive && 'bg-muted text-primary',
+          )}
+        >
+          <Table className='w-4 h-4' />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='start' className='w-56'>
+        <DropdownMenuItem
+          disabled={!canInsertTable}
+          onSelect={() =>
+            editor
+              .chain()
+              .focus()
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run()
+          }
+        >
+          <Table className='w-4 h-4' />
+          <span>Create 3x3 table</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addRowBefore().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Add row above</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addRowAfter().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Add row below</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteRow().run()}
+        >
+          <Rows3 className='w-4 h-4' />
+          <span>Delete row</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addColumnBefore().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Add column left</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().addColumnAfter().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Add column right</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteColumn().run()}
+        >
+          <Columns3 className='w-4 h-4' />
+          <span>Delete column</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().toggleHeaderRow().run()}
+        >
+          <TableRowsSplit className='w-4 h-4' />
+          <span>Toggle header row</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().toggleHeaderColumn().run()}
+        >
+          <TableColumnsSplit className='w-4 h-4' />
+          <span>Toggle header column</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().mergeCells().run()}
+        >
+          <TableCellsMerge className='w-4 h-4' />
+          <span>Merge cells</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().splitCell().run()}
+        >
+          <TableCellsSplit className='w-4 h-4' />
+          <span>Split cell</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={!tableCommandEnabled}
+          onSelect={() => editor.chain().focus().deleteTable().run()}
+          variant='destructive'
+        >
+          <Trash2 className='w-4 h-4' />
+          <span>Delete table</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export function Toolbar({ editor }: ToolbarProps) {
+  const [, forceUpdate] = useReducer((state: number) => state + 1, 0);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => forceUpdate();
+
+    editor.on('selectionUpdate', update);
+    editor.on('transaction', update);
+
+    return () => {
+      editor.off('selectionUpdate', update);
+      editor.off('transaction', update);
+    };
+  }, [editor]);
+
   return (
     <div className='border-b border-foreground/5 bg-background sticky top-0 z-10'>
       <div className='flex items-center gap-1 p-2 flex-wrap'>
@@ -357,6 +631,10 @@ export function Toolbar({ editor }: ToolbarProps) {
 
         <Divider />
 
+        <FontFamilySelect editor={editor} />
+
+        <Divider />
+
         {/* Colors */}
         <ColorPicker editor={editor} type='text' />
         <ColorPicker editor={editor} type='highlight' />
@@ -410,6 +688,17 @@ export function Toolbar({ editor }: ToolbarProps) {
         >
           <ListOrdered className='w-4 h-4' />
         </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+          isActive={editor.isActive('taskList')}
+          title='Task List'
+        >
+          <CheckSquare className='w-4 h-4' />
+        </ToolbarButton>
+
+        <Divider />
+
+        <TableMenu editor={editor} />
 
         <Divider />
 
