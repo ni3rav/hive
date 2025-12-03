@@ -6,6 +6,7 @@ import {
   Code,
   List,
   ListOrdered,
+  CheckSquare,
   Quote,
   Undo,
   Redo,
@@ -686,6 +687,13 @@ export function Toolbar({ editor }: ToolbarProps) {
           title='Numbered List'
         >
           <ListOrdered className='w-4 h-4' />
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().toggleTaskList().run()}
+          isActive={editor.isActive('taskList')}
+          title='Task List'
+        >
+          <CheckSquare className='w-4 h-4' />
         </ToolbarButton>
 
         <Divider />

@@ -7,6 +7,8 @@ import Highlight from '@tiptap/extension-highlight';
 import { TextStyle, FontFamily } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { TableKit } from '@tiptap/extension-table';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 
 /**
  * Shared extensions list used by both the editor and HTML utilities
@@ -43,6 +45,18 @@ export const getEditorExtensions = () => [
       },
     },
   }),
+  TaskList.configure({
+    itemTypeName: 'taskItem',
+    HTMLAttributes: {
+      class: 'tiptap-task-list',
+    },
+  }),
+  TaskItem.configure({
+    nested: true,
+    HTMLAttributes: {
+      class: 'tiptap-task-item',
+    },
+  }),
   Underline,
   Link.configure({
     openOnClick: false,
@@ -63,6 +77,6 @@ export const getEditorExtensions = () => [
     multicolor: true,
   }),
   Placeholder.configure({
-    placeholder: 'Start writing...',
+    placeholder: '',
   }),
 ];
