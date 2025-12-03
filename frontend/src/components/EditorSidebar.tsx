@@ -43,7 +43,7 @@ import {
   postMetadataSchema,
   type PostMetadataFormData,
 } from '@/lib/validations/post';
-import { cn, getCookie, setCookie } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -54,12 +54,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Sparkles } from 'lucide-react';
 
-const EDITOR_SIDEBAR_EXPANDED_COOKIE = 'editorSidebarExpanded';
-
 export function EditorSidebar() {
   const {
-    isExpanded,
-    setIsExpanded,
     metadata,
     setMetadata,
     editorRef,
@@ -144,20 +140,6 @@ export function EditorSidebar() {
       setValue('slug', autoSlug, { shouldValidate: true });
     }
   }, [titleValue, slugValue, setValue, isEditing]);
-
-  // Expanded state cookie for editor sidebar
-  useEffect(() => {
-    const savedExpanded = getCookie(EDITOR_SIDEBAR_EXPANDED_COOKIE);
-    if (savedExpanded !== undefined) {
-      setIsExpanded(savedExpanded === 'true');
-    }
-  }, [setIsExpanded]);
-
-  useEffect(() => {
-    setCookie(EDITOR_SIDEBAR_EXPANDED_COOKIE, String(isExpanded), {
-      maxAgeSeconds: 365 * 24 * 60 * 60,
-    });
-  }, [isExpanded]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
