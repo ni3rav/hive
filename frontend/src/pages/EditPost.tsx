@@ -36,12 +36,18 @@ export default function EditPost() {
   const navigate = useNavigate();
   const { postSlug } = useParams<{ postSlug: string }>();
 
-  const { setMetadata, editorRef } = useEditorContext();
+  const {
+    setMetadata,
+    editorRef,
+    setOriginalMetadata: setContextOriginalMetadata,
+    setOriginalContent: setContextOriginalContent,
+  } = useEditorContext();
   const [localMetadata, setLocalMetadata] = useState<PostMetadata | null>(null);
-  const [originalMetadata, setOriginalMetadata] = useState<PostMetadata | null>(
+  const [originalMetadata, setOriginalMetadataState] =
+    useState<PostMetadata | null>(null);
+  const [originalContent, setOriginalContentState] = useState<string | null>(
     null,
   );
-  const [originalContent, setOriginalContent] = useState<string | null>(null);
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<
     (() => void) | null
@@ -74,14 +80,23 @@ export default function EditPost() {
         visible: post.visible,
         status: post.status,
       };
+      const serializedContent = post.content?.contentJson
+        ? JSON.stringify(post.content.contentJson)
+        : null;
+
       setLocalMetadata(postMetadata);
       setMetadata(postMetadata);
-      setOriginalMetadata(postMetadata);
-      if (post.content?.contentJson) {
-        setOriginalContent(JSON.stringify(post.content.contentJson));
-      }
+      setOriginalMetadataState(postMetadata);
+      setContextOriginalMetadata(postMetadata);
+      setOriginalContentState(serializedContent);
+      setContextOriginalContent(serializedContent);
     }
-  }, [post, setMetadata]);
+  }, [
+    post,
+    setMetadata,
+    setContextOriginalMetadata,
+    setContextOriginalContent,
+  ]);
 
   // SEO metadata for the post
   useHead(

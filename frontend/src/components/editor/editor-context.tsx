@@ -14,6 +14,12 @@ export type EditorContextValue = {
   isEditing: boolean;
   originalPublishedAt?: Date;
   originalSlug?: string;
+  originalMetadata: PostMetadata | null;
+  setOriginalMetadata: React.Dispatch<
+    React.SetStateAction<PostMetadata | null>
+  >;
+  originalContent: string | null;
+  setOriginalContent: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const EditorContext = React.createContext<EditorContextValue | null>(null);
@@ -30,6 +36,7 @@ export function EditorProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useEditorContext(): EditorContextValue {
   const ctx = React.useContext(EditorContext);
   if (!ctx) {
@@ -37,5 +44,3 @@ export function useEditorContext(): EditorContextValue {
   }
   return ctx;
 }
-
-

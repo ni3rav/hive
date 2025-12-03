@@ -47,6 +47,8 @@ export function EditorLayout() {
     error,
   } = useWorkspaceVerification(workspaceSlug);
 
+  const initialMetadataRef = useRef<PostMetadata>(getInitialMetadata());
+
   const [isExpanded, setIsExpanded] = useState<boolean>(() => {
     if (typeof document === 'undefined') {
       return false;
@@ -58,8 +60,27 @@ export function EditorLayout() {
 
     return false;
   });
-  const [metadata, setMetadata] = useState<PostMetadata>(getInitialMetadata);
+  const [metadata, setMetadata] = useState<PostMetadata>(
+    initialMetadataRef.current,
+  );
+  const [originalMetadata, setOriginalMetadata] = useState<PostMetadata | null>(
+    null,
+  );
+  const [originalContent, setOriginalContent] = useState<string | null>(null);
   const editorRef = useRef<TiptapHandle>(null);
+
+  useEffect(() => {
+    setOriginalMetadata(null);
+    setOriginalContent(null);
+  }, [workspaceSlug, postSlug]);
+
+  useEffect(() => {
+    if (postSlug || originalMetadata !== null) {
+      return;
+    }
+
+    setOriginalMetadata(initialMetadataRef.current);
+  }, [postSlug, originalMetadata, initialMetadataRef]);
 
   // Load saved draft metadata on mount
   useEffect(() => {
@@ -134,6 +155,10 @@ export function EditorLayout() {
         workspaceSlug: workspaceSlug ?? '',
         postSlug,
         isEditing: !!postSlug,
+        originalMetadata,
+        setOriginalMetadata,
+        originalContent,
+        setOriginalContent,
       }}
     >
       <SidebarProvider
