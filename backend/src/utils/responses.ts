@@ -155,6 +155,23 @@ export function conflict(
 }
 
 /**
+ * 429 Too Many Requests - Rate limiting
+ */
+export function tooManyRequests(
+  res: Response,
+  message = 'Too many requests',
+  details?: unknown,
+): Response {
+  const response: ErrorResponse = {
+    success: false,
+    message,
+    code: 'TOO_MANY_REQUESTS',
+    ...(details !== undefined && { details }),
+  };
+  return res.status(429).json(response);
+}
+
+/**
  * 500 Internal Server Error - Unexpected server errors
  */
 export function serverError(

@@ -39,6 +39,7 @@ import {
   serverError,
   ok,
   badRequest,
+  tooManyRequests,
 } from '../utils/responses';
 import { setSessionCookie, clearSessionCookie } from '../utils/cookie';
 import { getUserFromEmail } from '../utils/user';
@@ -174,13 +175,22 @@ export async function loginController(req: Request, res: Response) {
 
     //* email verification check
     if (!user.emailVerified) {
-      const canSend = await checkEmailRateLimit(
+      const [error, canSend] = await checkEmailRateLimit(
         user.email,
         EMAIL_TYPES.VERIFICATION,
       );
 
+      if (error) {
+        logger.error(error, 'Rate limit check failed');
+        // Fail open or closed? Usually fail open for rate limits if DB is down, but closed is safer.
+        // Let's fail closed to be safe or just ignore if you want.
+        // For now, let's log and proceed or return error.
+        // Assuming fail safe => return server error
+        return serverError(res, 'Failed to check rate limit');
+      }
+
       if (!canSend) {
-        return forbidden(
+        return tooManyRequests(
           res,
           'Please wait a moment before requesting another verification email.',
         );
@@ -393,10 +403,17 @@ export async function generateResetPasswordLinkController(
 
   const { id, email } = user;
 
-  const canSend = await checkEmailRateLimit(email, EMAIL_TYPES.PASSWORD_RESET);
+  const [rateLimitError, canSend] = await checkEmailRateLimit(
+    email,
+    EMAIL_TYPES.PASSWORD_RESET,
+  );
+
+  if (rateLimitError) {
+    return serverError(res, 'Failed to check rate limit');
+  }
 
   if (!canSend) {
-    return forbidden(
+    return tooManyRequests(
       res,
       'Please wait a moment before requesting another password reset email.',
     );

@@ -27,6 +27,7 @@ import {
   forbidden,
   notFound,
   conflict,
+  tooManyRequests,
 } from '../utils/responses';
 import {
   toInvitationListResponse,
@@ -83,12 +84,17 @@ export async function inviteMemberController(req: Request, res: Response) {
   const workspaceId = req.workspaceId!;
   const invitedBy = req.userId!;
 
-  const canSend = await checkEmailRateLimit(
+  const [rateLimitError, canSend] = await checkEmailRateLimit(
     email,
     EMAIL_TYPES.WORKSPACE_INVITATION,
   );
+
+  if (rateLimitError) {
+    return serverError(res, 'Failed to check rate limit');
+  }
+
   if (!canSend) {
-    return forbidden(
+    return tooManyRequests(
       res,
       'Please wait a moment before sending another invitation to this email.',
     );
