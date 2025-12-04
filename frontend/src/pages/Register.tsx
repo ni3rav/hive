@@ -39,7 +39,7 @@ export default function RegisterPage() {
           toast.success(
             'Registration successful! Please check your email to verify your account.',
           );
-          navigate('/login');
+          navigate(`/verify?email=${validatedEmail}`);
         },
         onError: (error: unknown) => {
           const message = getAuthErrorMessage(
