@@ -25,6 +25,11 @@ import {
 } from '../utils/sessions';
 import { eq, and, gt } from 'drizzle-orm';
 import {
+  checkEmailRateLimit,
+  updateEmailRateLimit,
+  EMAIL_TYPES,
+} from '../utils/rate-limit';
+import {
   validationError,
   conflict,
   created,
@@ -99,6 +104,9 @@ export async function registerController(req: Request, res: Response) {
       return user;
     });
 
+    // Initialize rate limit for this new user/email
+    await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
+
     const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
 
     const [emailError] = await sendEmail({
@@ -166,6 +174,18 @@ export async function loginController(req: Request, res: Response) {
 
     //* email verification check
     if (!user.emailVerified) {
+      const canSend = await checkEmailRateLimit(
+        user.email,
+        EMAIL_TYPES.VERIFICATION,
+      );
+
+      if (!canSend) {
+        return forbidden(
+          res,
+          'Please wait a moment before requesting another verification email.',
+        );
+      }
+
       // TODO: replace it with the common verification link generator function later
       const { token, expiresAt } = generateVerificationLinkToken();
 
@@ -175,6 +195,8 @@ export async function loginController(req: Request, res: Response) {
         token: token,
         expiresAt: expiresAt,
       });
+
+      await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
 
       const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
 
@@ -370,11 +392,23 @@ export async function generateResetPasswordLinkController(
   }
 
   const { id, email } = user;
+
+  const canSend = await checkEmailRateLimit(email, EMAIL_TYPES.PASSWORD_RESET);
+
+  if (!canSend) {
+    return forbidden(
+      res,
+      'Please wait a moment before requesting another password reset email.',
+    );
+  }
+
   const [linkError, link] = await createResetPasswordLink(id, email);
 
   if (linkError || !link) {
     return serverError(res, 'Error while creating reset password link');
   }
+
+  await updateEmailRateLimit(email, EMAIL_TYPES.PASSWORD_RESET);
 
   const resetLink = `${env.FRONTEND_URL}/reset?email=${link.email}&token=${link.token}`;
 

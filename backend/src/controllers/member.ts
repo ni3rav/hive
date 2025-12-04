@@ -15,6 +15,11 @@ import {
   updateMemberRoleSchema,
 } from '../utils/validations/member';
 import {
+  checkEmailRateLimit,
+  updateEmailRateLimit,
+  EMAIL_TYPES,
+} from '../utils/rate-limit';
+import {
   ok,
   created,
   validationError,
@@ -77,6 +82,18 @@ export async function inviteMemberController(req: Request, res: Response) {
   const { email, role } = parse.data;
   const workspaceId = req.workspaceId!;
   const invitedBy = req.userId!;
+
+  const canSend = await checkEmailRateLimit(
+    email,
+    EMAIL_TYPES.WORKSPACE_INVITATION,
+  );
+  if (!canSend) {
+    return forbidden(
+      res,
+      'Please wait a moment before sending another invitation to this email.',
+    );
+  }
+
   try {
     const [err, invitation] = await inviteMember(
       workspaceId,
@@ -123,6 +140,8 @@ export async function inviteMemberController(req: Request, res: Response) {
           html: emailHtml,
           from: WORKSPACE_INVITATION_EMAIL_FROM,
         });
+
+        await updateEmailRateLimit(email, EMAIL_TYPES.WORKSPACE_INVITATION);
       }
     }
 

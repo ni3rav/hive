@@ -6,3 +6,4 @@ export * from './tag';
 export * from './post';
 export * from './workspace-invitation';
 export * from './workspace-api-key';
+export * from './email-rate-limit';

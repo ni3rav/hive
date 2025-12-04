@@ -127,6 +127,13 @@
       "when": 1764141268280,
       "tag": "0017_illegal_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1764861236191,
+      "tag": "0018_funny_deathstrike",
+      "breakpoints": true
     }
   ]
 }
