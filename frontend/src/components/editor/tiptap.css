@@ -333,7 +333,7 @@
 .tiptap hr {
   margin-top: 2rem;
   margin-bottom: 2rem;
-  border-color: var(--color-border);
+  border-color: var(--color-accent);
 }
 
 .tiptap hr:first-child {
@@ -413,4 +413,11 @@
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Floating Menu positioning - ensure it appears below cursor line */
+/* Push the floating menu down so placeholder text stays visible */
+.floating-menu-below {
+  transform: translateY(2.5rem) translateX(-0.75rem) !important;
+  margin-top: 0 !important;
 }

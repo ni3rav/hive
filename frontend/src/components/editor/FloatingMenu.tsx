@@ -125,7 +125,7 @@ export const EditorFloatingMenu = memo(
       <TiptapFloatingMenu
         editor={editor}
         shouldShow={floatingMenuShouldShow}
-        className='inline-flex items-center gap-1 rounded-md border border-foreground/10 bg-background/95 px-2 py-1 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80'
+        className='inline-flex items-center gap-1 rounded-md border border-foreground/10 bg-background/95 px-2 py-1 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80 floating-menu-below'
       >
         {menuItems.map((item) => (
           <MenuButton

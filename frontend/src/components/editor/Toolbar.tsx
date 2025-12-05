@@ -522,6 +522,168 @@ const TableMenu = ({ editor }: { editor: Editor }) => {
   );
 };
 
+const HistoryControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().undo().run()}
+      disabled={!editor.can().undo()}
+      title='Undo'
+    >
+      <Undo className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().redo().run()}
+      disabled={!editor.can().redo()}
+      title='Redo'
+    >
+      <Redo className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
+const HeadingControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+      isActive={editor.isActive('heading', { level: 1 })}
+      title='Heading 1'
+    >
+      <Heading1 className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+      isActive={editor.isActive('heading', { level: 2 })}
+      title='Heading 2'
+    >
+      <Heading2 className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+      isActive={editor.isActive('heading', { level: 3 })}
+      title='Heading 3'
+    >
+      <Heading3 className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
+const BasicFormattingControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleBold().run()}
+      isActive={editor.isActive('bold')}
+      title='Bold (Ctrl+B)'
+    >
+      <Bold className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleItalic().run()}
+      isActive={editor.isActive('italic')}
+      title='Italic (Ctrl+I)'
+    >
+      <Italic className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleStrike().run()}
+      isActive={editor.isActive('strike')}
+      title='Strikethrough'
+    >
+      <Strikethrough className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleUnderline().run()}
+      isActive={editor.isActive('underline')}
+      title='Underline (Ctrl+U)'
+    >
+      <UnderlineIcon className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleCode().run()}
+      isActive={editor.isActive('code')}
+      title='Code'
+    >
+      <Code className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
+const AlignmentControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().setTextAlign('left').run()}
+      isActive={false}
+      title='Align Left'
+    >
+      <AlignLeft className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().setTextAlign('center').run()}
+      isActive={false}
+      title='Align Center'
+    >
+      <AlignCenter className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().setTextAlign('right').run()}
+      isActive={false}
+      title='Align Right'
+    >
+      <AlignRight className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+      isActive={false}
+      title='Justify'
+    >
+      <AlignJustify className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
+const ListControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleBulletList().run()}
+      isActive={editor.isActive('bulletList')}
+      title='Bullet List'
+    >
+      <List className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleOrderedList().run()}
+      isActive={editor.isActive('orderedList')}
+      title='Numbered List'
+    >
+      <ListOrdered className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleTaskList().run()}
+      isActive={editor.isActive('taskList')}
+      title='Task List'
+    >
+      <CheckSquare className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
+const BlockControls = ({ editor }: { editor: Editor }) => (
+  <>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().toggleBlockquote().run()}
+      isActive={editor.isActive('blockquote')}
+      title='Quote'
+    >
+      <Quote className='w-4 h-4' />
+    </ToolbarButton>
+    <ToolbarButton
+      onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      title='Horizontal Rule'
+    >
+      <Minus className='w-4 h-4' />
+    </ToolbarButton>
+  </>
+);
+
 export function Toolbar({ editor }: ToolbarProps) {
   const [, forceUpdate] = useReducer((state: number) => state + 1, 0);
 
@@ -542,184 +704,26 @@ export function Toolbar({ editor }: ToolbarProps) {
   return (
     <div className='border-b border-foreground/5 bg-background sticky top-0 z-10'>
       <div className='flex items-center gap-1 p-2 flex-wrap'>
-        {/* Undo/Redo */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          title='Undo'
-        >
-          <Undo className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          title='Redo'
-        >
-          <Redo className='w-4 h-4' />
-        </ToolbarButton>
-
+        <HistoryControls editor={editor} />
         <Divider />
-
-        {/* Headings */}
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-          isActive={editor.isActive('heading', { level: 1 })}
-          title='Heading 1'
-        >
-          <Heading1 className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-          isActive={editor.isActive('heading', { level: 2 })}
-          title='Heading 2'
-        >
-          <Heading2 className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
-          }
-          isActive={editor.isActive('heading', { level: 3 })}
-          title='Heading 3'
-        >
-          <Heading3 className='w-4 h-4' />
-        </ToolbarButton>
-
+        <HeadingControls editor={editor} />
         <Divider />
-
-        {/* Text Formatting */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          isActive={editor.isActive('bold')}
-          title='Bold (Ctrl+B)'
-        >
-          <Bold className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive('italic')}
-          title='Italic (Ctrl+I)'
-        >
-          <Italic className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          isActive={editor.isActive('strike')}
-          title='Strikethrough'
-        >
-          <Strikethrough className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          isActive={editor.isActive('underline')}
-          title='Underline (Ctrl+U)'
-        >
-          <UnderlineIcon className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          isActive={editor.isActive('code')}
-          title='Code'
-        >
-          <Code className='w-4 h-4' />
-        </ToolbarButton>
+        <BasicFormattingControls editor={editor} />
         <LinkButton editor={editor} />
-
         <Divider />
-
         <FontFamilySelect editor={editor} />
-
         <Divider />
-
-        {/* Colors */}
         <ColorPicker editor={editor} type='text' />
         <ColorPicker editor={editor} type='highlight' />
-
         <Divider />
-
-        {/* Text Alignment */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          isActive={false}
-          title='Align Left'
-        >
-          <AlignLeft className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          isActive={false}
-          title='Align Center'
-        >
-          <AlignCenter className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          isActive={false}
-          title='Align Right'
-        >
-          <AlignRight className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-          isActive={false}
-          title='Justify'
-        >
-          <AlignJustify className='w-4 h-4' />
-        </ToolbarButton>
-
+        <AlignmentControls editor={editor} />
         <Divider />
-
-        {/* Lists */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive('bulletList')}
-          title='Bullet List'
-        >
-          <List className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive('orderedList')}
-          title='Numbered List'
-        >
-          <ListOrdered className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleTaskList().run()}
-          isActive={editor.isActive('taskList')}
-          title='Task List'
-        >
-          <CheckSquare className='w-4 h-4' />
-        </ToolbarButton>
-
+        <ListControls editor={editor} />
         <Divider />
-
         <TableMenu editor={editor} />
-
         <Divider />
-
-        {/* Block Elements */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive('blockquote')}
-          title='Quote'
-        >
-          <Quote className='w-4 h-4' />
-        </ToolbarButton>
-        <ToolbarButton
-          onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          title='Horizontal Rule'
-        >
-          <Minus className='w-4 h-4' />
-        </ToolbarButton>
-
+        <BlockControls editor={editor} />
         <Divider />
-
-        {/* Clear Formatting */}
         <ToolbarButton
           onClick={() =>
             editor.chain().focus().clearNodes().unsetAllMarks().run()
