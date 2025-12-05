@@ -105,9 +105,6 @@ export async function registerController(req: Request, res: Response) {
       return user;
     });
 
-    // Initialize rate limit for this new user/email
-    await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
-
     const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
 
     const [emailError] = await sendEmail({
@@ -122,7 +119,13 @@ export async function registerController(req: Request, res: Response) {
 
     if (emailError) {
       logger.error(emailError, 'Failed to send verification email');
+      return serverError(
+        res,
+        'Failed to send verification email. Please try again later.',
+      );
     }
+
+    await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
 
     return created(
       res,
@@ -182,10 +185,6 @@ export async function loginController(req: Request, res: Response) {
 
       if (error) {
         logger.error(error, 'Rate limit check failed');
-        // Fail open or closed? Usually fail open for rate limits if DB is down, but closed is safer.
-        // Let's fail closed to be safe or just ignore if you want.
-        // For now, let's log and proceed or return error.
-        // Assuming fail safe => return server error
         return serverError(res, 'Failed to check rate limit');
       }
 
@@ -206,8 +205,6 @@ export async function loginController(req: Request, res: Response) {
         expiresAt: expiresAt,
       });
 
-      await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
-
       const verificationLink = `${env.FRONTEND_URL}/verify?userId=${user.id}&token=${token}`;
 
       const [emailError] = await sendEmail({
@@ -222,7 +219,13 @@ export async function loginController(req: Request, res: Response) {
 
       if (emailError) {
         logger.error(emailError, 'Failed to send verification email');
+        return serverError(
+          res,
+          'Failed to send verification email. Please try again later.',
+        );
       }
+
+      await updateEmailRateLimit(user.email, EMAIL_TYPES.VERIFICATION);
 
       return forbidden(
         res,
@@ -425,8 +428,6 @@ export async function generateResetPasswordLinkController(
     return serverError(res, 'Error while creating reset password link');
   }
 
-  await updateEmailRateLimit(email, EMAIL_TYPES.PASSWORD_RESET);
-
   const resetLink = `${env.FRONTEND_URL}/reset?email=${link.email}&token=${link.token}`;
 
   const [emailError] = await sendEmail({
@@ -443,6 +444,9 @@ export async function generateResetPasswordLinkController(
     logger.error(emailError, 'Failed to send password reset email');
     return serverError(res, 'Failed to send password reset email');
   }
+
+  // Update rate limit only after successful email transmission
+  await updateEmailRateLimit(email, EMAIL_TYPES.PASSWORD_RESET);
 
   return created(
     res,
@@ -519,31 +523,29 @@ export async function resetPasswordController(req: Request, res: Response) {
           and(eq(usersTable.email, user.email), eq(usersTable.id, user.id)),
         );
       await tx.delete(sessionsTable).where(eq(sessionsTable.userId, user.id));
-      await tx
-        .delete(passwordResetLinksTable)
-        .where(
-          and(
-            eq(passwordResetLinksTable.email, email),
-            eq(passwordResetLinksTable.token, token),
-            gt(
-          passwordResetLinksTable.expiresAt,
-          (() => {
-            const now = new Date();
-            return new Date(
-              Date.UTC(
-                now.getUTCFullYear(),
-                now.getUTCMonth(),
-                now.getUTCDate(),
-                now.getUTCHours(),
-                now.getUTCMinutes(),
-                now.getUTCSeconds(),
-                now.getUTCMilliseconds(),
-              ),
-            );
-          })(),
-        ),
+      await tx.delete(passwordResetLinksTable).where(
+        and(
+          eq(passwordResetLinksTable.email, email),
+          eq(passwordResetLinksTable.token, token),
+          gt(
+            passwordResetLinksTable.expiresAt,
+            (() => {
+              const now = new Date();
+              return new Date(
+                Date.UTC(
+                  now.getUTCFullYear(),
+                  now.getUTCMonth(),
+                  now.getUTCDate(),
+                  now.getUTCHours(),
+                  now.getUTCMinutes(),
+                  now.getUTCSeconds(),
+                  now.getUTCMilliseconds(),
+                ),
+              );
+            })(),
           ),
-        );
+        ),
+      );
       await tx
         .delete(verificationLinksTable)
         .where(eq(verificationLinksTable.userId, user.id));

@@ -40,7 +40,11 @@ import {
   WORKSPACE_INVITATION_EMAIL_FROM,
 } from '../templates';
 import { db } from '../db';
-import { workspacesTable, usersTable } from '../db/schema';
+import {
+  workspacesTable,
+  usersTable,
+  workspaceInvitationsTable,
+} from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { env } from '../env';
 import logger from '../logger';
@@ -140,13 +144,26 @@ export async function inviteMemberController(req: Request, res: Response) {
           invitationLink: invitationLink,
         });
 
-        await sendEmail({
+        const [emailError] = await sendEmail({
           to: email,
           subject: `You've been invited to join ${workspace.name}`,
           html: emailHtml,
           from: WORKSPACE_INVITATION_EMAIL_FROM,
         });
 
+        if (emailError) {
+          logger.error(emailError, 'Failed to send invitation email');
+          if (invitation) {
+            await db
+              .update(workspaceInvitationsTable)
+              .set({ status: 'revoked' })
+              .where(eq(workspaceInvitationsTable.id, invitation.id));
+          }
+          return serverError(
+            res,
+            'Failed to send invitation email. Please try again later.',
+          );
+        }
         await updateEmailRateLimit(email, EMAIL_TYPES.WORKSPACE_INVITATION);
       }
     }
