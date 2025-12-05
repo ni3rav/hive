@@ -9,6 +9,7 @@ import { Color } from '@tiptap/extension-color';
 import { TableKit } from '@tiptap/extension-table';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
+import Youtube from '@tiptap/extension-youtube';
 import { SlashCommand } from './slash-command/extension';
 import { getSuggestionItems, renderItems } from './slash-command/suggestion';
 
@@ -80,6 +81,16 @@ export const getEditorExtensions = () => [
   }),
   Placeholder.configure({
     placeholder: "Type '/' for commands...",
+  }),
+  Youtube.configure({
+    inline: false,
+    width: 640,
+    height: 360,
+    controls: true,
+    allowFullscreen: true,
+    HTMLAttributes: {
+      class: 'youtube-video',
+    },
   }),
   SlashCommand.configure({
     suggestion: {

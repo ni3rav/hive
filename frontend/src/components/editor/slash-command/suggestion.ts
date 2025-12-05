@@ -9,6 +9,7 @@ import {
   Quote,
   Minus,
   Table,
+  Youtube,
 } from 'lucide-react';
 import { ReactRenderer } from '@tiptap/react';
 import type { Editor, Range } from '@tiptap/react';
@@ -138,6 +139,24 @@ export const getSuggestionItems = ({
           .focus()
           .deleteRange(range)
           .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+          .run();
+      },
+    },
+    {
+      title: 'YouTube Video',
+      description: 'Embed a YouTube player.',
+      searchTerms: ['video', 'youtube', 'yt'],
+      icon: Youtube,
+      command: ({ editor, range }: CommandFunctionProps) => {
+        const url = window.prompt('Paste a YouTube or youtu.be URL');
+        if (!url) {
+          return;
+        }
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setYoutubeVideo({ src: url })
           .run();
       },
     },
