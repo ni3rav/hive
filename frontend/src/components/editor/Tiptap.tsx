@@ -48,15 +48,19 @@ export const Tiptap = forwardRef<TiptapHandle, TiptapProps>(
 
       if (initialContent) {
         editor.commands.setContent(initialContent);
-        return;
+      } else {
+        const savedContent = loadContent(workspaceSlug);
+        if (savedContent) {
+          editor.commands.setContent(savedContent);
+        } else {
+          editor.commands.setContent('<p></p>');
+        }
       }
 
-      const savedContent = loadContent(workspaceSlug);
-      if (savedContent) {
-        editor.commands.setContent(savedContent);
-      } else {
-        editor.commands.setContent('<p></p>');
-      }
+      // Focus editor after content is set
+      setTimeout(() => {
+        editor.commands.focus();
+      }, 0);
     }, [workspaceSlug, editor, initialContent]);
 
     if (!editor) {

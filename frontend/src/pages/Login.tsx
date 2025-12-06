@@ -41,10 +41,15 @@ export default function LoginPage() {
         onError: (error: unknown) => {
           const apiError = error as { response?: { status?: number } };
 
-          // Handle email not verified (403)
           if (apiError.response?.status === 403) {
+            toast.success('Verification email sent. Please check your inbox.');
+            navigate(`/verify?email=${validatedEmail}&sent=true`);
+            return;
+          }
+
+          if (apiError.response?.status === 429) {
             toast.error(
-              'Email not verified. Please check your email for verification link.',
+              'Please wait 5 minutes before requesting another verification email.',
             );
             return;
           }

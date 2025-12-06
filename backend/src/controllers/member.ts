@@ -15,6 +15,11 @@ import {
   updateMemberRoleSchema,
 } from '../utils/validations/member';
 import {
+  checkEmailRateLimit,
+  updateEmailRateLimit,
+  EMAIL_TYPES,
+} from '../utils/rate-limit';
+import {
   ok,
   created,
   validationError,
@@ -22,6 +27,7 @@ import {
   forbidden,
   notFound,
   conflict,
+  tooManyRequests,
 } from '../utils/responses';
 import {
   toInvitationListResponse,
@@ -34,7 +40,11 @@ import {
   WORKSPACE_INVITATION_EMAIL_FROM,
 } from '../templates';
 import { db } from '../db';
-import { workspacesTable, usersTable } from '../db/schema';
+import {
+  workspacesTable,
+  usersTable,
+  workspaceInvitationsTable,
+} from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { env } from '../env';
 import logger from '../logger';
@@ -77,6 +87,23 @@ export async function inviteMemberController(req: Request, res: Response) {
   const { email, role } = parse.data;
   const workspaceId = req.workspaceId!;
   const invitedBy = req.userId!;
+
+  const [rateLimitError, canSend] = await checkEmailRateLimit(
+    email,
+    EMAIL_TYPES.WORKSPACE_INVITATION,
+  );
+
+  if (rateLimitError) {
+    return serverError(res, 'Failed to check rate limit');
+  }
+
+  if (!canSend) {
+    return tooManyRequests(
+      res,
+      'Please wait a moment before sending another invitation to this email.',
+    );
+  }
+
   try {
     const [err, invitation] = await inviteMember(
       workspaceId,
@@ -117,12 +144,27 @@ export async function inviteMemberController(req: Request, res: Response) {
           invitationLink: invitationLink,
         });
 
-        await sendEmail({
+        const [emailError] = await sendEmail({
           to: email,
           subject: `You've been invited to join ${workspace.name}`,
           html: emailHtml,
           from: WORKSPACE_INVITATION_EMAIL_FROM,
         });
+
+        if (emailError) {
+          logger.error(emailError, 'Failed to send invitation email');
+          if (invitation) {
+            await db
+              .update(workspaceInvitationsTable)
+              .set({ status: 'revoked' })
+              .where(eq(workspaceInvitationsTable.id, invitation.id));
+          }
+          return serverError(
+            res,
+            'Failed to send invitation email. Please try again later.',
+          );
+        }
+        await updateEmailRateLimit(email, EMAIL_TYPES.WORKSPACE_INVITATION);
       }
     }
 

@@ -333,7 +333,7 @@
 .tiptap hr {
   margin-top: 2rem;
   margin-bottom: 2rem;
-  border-color: var(--color-border);
+  border-color: var(--color-accent);
 }
 
 .tiptap hr:first-child {
@@ -394,11 +394,6 @@
   text-align: justify;
 }
 
-/* Text Color */
-.tiptap [style*='color'] {
-  /* Preserve inline color styles from Color extension */
-}
-
 /* Highlight / Text Background */
 .tiptap mark {
   padding: 0.125rem 0.25rem;
@@ -413,4 +408,52 @@
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* Media - YouTube embeds */
+.tiptap .youtube-video {
+  display: block;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 40%;
+  max-width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: #000;
+  border: none;
+}
+
+.tiptap iframe.youtube-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+
+.tiptap .youtube-video:first-child {
+  margin-top: 0;
+}
+
+.tiptap .youtube-video:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap .youtube-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+
+/* Floating Menu positioning - ensure it appears below cursor line */
+/* Push the floating menu down so placeholder text stays visible */
+.floating-menu-below {
+  transform: translateY(2.5rem) translateX(-0.75rem) !important;
+  margin-top: 0 !important;
 }
