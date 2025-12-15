@@ -1,5 +1,6 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next";
 import "./global.css";
 import { Geist } from "next/font/google";
 import type { Metadata } from "next";
@@ -126,6 +127,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <RootProvider>{children}</RootProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
