@@ -398,7 +398,12 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
     const [isOpen, setIsOpen] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
-    const [mediaItems, setMediaItems] = useState<any[]>([]);
+    interface MediaItem {
+      id: string;
+      url: string;
+      filename: string;
+    }
+    const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
     useImperativeHandle(ref, () => ({
       openDialog: () => setIsOpen(true),
@@ -512,6 +517,7 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                   className='hidden'
                   onChange={handleFileUpload}
                 />
+                {error && <p className='text-xs text-destructive'>{error}</p>}
               </div>
             )}
 
@@ -967,13 +973,12 @@ export function Toolbar({ editor }: ToolbarProps) {
       imageButtonRef.current?.openDialog();
     };
 
-    // Store the handler on the editor instance so slash commands can access it
-    (editor as any).openImageDialog = handleOpenImageDialog;
+    (editor as Editor & { openImageDialog?: () => void }).openImageDialog = handleOpenImageDialog;
 
     return () => {
       editor.off('selectionUpdate', update);
       editor.off('transaction', update);
-      delete (editor as any).openImageDialog;
+      delete (editor as Editor & { openImageDialog?: () => void }).openImageDialog;
     };
   }, [editor]);
 

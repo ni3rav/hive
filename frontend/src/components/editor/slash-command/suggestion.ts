@@ -169,8 +169,12 @@ export const getSuggestionItems = ({
       command: ({ editor, range }: CommandFunctionProps) => {
         editor.chain().focus().deleteRange(range).run();
         setTimeout(() => {
-          if ((editor as any).openImageDialog) {
-            (editor as any).openImageDialog();
+          interface EditorWithImageDialog extends Editor {
+            openImageDialog?: () => void;
+          }
+          const editorWithDialog = editor as EditorWithImageDialog;
+          if (editorWithDialog.openImageDialog) {
+            editorWithDialog.openImageDialog();
           }
         }, 100);
       },
