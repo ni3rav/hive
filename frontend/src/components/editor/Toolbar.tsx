@@ -33,8 +33,9 @@ import {
   TableRowsSplit,
   Trash2,
   Youtube,
+  Image,
 } from 'lucide-react';
-import { useState, memo, useEffect, useReducer } from 'react';
+import { useState, memo, useEffect, useReducer, useRef, forwardRef, useImperativeHandle } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -256,7 +257,7 @@ const ColorPicker = memo(
               'p-2 rounded hover:bg-muted transition-colors',
               ((type === 'text' && editor.getAttributes('textStyle').color) ||
                 (type === 'highlight' && editor.isActive('highlight'))) &&
-                'bg-muted text-primary',
+              'bg-muted text-primary',
             )}
           >
             {type === 'text' ? (
@@ -387,6 +388,170 @@ const YoutubeButton = memo(({ editor }: { editor: Editor }) => {
 });
 
 YoutubeButton.displayName = 'YoutubeButton';
+
+export interface ImageButtonRef {
+  openDialog: () => void;
+}
+
+const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
+  ({ editor }, ref) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
+    const [mediaItems, setMediaItems] = useState<any[]>([]);
+
+    useImperativeHandle(ref, () => ({
+      openDialog: () => setIsOpen(true),
+    }));
+
+    // Load media items from localStorage when dialog opens
+    useEffect(() => {
+      if (isOpen) {
+        try {
+          const stored = localStorage.getItem('hive_media_items');
+          if (stored) {
+            setMediaItems(JSON.parse(stored));
+          }
+        } catch (e) {
+          console.error('Failed to load media items', e);
+        }
+      }
+    }, [isOpen]);
+
+    const insertMediaImage = (url: string) => {
+      editor.chain().focus().setImage({ src: url }).run();
+      setIsOpen(false);
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        editor.chain().focus().setImage({ src: base64 }).run();
+        setIsOpen(false);
+        setError('');
+      };
+      reader.onerror = () => {
+        setError('Failed to read file');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    return (
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type='button'
+            title='Insert Image'
+            className={cn(
+              'p-2 rounded hover:bg-muted transition-colors',
+              editor.isActive('image') && 'bg-muted text-primary',
+            )}
+          >
+            <Image className='w-4 h-4' />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className='w-96'>
+          <div className='space-y-3'>
+            <h4 className='font-medium text-sm'>Insert Image</h4>
+
+            {/* Tabs */}
+            <div className='flex gap-1 border-b'>
+              <button
+                className={cn(
+                  'px-3 py-1.5 text-sm transition-colors border-b-2',
+                  activeTab === 'upload'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setActiveTab('upload')}
+              >
+                Upload
+              </button>
+              <button
+                className={cn(
+                  'px-3 py-1.5 text-sm transition-colors border-b-2',
+                  activeTab === 'library'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                )}
+                onClick={() => setActiveTab('library')}
+              >
+                Media Library ({mediaItems.length})
+              </button>
+            </div>
+
+            {/* Upload Tab */}
+            {activeTab === 'upload' && (
+              <div className='space-y-3'>
+                <p className='text-xs text-muted-foreground'>
+                  Upload an image from your computer
+                </p>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  className='w-full'
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  Choose File
+                </Button>
+                <input
+                  id='image-upload'
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
+                  onChange={handleFileUpload}
+                />
+              </div>
+            )}
+
+            {/* Media Library Tab */}
+            {activeTab === 'library' && (
+              <div className='space-y-3'>
+                {mediaItems.length === 0 ? (
+                  <div className='text-center py-8 text-sm text-muted-foreground'>
+                    No images in media library yet.
+                    <br />
+                    Upload images from the Media page.
+                  </div>
+                ) : (
+                  <div className='grid grid-cols-3 gap-2 max-h-64 overflow-y-auto'>
+                    {mediaItems.map((media) => (
+                      <button
+                        key={media.id}
+                        className='aspect-square border rounded-lg overflow-hidden hover:ring-2 hover:ring-primary transition-all'
+                        onClick={() => insertMediaImage(media.url)}
+                        title={media.filename}
+                      >
+                        <img
+                          src={media.url}
+                          alt={media.filename}
+                          className='w-full h-full object-cover'
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+);
+
+ImageButton.displayName = 'ImageButton';
 
 const fontOptions = [
   {
@@ -787,6 +952,7 @@ const BlockControls = ({ editor }: { editor: Editor }) => (
 
 export function Toolbar({ editor }: ToolbarProps) {
   const [, forceUpdate] = useReducer((state: number) => state + 1, 0);
+  const imageButtonRef = useRef<ImageButtonRef>(null);
 
   useEffect(() => {
     if (!editor) return;
@@ -796,9 +962,18 @@ export function Toolbar({ editor }: ToolbarProps) {
     editor.on('selectionUpdate', update);
     editor.on('transaction', update);
 
+    // Listen for custom event to open image dialog
+    const handleOpenImageDialog = () => {
+      imageButtonRef.current?.openDialog();
+    };
+
+    // Store the handler on the editor instance so slash commands can access it
+    (editor as any).openImageDialog = handleOpenImageDialog;
+
     return () => {
       editor.off('selectionUpdate', update);
       editor.off('transaction', update);
+      delete (editor as any).openImageDialog;
     };
   }, [editor]);
 
@@ -812,6 +987,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <BasicFormattingControls editor={editor} />
         <LinkButton editor={editor} />
         <YoutubeButton editor={editor} />
+        <ImageButton ref={imageButtonRef} editor={editor} />
         <Divider />
         <FontFamilySelect editor={editor} />
         <Divider />

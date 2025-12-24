@@ -10,6 +10,7 @@ import {
   Minus,
   Table,
   Youtube,
+  Image,
 } from 'lucide-react';
 import { ReactRenderer } from '@tiptap/react';
 import type { Editor, Range } from '@tiptap/react';
@@ -158,6 +159,20 @@ export const getSuggestionItems = ({
           .deleteRange(range)
           .setYoutubeVideo({ src: url })
           .run();
+      },
+    },
+    {
+      title: 'Image',
+      description: 'Insert an image from URL.',
+      searchTerms: ['photo', 'picture', 'img'],
+      icon: Image,
+      command: ({ editor, range }: CommandFunctionProps) => {
+        editor.chain().focus().deleteRange(range).run();
+        setTimeout(() => {
+          if ((editor as any).openImageDialog) {
+            (editor as any).openImageDialog();
+          }
+        }, 100);
       },
     },
     {

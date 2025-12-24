@@ -10,6 +10,7 @@ import { TableKit } from '@tiptap/extension-table';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Youtube from '@tiptap/extension-youtube';
+import Image from '@tiptap/extension-image';
 import { SlashCommand } from './slash-command/extension';
 import { getSuggestionItems, renderItems } from './slash-command/suggestion';
 
@@ -90,6 +91,28 @@ export const getEditorExtensions = () => [
     allowFullscreen: true,
     HTMLAttributes: {
       class: 'youtube-video',
+    },
+  }),
+  Image.configure({
+    inline: true,
+    allowBase64: true,
+    HTMLAttributes: {
+      class: 'tiptap-image',
+    },
+  }).extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        class: {
+          default: 'tiptap-image',
+          parseHTML: element => element.getAttribute('class'),
+          renderHTML: attributes => {
+            return {
+              class: attributes.class,
+            };
+          },
+        },
+      };
     },
   }),
   SlashCommand.configure({
