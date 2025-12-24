@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SquareTerminal, Users, FileText, Layers, Tag, UserCog, Key } from 'lucide-react';
+import { SquareTerminal, Users, FileText, Layers, Tag, Image, UserCog, Key } from 'lucide-react';
 import { WorkspaceSwitcher } from '@/components/Workspace/workspaceSwitcher';
 import { useParams } from 'react-router-dom';
 
@@ -39,6 +39,11 @@ const navItems = [
     title: 'Tags',
     url: 'tags',
     icon: Tag,
+  },
+  {
+    title: 'Media',
+    url: 'media',
+    icon: Image,
   },
   {
     title: 'Members',

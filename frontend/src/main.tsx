@@ -39,6 +39,7 @@ const ProfilePage = lazyPage('/src/pages/ProfilePage.tsx', 'ProfilePage');
 const AcceptInvitePage = lazyPage('/src/pages/AcceptInvitePage.tsx');
 const ApiKeysPage = lazyPage('/src/pages/ApiKeys.tsx');
 const CategoriesPage = lazyPage('/src/pages/Category.tsx');
+const MediaPage = lazyPage('/src/pages/Media.tsx');
 const MemberPage = lazyPage('/src/pages/Member.tsx');
 const InviteMember = lazyPage('/src/pages/InviteMember.tsx');
 const DashboardLayout = lazyImport(
@@ -141,6 +142,10 @@ const router = createBrowserRouter([
           {
             path: 'tags',
             element: <TagsPage />,
+          },
+          {
+            path: 'media',
+            element: <MediaPage />,
           },
           {
             path: 'posts',
