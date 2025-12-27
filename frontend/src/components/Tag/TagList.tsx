@@ -1,6 +1,12 @@
 import type { Tag } from '@/types/tag';
 import { useMemo, useState } from 'react';
-import { MoreHorizontal, Plus, Pencil, Trash2, Tag as TagIcon } from 'lucide-react';
+import {
+  MoreHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
+  Tag as TagIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -61,18 +67,20 @@ export default function TagList({
         </div>
       </CardHeader>
       <CardContent>
-        <div className='flex items-center gap-2 pt-0 pb-4'>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder='Search tags...'
-            className='sm:w-64'
-          />
-          <Button onClick={onAddTag} className='whitespace-nowrap'>
-            <Plus size={16} className='mr-1' />
-            Add Tag
-          </Button>
-        </div>
+        {tags.length > 0 && (
+          <div className='flex items-center gap-2 pt-0 pb-4'>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder='Search tags...'
+              className='sm:w-64'
+            />
+            <Button onClick={onAddTag} className='whitespace-nowrap'>
+              <Plus size={16} className='mr-1' />
+              Add Tag
+            </Button>
+          </div>
+        )}
         {filtered.length === 0 ? (
           <Empty className='border-dashed animate-in fade-in-50'>
             <EmptyHeader>
@@ -170,4 +178,3 @@ export default function TagList({
     </Card>
   );
 }
-

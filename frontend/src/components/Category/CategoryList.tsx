@@ -45,8 +45,7 @@ export default function CategoryList({
     if (!q) return categories;
     return categories.filter(
       (c) =>
-        c.name?.toLowerCase().includes(q) ||
-        c.slug?.toLowerCase().includes(q),
+        c.name?.toLowerCase().includes(q) || c.slug?.toLowerCase().includes(q),
     );
   }, [categories, search]);
 
@@ -64,18 +63,20 @@ export default function CategoryList({
         </div>
       </CardHeader>
       <CardContent>
-        <div className='flex items-center gap-2 pt-0 pb-4'>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder='Search categories...'
-            className='sm:w-64'
-          />
-          <Button onClick={onAddCategory} className='whitespace-nowrap'>
-            <Plus size={16} className='mr-1' />
-            Add Category
-          </Button>
-        </div>
+        {categories.length > 0 && (
+          <div className='flex items-center gap-2 pt-0 pb-4'>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder='Search categories...'
+              className='sm:w-64'
+            />
+            <Button onClick={onAddCategory} className='whitespace-nowrap'>
+              <Plus size={16} className='mr-1' />
+              Add Category
+            </Button>
+          </div>
+        )}
         {filtered.length === 0 ? (
           <Empty className='border-dashed animate-in fade-in-50'>
             {/* ... (empty state) ... */}

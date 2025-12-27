@@ -69,18 +69,20 @@ export default function AuthorList({
         </div>
       </CardHeader>
       <CardContent>
-        <div className='flex items-center gap-2 pt-0 pb-4'>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder='Search authors...'
-            className='sm:w-64'
-          />
-          <Button onClick={onAddAuthor} className='whitespace-nowrap'>
-            <Plus size={16} className='mr-1' />
-            Add Author
-          </Button>
-        </div>
+        {authors.length > 0 && (
+          <div className='flex items-center gap-2 pt-0 pb-4'>
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder='Search authors...'
+              className='sm:w-64'
+            />
+            <Button onClick={onAddAuthor} className='whitespace-nowrap'>
+              <Plus size={16} className='mr-1' />
+              Add Author
+            </Button>
+          </div>
+        )}
         {filtered.length === 0 ? (
           <Empty className='border-dashed animate-in fade-in-50'>
             <EmptyHeader>
