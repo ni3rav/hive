@@ -10,6 +10,7 @@ import { authorTable } from './author';
 import { categoryTable } from './category';
 import { tagTable } from './tag';
 import { postsTable } from './post';
+import { mediaTable } from './media';
 import { relations } from 'drizzle-orm';
 import { workspaceInvitationsTable } from './workspace-invitation';
 import { workspaceApiKeysTable } from './workspace-api-key';
@@ -56,6 +57,7 @@ export const workspacesRelations = relations(
     categories: many(categoryTable),
     tags: many(tagTable),
     posts: many(postsTable),
+    media: many(mediaTable),
     invitations: many(workspaceInvitationsTable),
     apiKeys: many(workspaceApiKeysTable),
   }),
