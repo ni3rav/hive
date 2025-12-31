@@ -10,6 +10,18 @@ import {
 import { eq, and, sql, gte } from 'drizzle-orm';
 import logger from '../logger';
 
+export async function getWorkspaceBySlug(workspaceSlug: string) {
+  const workspace = await db.query.workspacesTable.findFirst({
+    where: eq(workspacesTable.slug, workspaceSlug),
+  });
+
+  if (!workspace) {
+    throw new Error('workspace not found');
+  }
+
+  return workspace;
+}
+
 export async function checkSlugExists(slug: string): Promise<boolean> {
   try {
     const workspace = await db.query.workspacesTable.findFirst({
