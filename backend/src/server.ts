@@ -6,6 +6,7 @@ import { router as categoryRouter } from './routes/category';
 import { router as tagRouter } from './routes/tag';
 import { router as workspaceRouter } from './routes/workspace';
 import { router as postRouter } from './routes/post';
+import { router as mediaRouter } from './routes/media';
 import { router as publicRouter } from './routes/public';
 import { router as invitationRouter } from './routes/invitation';
 import cookieParser from 'cookie-parser';
@@ -80,6 +81,7 @@ app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 app.use('/api/post', authMiddleware, postRouter);
+app.use('/api/media', authMiddleware, mediaRouter);
 app.use('/api/public', publicRouter);
 app.get('/api/health', async (_req: Request, res: Response) => {
   try {
