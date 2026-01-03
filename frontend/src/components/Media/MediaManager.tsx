@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Plus, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
 import {
   Empty,
   EmptyContent,
@@ -26,25 +26,19 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
-import { toast } from 'sonner';
+import { useMedia, useDeleteMedia } from '@/hooks/useMedia';
+import { useMediaUpload } from '@/hooks/useMediaUpload';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImagePreview } from './ImagePreview';
-
-interface MediaItem {
-  id: string;
-  url: string;
-  filename: string;
-  size: number;
-  uploadedAt: Date;
-}
+import type { Media } from '@/types/media';
 
 function MediaItemCard({
   media,
   onDelete,
   formatFileSize,
 }: {
-  media: MediaItem;
-  onDelete: (m: MediaItem) => void;
+  media: Media;
+  onDelete: (m: Media) => void;
   formatFileSize: (bytes: number) => string;
 }) {
   return (
@@ -60,7 +54,7 @@ function MediaItemCard({
       </Button>
 
       <ImagePreview
-        src={media.url}
+        src={media.publicUrl}
         alt={media.filename}
         className='aspect-square bg-muted'
       />
@@ -78,77 +72,47 @@ function MediaItemCard({
 
 export default function MediaManager() {
   const workspaceSlug = useWorkspaceSlug();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
-  // Placeholder states - will be replaced with actual API hooks
-  const isLoading = false;
-  const isError = false;
-
-  // Sync mediaItems to localStorage whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem('hive_media_items', JSON.stringify(mediaItems));
-    } catch (e) {
-      console.error('Failed to save media items', e);
-    }
-  }, [mediaItems]);
+  const {
+    data: mediaItems = [],
+    isLoading,
+    isError,
+  } = useMedia(workspaceSlug || '');
+  const deleteMedia = useDeleteMedia(workspaceSlug || '');
+  const {
+    uploadImage,
+    isPending: isUploading,
+    progress,
+    uploadStage,
+  } = useMediaUpload(workspaceSlug || '');
 
   const handleUploadMedia = () => {
-    // Trigger file input click
-    document.getElementById('media-file-input')?.click();
+    fileInputRef.current?.click();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0 || !workspaceSlug) return;
 
-    Array.from(files).forEach((file) => {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image file`);
-        return;
-      }
-
-      // Convert to base64 for preview (in production, upload to server)
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        const newMedia: MediaItem = {
-          id: Math.random().toString(36).substring(7),
-          url: base64,
-          filename: file.name,
-          size: file.size,
-          uploadedAt: new Date(),
-        };
-        setMediaItems((prev) => [newMedia, ...prev]);
-        toast.success(`${file.name} uploaded successfully`);
-      };
-      reader.onerror = () => {
-        toast.error(`Failed to upload ${file.name}`);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Reset input
+    const file = files[0];
+    uploadImage(file);
     e.target.value = '';
   };
 
-  const handleDeleteClick = (media: MediaItem) => {
+  const handleDeleteClick = (media: Media) => {
     setSelectedMedia(media);
     setIsDeleteOpen(true);
   };
 
   const confirmDelete = () => {
-    if (selectedMedia) {
-      setMediaItems((prev) =>
-        prev.filter((item) => item.id !== selectedMedia.id),
-      );
-      toast.success('Image deleted successfully');
+    if (selectedMedia && workspaceSlug) {
+      deleteMedia.mutate(selectedMedia.id);
+      setIsDeleteOpen(false);
+      setSelectedMedia(null);
     }
-    setIsDeleteOpen(false);
-    setSelectedMedia(null);
   };
 
   const cancelDelete = () => {
@@ -225,16 +189,45 @@ export default function MediaManager() {
                 <CardTitle>Media</CardTitle>
                 <CardDescription>Manage your media files</CardDescription>
               </div>
-              {mediaItems.length > 0 && (
-                <Button onClick={handleUploadMedia} size='sm'>
-                  <Plus />
-                  Upload Media
-                </Button>
-              )}
+              <Button
+                onClick={handleUploadMedia}
+                size='sm'
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Plus />
+                    Upload Media
+                  </>
+                )}
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {mediaItems.length === 0 ? (
+            {isUploading && (
+              <div className='mb-4 space-y-2'>
+                <div className='flex items-center justify-between text-sm'>
+                  <span>
+                    {uploadStage === 'generating' && 'Generating upload URL...'}
+                    {uploadStage === 'uploading' && 'Uploading to cloud...'}
+                    {uploadStage === 'confirming' && 'Saving...'}
+                  </span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className='h-2 w-full bg-muted rounded-full overflow-hidden'>
+                  <div
+                    className='h-full bg-primary transition-all duration-300'
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            {mediaItems.length === 0 && !isLoading ? (
               <Empty className='border-dashed animate-in fade-in-50'>
                 <EmptyHeader>
                   <EmptyMedia variant='icon'>
@@ -271,9 +264,8 @@ export default function MediaManager() {
         </Card>
       </div>
 
-      {/* Hidden file input */}
       <input
-        id='media-file-input'
+        ref={fileInputRef}
         type='file'
         accept='image/*'
         className='hidden'
