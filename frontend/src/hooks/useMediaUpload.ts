@@ -117,6 +117,10 @@ export function useMediaUpload(workspaceSlug: string) {
       file: File,
       onProgress?: (progress: number, stage: string) => void,
     ) => mutation.mutate({ file, workspaceSlug, onProgress }),
+    uploadImageAsync: (
+      file: File,
+      onProgress?: (progress: number, stage: string) => void,
+    ) => mutation.mutateAsync({ file, workspaceSlug, onProgress }),
     isPending: mutation.isPending,
     progress,
     uploadStage,

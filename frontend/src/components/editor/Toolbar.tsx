@@ -35,8 +35,20 @@ import {
   Youtube,
   Image,
 } from 'lucide-react';
-import { useState, memo, useEffect, useReducer, useRef, forwardRef, useImperativeHandle } from 'react';
+import {
+  useState,
+  memo,
+  useEffect,
+  useReducer,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import { cn } from '@/lib/utils';
+import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
+import { useMedia } from '@/hooks/useMedia';
+import { useMediaUpload } from '@/hooks/useMediaUpload';
+import { Loader2 } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -257,7 +269,7 @@ const ColorPicker = memo(
               'p-2 rounded hover:bg-muted transition-colors',
               ((type === 'text' && editor.getAttributes('textStyle').color) ||
                 (type === 'highlight' && editor.isActive('highlight'))) &&
-              'bg-muted text-primary',
+                'bg-muted text-primary',
             )}
           >
             {type === 'text' ? (
@@ -395,33 +407,25 @@ export interface ImageButtonRef {
 
 const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
   ({ editor }, ref) => {
+    const workspaceSlug = useWorkspaceSlug();
     const [isOpen, setIsOpen] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
-    interface MediaItem {
-      id: string;
-      url: string;
-      filename: string;
-    }
-    const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const { data: mediaItems = [], isLoading: isLoadingMedia } = useMedia(
+      workspaceSlug || '',
+    );
+    const {
+      uploadImageAsync,
+      isPending: isUploading,
+      progress,
+      uploadStage,
+    } = useMediaUpload(workspaceSlug || '');
 
     useImperativeHandle(ref, () => ({
       openDialog: () => setIsOpen(true),
     }));
-
-    // Load media items from localStorage when dialog opens
-    useEffect(() => {
-      if (isOpen) {
-        try {
-          const stored = localStorage.getItem('hive_media_items');
-          if (stored) {
-            setMediaItems(JSON.parse(stored));
-          }
-        } catch (e) {
-          console.error('Failed to load media items', e);
-        }
-      }
-    }, [isOpen]);
 
     const insertMediaImage = (url: string) => {
       editor.chain().focus().setImage({ src: url }).run();
@@ -430,26 +434,33 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) return;
+      if (!file || !workspaceSlug) return;
 
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         setError('Please select an image file');
         return;
       }
 
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        editor.chain().focus().setImage({ src: base64 }).run();
-        setIsOpen(false);
-        setError('');
-      };
-      reader.onerror = () => {
-        setError('Failed to read file');
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      setError('');
+      uploadImageAsync(file, (_progress, stage) => {
+        if (stage === 'complete') {
+          setIsOpen(false);
+        }
+      })
+        .then((media) => {
+          if (media) {
+            insertMediaImage(media.publicUrl);
+          }
+        })
+        .catch(() => {
+          setError('Failed to upload image');
+        });
+      e.target.value = '';
     };
 
     return (
@@ -477,7 +488,7 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                   'px-3 py-1.5 text-sm transition-colors border-b-2',
                   activeTab === 'upload'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
                 onClick={() => setActiveTab('upload')}
               >
@@ -488,7 +499,7 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                   'px-3 py-1.5 text-sm transition-colors border-b-2',
                   activeTab === 'library'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
                 onClick={() => setActiveTab('library')}
               >
@@ -502,33 +513,79 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                 <p className='text-xs text-muted-foreground'>
                   Upload an image from your computer
                 </p>
-                <Button
-                  size='sm'
-                  variant='outline'
-                  className='w-full'
-                  onClick={() => document.getElementById('image-upload')?.click()}
-                >
-                  Choose File
-                </Button>
-                <input
-                  id='image-upload'
-                  type='file'
-                  accept='image/*'
-                  className='hidden'
-                  onChange={handleFileUpload}
-                />
-                {error && <p className='text-xs text-destructive'>{error}</p>}
+                {!workspaceSlug ? (
+                  <p className='text-xs text-destructive'>
+                    Workspace not found
+                  </p>
+                ) : (
+                  <>
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      className='w-full'
+                      disabled={isUploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                          Uploading...
+                        </>
+                      ) : (
+                        'Choose File'
+                      )}
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type='file'
+                      accept='image/*'
+                      className='hidden'
+                      onChange={handleFileUpload}
+                    />
+                    {isUploading && (
+                      <div className='space-y-2'>
+                        <div className='flex items-center justify-between text-xs'>
+                          <span>
+                            {uploadStage === 'generating' &&
+                              'Generating upload URL...'}
+                            {uploadStage === 'uploading' &&
+                              'Uploading to cloud...'}
+                            {uploadStage === 'confirming' && 'Saving...'}
+                          </span>
+                          <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className='h-2 w-full bg-muted rounded-full overflow-hidden'>
+                          <div
+                            className='h-full bg-primary transition-all duration-300'
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {error && (
+                      <p className='text-xs text-destructive'>{error}</p>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
             {/* Media Library Tab */}
             {activeTab === 'library' && (
               <div className='space-y-3'>
-                {mediaItems.length === 0 ? (
+                {!workspaceSlug ? (
+                  <div className='text-center py-8 text-sm text-muted-foreground'>
+                    Workspace not found
+                  </div>
+                ) : isLoadingMedia ? (
+                  <div className='flex items-center justify-center py-8'>
+                    <Loader2 className='w-4 h-4 animate-spin text-muted-foreground' />
+                  </div>
+                ) : mediaItems.length === 0 ? (
                   <div className='text-center py-8 text-sm text-muted-foreground'>
                     No images in media library yet.
                     <br />
-                    Upload images from the Media page.
+                    Upload images from the Upload tab.
                   </div>
                 ) : (
                   <div className='grid grid-cols-3 gap-2 max-h-64 overflow-y-auto'>
@@ -536,11 +593,11 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                       <button
                         key={media.id}
                         className='aspect-square border rounded-lg overflow-hidden hover:ring-2 hover:ring-primary transition-all'
-                        onClick={() => insertMediaImage(media.url)}
+                        onClick={() => insertMediaImage(media.publicUrl)}
                         title={media.filename}
                       >
                         <img
-                          src={media.url}
+                          src={media.publicUrl}
                           alt={media.filename}
                           className='w-full h-full object-cover'
                         />
@@ -973,12 +1030,14 @@ export function Toolbar({ editor }: ToolbarProps) {
       imageButtonRef.current?.openDialog();
     };
 
-    (editor as Editor & { openImageDialog?: () => void }).openImageDialog = handleOpenImageDialog;
+    (editor as Editor & { openImageDialog?: () => void }).openImageDialog =
+      handleOpenImageDialog;
 
     return () => {
       editor.off('selectionUpdate', update);
       editor.off('transaction', update);
-      delete (editor as Editor & { openImageDialog?: () => void }).openImageDialog;
+      delete (editor as Editor & { openImageDialog?: () => void })
+        .openImageDialog;
     };
   }, [editor]);
 

@@ -95,7 +95,7 @@ export const getEditorExtensions = () => [
   }),
   Image.configure({
     inline: true,
-    allowBase64: true,
+    allowBase64: false,
     HTMLAttributes: {
       class: 'tiptap-image',
     },
