@@ -32,10 +32,10 @@ import type { CreatePostData, UpdatePostData } from '@/types/post';
 import {
   getContentFromEditor,
   isEditorEmpty as checkEditorEmpty,
+  hasOnlyMediaContent,
 } from '@/components/editor/content-utils';
 import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useQueryParam } from '@/lib/query-params';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -67,7 +67,6 @@ export function EditorSidebar() {
 
   const createPostMutation = useCreatePost(workspaceSlug);
   const updatePostMutation = useUpdatePost(workspaceSlug, postSlug || '');
-  const navigate = useNavigate();
 
   const defaultValues = useMemo<PostMetadataFormData>(
     () => ({
@@ -273,12 +272,20 @@ export function EditorSidebar() {
       return;
     }
 
-    if (checkEditorEmpty(editor)) {
-      toast.error('Post content cannot be empty');
+    const formValues = getValues();
+    const onlyMedia = hasOnlyMediaContent(editor);
+
+    // If there's only media content, allow saving as draft but prevent publishing
+    if (onlyMedia && formValues.status === 'published') {
+      toast.error('Published posts must contain some text content.');
       return;
     }
 
-    const formValues = getValues();
+    // Check if editor is empty (skip this check if we have media content, as it's allowed for drafts)
+    if (!onlyMedia && checkEditorEmpty(editor)) {
+      toast.error('Post content cannot be empty');
+      return;
+    }
 
     const { contentHtml, contentJson } = getContentFromEditor(editor);
 
@@ -303,15 +310,8 @@ export function EditorSidebar() {
 
       updatePostMutation.mutate(updateData, {
         onSuccess: () => {
-          const editorInstance = editorRef.current?.editor;
-          if (editorInstance) {
-            editorInstance.commands.setContent('<p></p>');
-          }
-
           clearWorkspacePersistence(workspaceSlug);
           clearWorkspacePersistence(undefined);
-
-          navigate(`/dashboard/${workspaceSlug}/posts`);
         },
       });
     } else {
@@ -321,30 +321,7 @@ export function EditorSidebar() {
         publishedAt: formValues.publishedAt || new Date(),
       } as CreatePostData & { slug: string; publishedAt: Date };
 
-      createPostMutation.mutate(postData, {
-        onSuccess: () => {
-          const editorInstance = editorRef.current?.editor;
-          if (editorInstance) {
-            editorInstance.commands.setContent('<p></p>');
-          }
-
-          clearWorkspacePersistence(workspaceSlug);
-          clearWorkspacePersistence(undefined);
-
-          setMetadata((prev) => ({
-            ...prev,
-            title: '',
-            slug: '',
-            excerpt: '',
-            authorId: undefined,
-            categorySlug: undefined,
-            tagSlugs: [],
-            publishedAt: new Date(),
-            visible: true,
-            status: 'draft',
-          }));
-        },
-      });
+      createPostMutation.mutate(postData);
     }
   };
 

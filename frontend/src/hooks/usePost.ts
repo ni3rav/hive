@@ -14,6 +14,7 @@ import type {
   DashboardStatsPayload,
   DashboardHeatmapPayload,
 } from '@/types/dashboard';
+import { useNavigate } from 'react-router-dom';
 
 const postsKey = (workspaceSlug: string) =>
   QueryKeys.postKeys().all(workspaceSlug);
@@ -38,6 +39,7 @@ export function usePost(workspaceSlug: string, postSlug: string) {
 
 export function useCreatePost(workspaceSlug: string) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: CreatePostData) => apiCreatePost(workspaceSlug, data),
     onMutate: async (newPost) => {
@@ -121,10 +123,10 @@ export function useCreatePost(workspaceSlug: string) {
               heatmap: oldData.heatmap.map((point) =>
                 point.day === today
                   ? {
-                      ...point,
-                      posts: point.posts + 1,
-                      activity: point.activity + 1,
-                    }
+                    ...point,
+                    posts: point.posts + 1,
+                    activity: point.activity + 1,
+                  }
                   : point,
               ),
             };
@@ -146,6 +148,9 @@ export function useCreatePost(workspaceSlug: string) {
           }
         },
       );
+
+      // Navigate to the newly created post's edit page (replace to stay on same editor)
+      navigate(`/dashboard/${workspaceSlug}/editor/${data.slug}`, { replace: true });
     },
     onError: (error, _v, ctx) => {
       const message = getErrorMessage(error, 'Failed to create post');
@@ -242,10 +247,10 @@ export function useDeletePost(workspaceSlug: string) {
               heatmap: oldData.heatmap.map((point) =>
                 point.day === today
                   ? {
-                      ...point,
-                      posts: Math.max(0, point.posts - 1),
-                      activity: Math.max(0, point.activity - 1),
-                    }
+                    ...point,
+                    posts: Math.max(0, point.posts - 1),
+                    activity: Math.max(0, point.activity - 1),
+                  }
                   : point,
               ),
             };
