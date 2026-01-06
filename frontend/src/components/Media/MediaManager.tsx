@@ -64,6 +64,7 @@ function MediaItemCard({
         src={media.publicUrl}
         alt={media.filename}
         className='aspect-square bg-muted'
+        filename={media.filename}
       />
       <div className='p-3 space-y-2'>
         <p className='text-sm font-medium truncate' title={media.filename}>
@@ -207,23 +208,25 @@ export default function MediaManager() {
                 <CardTitle>Media</CardTitle>
                 <CardDescription>Manage your media files</CardDescription>
               </div>
-              <Button
-                onClick={handleUploadMedia}
-                size='sm'
-                disabled={isUploading}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Plus />
-                    Upload Media
-                  </>
-                )}
-              </Button>
+              {mediaItems.length > 0 && (
+                <Button
+                  onClick={handleUploadMedia}
+                  size='sm'
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                      Uploading
+                    </>
+                  ) : (
+                    <>
+                      <Plus />
+                      Upload Media
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -258,9 +261,18 @@ export default function MediaManager() {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button onClick={handleUploadMedia} size='sm'>
-                    <Plus />
-                    Upload Media
+                  <Button onClick={handleUploadMedia} size='sm' disabled={isUploading}>
+                    {isUploading ? (
+                      <>
+                        <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                        Uploading
+                      </>
+                    ) : (
+                      <>
+                        <Plus />
+                        Upload Media
+                      </>
+                    )}
                   </Button>
                 </EmptyContent>
               </Empty>
