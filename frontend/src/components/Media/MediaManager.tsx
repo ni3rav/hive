@@ -28,30 +28,37 @@ import {
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { useMedia, useDeleteMedia } from '@/hooks/useMedia';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
+import { useWorkspaceVerification } from '@/hooks/useWorkspace';
+import { useAuth } from '@/hooks/useAuth';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImagePreview } from './ImagePreview';
 import type { Media } from '@/types/media';
+import type { MemberRole } from '@/types/member';
 
 function MediaItemCard({
   media,
   onDelete,
   formatFileSize,
+  canDelete,
 }: {
   media: Media;
   onDelete: (m: Media) => void;
   formatFileSize: (bytes: number) => string;
+  canDelete: boolean;
 }) {
   return (
     <div className='group relative border border-foreground/5 rounded-lg overflow-hidden'>
-      <Button
-        size='icon'
-        variant='destructive'
-        aria-label='Delete image'
-        className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'
-        onClick={() => onDelete(media)}
-      >
-        <Trash2 className='w-4 h-4' />
-      </Button>
+      {canDelete && (
+        <Button
+          size='icon'
+          variant='destructive'
+          aria-label='Delete image'
+          className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'
+          onClick={() => onDelete(media)}
+        >
+          <Trash2 className='w-4 h-4' />
+        </Button>
+      )}
 
       <ImagePreview
         src={media.publicUrl}
@@ -76,6 +83,10 @@ export default function MediaManager() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
+  const { data: user } = useAuth();
+  const { data: workspace } = useWorkspaceVerification(workspaceSlug);
+  const userRole = (workspace?.role || 'member') as MemberRole;
+
   const {
     data: mediaItems = [],
     isLoading,
@@ -88,6 +99,13 @@ export default function MediaManager() {
     progress,
     uploadStage,
   } = useMediaUpload(workspaceSlug || '');
+
+  const canDeleteMedia = (media: Media) => {
+    if (userRole === 'admin' || userRole === 'owner') {
+      return true;
+    }
+    return media.uploadedBy === user?.id;
+  };
 
   const handleUploadMedia = () => {
     fileInputRef.current?.click();
@@ -255,6 +273,7 @@ export default function MediaManager() {
                       media={media}
                       onDelete={handleDeleteClick}
                       formatFileSize={formatFileSize}
+                      canDelete={canDeleteMedia(media)}
                     />
                   ))}
                 </div>
