@@ -23,6 +23,7 @@ import {
   created,
   ok,
   serverError,
+  forbidden,
 } from '../utils/responses';
 import logger from '../logger';
 
@@ -156,6 +157,8 @@ export async function listMediaController(req: Request, res: Response) {
 
 export async function deleteMediaController(req: Request, res: Response) {
   const workspaceSlug = req.workspaceSlug!;
+  const userId = req.userId!;
+  const workspaceRole = req.workspaceRole!;
   const mediaId = req.params.mediaId;
 
   const validate = deleteMediaSchema.safeParse({ mediaId });
@@ -183,8 +186,11 @@ export async function deleteMediaController(req: Request, res: Response) {
     return notFound(res, 'media not found');
   }
 
-  const mediaRecord = media as { r2Key: string };
-  const [r2Error] = await deleteR2Object(mediaRecord.r2Key);
+  if (workspaceRole === 'member' && media.uploadedBy !== userId) {
+    return forbidden(res, 'You can only delete files uploaded by you');
+  }
+
+  const [r2Error] = await deleteR2Object(media.r2Key);
   if (r2Error) {
     logger.error(
       r2Error,

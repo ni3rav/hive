@@ -6,7 +6,7 @@ import {
   bigint,
   index,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, InferSelectModel } from 'drizzle-orm';
 import { workspacesTable } from './workspace';
 import { usersTable } from './auth';
 
@@ -43,3 +43,5 @@ export const mediaRelations = relations(mediaTable, ({ one }) => ({
     references: [usersTable.id],
   }),
 }));
+
+export type Media = InferSelectModel<typeof mediaTable>;

@@ -1,10 +1,12 @@
 import { db } from '../db';
-import { mediaTable } from '../db/schema';
+import { mediaTable, Media } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 import { getWorkspaceBySlug } from './workspace';
 import logger from '../logger';
 
-export async function getMediaByWorkspaceSlug(workspaceSlug: string) {
+export async function getMediaByWorkspaceSlug(
+  workspaceSlug: string,
+): Promise<[null, Media[]] | [unknown, null]> {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
     const result = await db.query.mediaTable.findMany({
@@ -18,7 +20,10 @@ export async function getMediaByWorkspaceSlug(workspaceSlug: string) {
   }
 }
 
-export async function getMediaById(mediaId: string, workspaceSlug: string) {
+export async function getMediaById(
+  mediaId: string,
+  workspaceSlug: string,
+): Promise<[null, Media] | [unknown, null]> {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
     const media = await db.query.mediaTable.findFirst({
@@ -49,7 +54,7 @@ export async function createMedia(
     r2Key: string;
     publicUrl: string;
   },
-) {
+): Promise<[null, Media] | [unknown, null]> {
   try {
     const workspace = await getWorkspaceBySlug(workspaceSlug);
 

@@ -20,20 +20,20 @@ router.get(
 router.post(
   '/:workspaceSlug/presigned-url',
   verifyWorkspaceMembership,
-  requireMinRole('admin'),
+  requireMinRole('member'),
   generatePresignedUrlController,
 );
 
 router.post(
   '/:workspaceSlug/confirm',
   verifyWorkspaceMembership,
-  requireMinRole('admin'),
+  requireMinRole('member'),
   confirmUploadController,
 );
 
 router.delete(
   '/:workspaceSlug/:mediaId',
   verifyWorkspaceMembership,
-  requireMinRole('admin'),
+  requireMinRole('member'),
   deleteMediaController,
 );
