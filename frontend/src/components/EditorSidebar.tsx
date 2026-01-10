@@ -63,6 +63,7 @@ export function EditorSidebar() {
     isEditing,
     postSlug,
     originalContent,
+    shouldSkipBlocker,
   } = useEditorContext();
 
   const createPostMutation = useCreatePost(workspaceSlug);
@@ -311,6 +312,7 @@ export function EditorSidebar() {
           clearWorkspacePersistence(workspaceSlug);
           clearWorkspacePersistence(undefined);
 
+          shouldSkipBlocker.current = true;
           navigate(`/dashboard/${workspaceSlug}/posts`);
         },
       });
@@ -343,6 +345,8 @@ export function EditorSidebar() {
             visible: true,
             status: 'draft',
           }));
+
+          navigate(`/dashboard/${workspaceSlug}/posts`);
         },
       });
     }

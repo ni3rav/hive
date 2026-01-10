@@ -68,6 +68,7 @@ export function EditorLayout() {
   );
   const [originalContent, setOriginalContent] = useState<string | null>(null);
   const editorRef = useRef<TiptapHandle>(null);
+  const shouldSkipBlockerRef = useRef<boolean>(false);
 
   useEffect(() => {
     setOriginalMetadata(null);
@@ -159,6 +160,7 @@ export function EditorLayout() {
         setOriginalMetadata,
         originalContent,
         setOriginalContent,
+        shouldSkipBlocker: shouldSkipBlockerRef,
       }}
     >
       <SidebarProvider

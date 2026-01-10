@@ -41,6 +41,7 @@ export default function EditPost() {
     editorRef,
     setOriginalMetadata: setContextOriginalMetadata,
     setOriginalContent: setContextOriginalContent,
+    shouldSkipBlocker,
   } = useEditorContext();
   const [localMetadata, setLocalMetadata] = useState<PostMetadata | null>(null);
   const [originalMetadata, setOriginalMetadataState] =
@@ -65,7 +66,8 @@ export default function EditPost() {
       clearContent(workspaceSlug);
       clearMetadata(workspaceSlug);
     }
-  }, [workspaceSlug]);
+    shouldSkipBlocker.current = false;
+  }, [workspaceSlug, shouldSkipBlocker]);
 
   useEffect(() => {
     if (post) {
@@ -97,6 +99,15 @@ export default function EditPost() {
     setContextOriginalMetadata,
     setContextOriginalContent,
   ]);
+
+  useEffect(() => {
+    if (shouldSkipBlocker.current) {
+      const timer = setTimeout(() => {
+        shouldSkipBlocker.current = false;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldSkipBlocker]);
 
   // SEO metadata for the post
   useHead(
@@ -160,7 +171,9 @@ export default function EditPost() {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges() && currentLocation.pathname !== nextLocation.pathname,
+      !shouldSkipBlocker.current &&
+      hasUnsavedChanges() &&
+      currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {

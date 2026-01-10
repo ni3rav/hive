@@ -20,6 +20,7 @@ export type EditorContextValue = {
   >;
   originalContent: string | null;
   setOriginalContent: React.Dispatch<React.SetStateAction<string | null>>;
+  shouldSkipBlocker: { current: boolean };
 };
 
 const EditorContext = React.createContext<EditorContextValue | null>(null);
