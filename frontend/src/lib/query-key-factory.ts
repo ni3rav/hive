@@ -150,6 +150,14 @@ export class QueryKeys {
     },
   };
 
+  private static media = {
+    base: ['media'] as const,
+
+    list(workspaceSlug: string) {
+      return [...this.base, 'list', workspaceSlug];
+    },
+  };
+
   public static userKeys() {
     return this.user;
   }
@@ -178,6 +186,10 @@ export class QueryKeys {
     return this.apiKeys;
   }
 
+  public static mediaKeys() {
+    return this.media;
+  }
+
   public static allKeys() {
     return {
       user: this.user.base,
@@ -187,6 +199,7 @@ export class QueryKeys {
       tags: this.tags.base,
       workspace: this.workspace.base,
       apiKeys: this.apiKeys.base,
+      media: this.media.base,
     };
   }
 }

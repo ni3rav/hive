@@ -7,6 +7,11 @@ const validatedEnv = cleanEnv(process.env, {
   FRONTEND_URL: str(),
   RESEND_API_KEY: str(),
   EMAIL_DOMAIN: str(),
+  R2_ACCOUNT_ID: str(),
+  R2_ACCESS_KEY_ID: str(),
+  R2_SECRET_ACCESS_KEY: str(),
+  R2_BUCKET_NAME: str(),
+  R2_PUBLIC_URL: str(),
   DMA: bool({ default: false }),
   DEV_USER_ID: str({ default: '' }),
 });

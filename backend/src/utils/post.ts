@@ -3,25 +3,13 @@ import {
   postsTable,
   postContentTable,
   postTagsTable,
-  workspacesTable,
   tagTable,
   authorTable,
   categoryTable,
 } from '../db/schema';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { sanitizePostHtml } from './sanitize';
-
-async function getWorkspaceBySlug(workspaceSlug: string) {
-  const workspace = await db.query.workspacesTable.findFirst({
-    where: eq(workspacesTable.slug, workspaceSlug),
-  });
-
-  if (!workspace) {
-    throw new Error('workspace not found');
-  }
-
-  return workspace;
-}
+import { getWorkspaceBySlug } from './workspace';
 
 //* metadata of posts in  a workspace
 export async function getPostsByWorkspaceSlug(workspaceSlug: string) {

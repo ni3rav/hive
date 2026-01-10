@@ -1,18 +1,7 @@
 import { db } from '../db';
-import { authorTable, workspacesTable } from '../db/schema';
+import { authorTable } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
-
-async function getWorkspaceBySlug(workspaceSlug: string) {
-  const workspace = await db.query.workspacesTable.findFirst({
-    where: eq(workspacesTable.slug, workspaceSlug),
-  });
-
-  if (!workspace) {
-    throw new Error('workspace not found');
-  }
-
-  return workspace;
-}
+import { getWorkspaceBySlug } from './workspace';
 
 export async function getAuthorsByWorkspaceSlug(workspaceSlug: string) {
   try {
