@@ -32,6 +32,7 @@ import type { CreatePostData, UpdatePostData } from '@/types/post';
 import {
   getContentFromEditor,
   isEditorEmpty as checkEditorEmpty,
+  hasTextContent,
 } from '@/components/editor/content-utils';
 import { clearWorkspacePersistence } from '@/components/editor/persistence';
 import { toast } from 'sonner';
@@ -102,7 +103,6 @@ export function EditorSidebar() {
   } = form;
 
   const titleValue = watch('title');
-  const slugValue = watch('slug');
   const allValues = watch();
   const slugManuallyEditedRef = React.useRef(false);
   const isSyncingRef = React.useRef(false);
@@ -174,10 +174,8 @@ export function EditorSidebar() {
     );
   }, [allValues, form.formState.defaultValues, defaultValues]);
 
-  // Auto-generate slug from title when creating and slug not manually edited
   useEffect(() => {
-    if (isEditing || !titleValue || slugValue || slugManuallyEditedRef.current)
-      return;
+    if (isEditing || !titleValue || slugManuallyEditedRef.current) return;
 
     const autoSlug = titleValue
       .toLowerCase()
@@ -190,7 +188,7 @@ export function EditorSidebar() {
     if (autoSlug) {
       setValue('slug', autoSlug, { shouldValidate: true });
     }
-  }, [titleValue, slugValue, setValue, isEditing]);
+  }, [titleValue, setValue, isEditing]);
 
   useEffect(() => {
     if (!editor) {
@@ -280,6 +278,13 @@ export function EditorSidebar() {
     }
 
     const formValues = getValues();
+
+    if (formValues.status === 'published' && !hasTextContent(editor)) {
+      toast.error(
+        'Posts with only images cannot be published. Add text content or save as draft.',
+      );
+      return;
+    }
 
     const { contentHtml, contentJson } = getContentFromEditor(editor);
 

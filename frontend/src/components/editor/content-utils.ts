@@ -16,6 +16,26 @@ export function convertJSONToHTML(json: ProseMirrorJSON): string {
  * Checks if editor content is empty
  * Returns true if editor has no meaningful content
  */
+export function hasTextContent(editor: Editor): boolean {
+  const json = editor.getJSON();
+
+  function checkNode(node: ProseMirrorJSON): boolean {
+    if (
+      node.type === 'text' &&
+      node.text &&
+      (node.text as string).trim().length > 0
+    ) {
+      return true;
+    }
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.some((child) => checkNode(child));
+    }
+    return false;
+  }
+
+  return checkNode(json);
+}
+
 export function isEditorEmpty(editor: Editor): boolean {
   const json = editor.getJSON();
 
@@ -31,10 +51,12 @@ export function isEditorEmpty(editor: Editor): boolean {
       if (!node.content || node.content.length === 0) {
         return false;
       }
-      // Check if any text node has non-whitespace content
       return node.content.some(
         (child: ProseMirrorJSON) =>
-          child.type === 'text' && child.text && (child.text as string).trim().length > 0,
+          (child.type === 'text' &&
+            child.text &&
+            (child.text as string).trim().length > 0) ||
+          child.type === 'image',
       );
     }
     // For other node types, consider them as having content
