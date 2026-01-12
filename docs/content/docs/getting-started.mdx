@@ -8,8 +8,18 @@ description: Learn how to authenticate and make your first API request
 All API requests are made to the following base URL:
 
 ```
-https://api.hivecms.online/api/public
+https://api.hivecms.online/api/public/v1
 ```
+
+## API Versioning
+
+The Hive Public Content API is versioned. `v1` is the current stable version. The version should be included in the URL path immediately after `/api/public`.
+
+**Supported URL formats:**
+- **Recommended**: `https://api.hivecms.online/api/public/v1/{API_KEY}/posts`
+- **Legacy (auto-routes to v1)**: `https://api.hivecms.online/api/public/{API_KEY}/posts`
+
+We recommend using the explicit `/v1/` format for clarity, as future API versions will be maintained separately.
 
 ## Authentication
 
@@ -25,10 +35,10 @@ Replace `{API_KEY}` in each endpoint URL with your actual API key. For example:
 
 ```bash
 # Before
-https://api.hivecms.online/api/public/{API_KEY}/posts
+https://api.hivecms.online/api/public/v1/{API_KEY}/posts
 
 # After (with your actual key)
-https://api.hivecms.online/api/public/your-actual-key-here/posts
+https://api.hivecms.online/api/public/v1/your-actual-key-here/posts
 ```
 
 ## Making Requests

@@ -12,7 +12,7 @@ Retrieve a paginated list of posts with optional filtering.
 ### Endpoint
 
 ```
-GET https://api.hivecms.online/api/public/{API_KEY}/posts
+GET https://api.hivecms.online/api/public/v1/{API_KEY}/posts
 ```
 
 ### Query Parameters
@@ -28,7 +28,7 @@ GET https://api.hivecms.online/api/public/{API_KEY}/posts
 ### Example Request
 
 ```bash
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5&tags=guides,updates"
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts?limit=5&tags=guides,updates"
 ```
 
 ### Example Response
@@ -67,7 +67,7 @@ Retrieve the full details of a specific post by its slug.
 ### Endpoint
 
 ```
-GET https://api.hivecms.online/api/public/{API_KEY}/posts/{postSlug}
+GET https://api.hivecms.online/api/public/v1/{API_KEY}/posts/{postSlug}
 ```
 
 ### Path Parameters

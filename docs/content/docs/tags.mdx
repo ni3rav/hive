@@ -8,13 +8,13 @@ The Tags API provides a list of all tags used in your workspace. Use this to bui
 ## Endpoint
 
 ```
-GET https://api.hivecms.online/api/public/{API_KEY}/tags
+GET https://api.hivecms.online/api/public/v1/{API_KEY}/tags
 ```
 
 ## Example Request
 
 ```bash
-curl "https://api.hivecms.online/api/public/{API_KEY}/tags"
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/tags"
 ```
 
 ## Example Response
@@ -50,7 +50,7 @@ Each tag object contains:
 ```js
 // Fetch tags
 const response = await fetch(
-  'https://api.hivecms.online/api/public/{API_KEY}/tags'
+  'https://api.hivecms.online/api/public/v1/{API_KEY}/tags'
 );
 const { data: tags } = await response.json();
 
