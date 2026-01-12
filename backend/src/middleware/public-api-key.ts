@@ -12,6 +12,7 @@ declare module 'express-serve-static-core' {
     publicWorkspaceId?: string;
     publicWorkspaceSlug?: string;
     workspaceApiKeyId?: string;
+    apiVersion?: string;
   }
 }
 

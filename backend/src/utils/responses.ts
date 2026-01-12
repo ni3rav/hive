@@ -155,6 +155,23 @@ export function conflict(
 }
 
 /**
+ * 410 Gone - Resource no longer available (e.g., deprecated API version)
+ */
+export function gone(
+  res: Response,
+  message = 'Resource no longer available',
+  details?: unknown,
+): Response {
+  const response: ErrorResponse = {
+    success: false,
+    message,
+    code: 'GONE',
+    ...(details !== undefined && { details }),
+  };
+  return res.status(410).json(response);
+}
+
+/**
  * 429 Too Many Requests - Rate limiting
  */
 export function tooManyRequests(
