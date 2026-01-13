@@ -5,6 +5,8 @@ import {
   timestamp,
   bigint,
   index,
+  doublePrecision,
+  text,
 } from 'drizzle-orm/pg-core';
 import { relations, InferSelectModel } from 'drizzle-orm';
 import { workspacesTable } from './workspace';
@@ -26,6 +28,8 @@ export const mediaTable = pgTable(
     r2Key: varchar('r2_key').notNull().unique(),
     publicUrl: varchar('public_url').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
+    thumbhashBase64: text('thumbhash_base64'),
+    aspectRatio: doublePrecision('aspect_ratio'),
   },
   (t) => [
     index('idx_media_workspace_id').on(t.workspaceId),
