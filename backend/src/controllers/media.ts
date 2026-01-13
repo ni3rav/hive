@@ -29,6 +29,8 @@ import {
 } from '../utils/responses';
 import { env } from '../env';
 import logger from '../logger';
+import https from 'https';
+import { URL } from 'url';
 
 export async function generatePresignedUrlController(
   req: Request,
@@ -123,7 +125,7 @@ export async function confirmUploadController(req: Request, res: Response) {
       publicUrl,
     });
 
-    if (error) {
+    if (error || !media) {
       const [deleteError] = await deleteR2Object(key);
       if (deleteError) {
         logger.error(
@@ -131,14 +133,69 @@ export async function confirmUploadController(req: Request, res: Response) {
           'Failed to cleanup R2 object after DB insert failure',
         );
       }
-      logger.error(error, 'Failed to save media metadata');
+      logger.error(
+        error || new Error('Failed to create media'),
+        'Failed to save media metadata',
+      );
       return serverError(res, 'failed to save media metadata');
+    }
+
+    if (env.AZURE_THUMBHASH_FUNCTION_URL && env.AZURE_FUNCTION_SECRET) {
+      triggerThumbhashGeneration({
+        mediaId: media.id,
+        publicUrl,
+        size,
+      });
     }
 
     return created(res, 'media uploaded successfully', media);
   } catch (error) {
     logger.error(error, 'Failed to confirm upload');
     return serverError(res, 'failed to confirm upload');
+  }
+}
+
+function triggerThumbhashGeneration(payload: {
+  mediaId: string;
+  publicUrl: string;
+  size: number;
+}) {
+  try {
+    const url = new URL(env.AZURE_THUMBHASH_FUNCTION_URL);
+    const data = JSON.stringify(payload);
+
+    const options: https.RequestOptions = {
+      method: 'POST',
+      hostname: url.hostname,
+      port: url.port || (url.protocol === 'https:' ? 443 : 80),
+      path: `${url.pathname}${url.search}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+        'x-azure-function-secret': env.AZURE_FUNCTION_SECRET,
+      },
+    };
+
+    const req = https.request(options, (res) => {
+      res.on('data', () => {
+        // intentionally ignore body
+      });
+      res.on('end', () => {
+        // no-op
+      });
+    });
+
+    req.on('error', (err) => {
+      logger.error(err, 'Failed to trigger Azure thumbhash function');
+    });
+
+    req.write(data);
+    req.end();
+  } catch (error) {
+    logger.error(
+      error,
+      'Failed to prepare request to Azure thumbhash function',
+    );
   }
 }
 
