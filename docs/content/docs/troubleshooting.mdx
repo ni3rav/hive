@@ -32,13 +32,13 @@ This guide helps you resolve common issues when working with the Hive Public Con
 **Example:**
 ```bash
 # ❌ Wrong - missing API key
-curl "https://api.hivecms.online/api/public/posts"
+curl "https://api.hivecms.online/api/public/v1/posts"
 
 # ❌ Wrong - incorrect key format
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts"
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
 
 # ✅ Correct - actual API key
-curl "https://api.hivecms.online/api/public/your-actual-key-here/posts"
+curl "https://api.hivecms.online/api/public/v1/your-actual-key-here/posts"
 ```
 
 ### Post Not Found (404 Not Found)
@@ -66,10 +66,10 @@ curl "https://api.hivecms.online/api/public/your-actual-key-here/posts"
 **Example:**
 ```bash
 # First, get a list of posts to find valid slugs
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts"
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
 
 # Then use a valid slug from the response
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts/valid-slug-here"
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts/valid-slug-here"
 ```
 
 ### Server Error (500 Internal Server Error)
@@ -112,6 +112,82 @@ curl "https://api.hivecms.online/api/public/{API_KEY}/posts/valid-slug-here"
 2. Implement request caching on your side
 3. Use pagination to fetch data in batches rather than making many small requests
 
+### API Version Not Found (404)
+
+**What you see:**
+```json
+{
+  "success": false,
+  "code": "VERSION_NOT_FOUND",
+  "message": "API version v99 not found"
+}
+```
+
+**Status Code:** `404 Not Found`
+
+**Possible causes:**
+- You're using an invalid or unsupported API version
+- Typo in the version number in the URL
+
+**Solutions:**
+1. Check the URL format: `/api/public/{VERSION}/{API_KEY}/...`
+2. Verify you're using a supported version (currently `v1`)
+3. See [API Versioning](/docs/versioning) for current version information
+
+**Example:**
+```bash
+# ❌ Wrong - unsupported version
+curl "https://api.hivecms.online/api/public/v99/{API_KEY}/posts"
+
+# ✅ Correct - use v1
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
+```
+
+### API Version Gone (410)
+
+**What you see:**
+```json
+{
+  "success": false,
+  "code": "API_VERSION_GONE",
+  "message": "API version v1 is no longer supported",
+  "migrate_to": "v2",
+  "sunset_date": "2026-12-31T23:59:59Z"
+}
+```
+
+**Status Code:** `410 Gone`
+
+**Cause:**
+- The API version you're using has reached its sunset date and is no longer available
+- This only happens after a deprecation period when clients have been warned
+
+**Solutions:**
+1. Update your integration to use the recommended version (see `migrate_to` in the error)
+2. See [API Versioning](/docs/versioning) for migration guides
+3. Review deprecation warnings in response headers before this occurs
+
+### Deprecation Warnings
+
+**What you see:**
+```
+HTTP/1.1 200 OK
+Deprecation: true
+Sunset: Mon, 31 Dec 2026 23:59:59 GMT
+X-API-Suggest: v2
+```
+
+**Meaning:**
+- Your API version is still working but will be sunset on the `Sunset` date
+- You should plan to migrate to the suggested version
+- After the sunset date, requests to this version will return `410 Gone`
+
+**Solutions:**
+1. Monitor response headers for `Deprecation: true`
+2. Plan migration to the version in `X-API-Suggest`
+3. Reference [API Versioning](/docs/versioning) for migration details
+4. Update your integration before the `Sunset` date
+
 ## Best Practices
 
 ### Caching Responses
@@ -129,7 +205,7 @@ async function getCachedPosts(apiKey) {
   }
 
   const response = await fetch(
-    `https://api.hivecms.online/api/public/${apiKey}/posts`
+    `https://api.hivecms.online/api/public/v1/${apiKey}/posts`
   );
   const data = await response.json();
   
@@ -149,7 +225,7 @@ Always handle errors gracefully:
 async function fetchPosts(apiKey) {
   try {
     const response = await fetch(
-      `https://api.hivecms.online/api/public/${apiKey}/posts`
+      `https://api.hivecms.online/api/public/v1/${apiKey}/posts`
     );
 
     if (!response.ok) {

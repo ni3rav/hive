@@ -65,6 +65,8 @@ function MediaItemCard({
         alt={media.filename}
         className='aspect-square bg-muted'
         filename={media.filename}
+        thumbhashBase64={media.thumbhashBase64}
+        aspectRatio={media.aspectRatio}
       />
       <div className='p-3 space-y-2'>
         <p className='text-sm font-medium truncate' title={media.filename}>
@@ -261,7 +263,11 @@ export default function MediaManager() {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button onClick={handleUploadMedia} size='sm' disabled={isUploading}>
+                  <Button
+                    onClick={handleUploadMedia}
+                    size='sm'
+                    disabled={isUploading}
+                  >
                     {isUploading ? (
                       <>
                         <Loader2 className='w-4 h-4 mr-2 animate-spin' />

@@ -13,6 +13,7 @@ This handoff guide is meant for people who simply want to pull live Hive content
   <Card title="Tags & Categories" href="/docs/tags" description="Retrieve tags and categories for filtering" />
   <Card title="Authors" href="/docs/authors" description="Get author information and profiles" />
   <Card title="Workspace Stats" href="/docs/stats" description="Display workspace statistics" />
+  <Card title="API Versioning" href="/docs/versioning" description="Understand versioning and deprecation policy" />
   <Card title="Response Shapes" href="/docs/response-shapes" description="TypeScript type definitions" />
 </Cards>
 
@@ -21,8 +22,10 @@ This handoff guide is meant for people who simply want to pull live Hive content
 All API requests are made to:
 
 ```
-https://api.hivecms.online/api/public
+https://api.hivecms.online/api/public/v1
 ```
+
+> **Note**: The API is versioned. `v1` is the current stable version. Both `/v1/` and the legacy format (without version) are supported for backward compatibility, but using `/v1/` explicitly is recommended.
 
 ## Authentication
 

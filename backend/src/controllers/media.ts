@@ -11,11 +11,13 @@ import {
   getMediaById,
   createMedia,
   deleteMedia,
+  updateMediaThumbhash,
 } from '../utils/media';
 import {
   generatePresignedUrlSchema,
   confirmUploadSchema,
   deleteMediaSchema,
+  updateThumbhashSchema,
 } from '../utils/validations/media';
 import {
   validationError,
@@ -25,7 +27,12 @@ import {
   serverError,
   forbidden,
 } from '../utils/responses';
+import { UUID_REGEX } from '../utils/validations/common';
+import { env } from '../env';
 import logger from '../logger';
+import https from 'https';
+import http from 'http';
+import { URL } from 'url';
 
 export async function generatePresignedUrlController(
   req: Request,
@@ -120,7 +127,7 @@ export async function confirmUploadController(req: Request, res: Response) {
       publicUrl,
     });
 
-    if (error) {
+    if (error || !media) {
       const [deleteError] = await deleteR2Object(key);
       if (deleteError) {
         logger.error(
@@ -128,14 +135,126 @@ export async function confirmUploadController(req: Request, res: Response) {
           'Failed to cleanup R2 object after DB insert failure',
         );
       }
-      logger.error(error, 'Failed to save media metadata');
+      logger.error(
+        error || new Error('Failed to create media'),
+        'Failed to save media metadata',
+      );
       return serverError(res, 'failed to save media metadata');
+    }
+
+    logger.info(
+      {
+        hasUrl: !!env.AZURE_THUMBHASH_FUNCTION_URL,
+        hasSecret: !!env.AZURE_FUNCTION_SECRET,
+        url: env.AZURE_THUMBHASH_FUNCTION_URL || 'not set',
+      },
+      'Checking Azure Function trigger',
+    );
+
+    if (env.AZURE_THUMBHASH_FUNCTION_URL && env.AZURE_FUNCTION_SECRET) {
+      logger.info(
+        {
+          mediaId: media.id,
+          publicUrl,
+          size,
+        },
+        'Triggering Azure Function for thumbhash generation',
+      );
+      triggerThumbhashGeneration({
+        mediaId: media.id,
+        publicUrl,
+        size,
+      });
+    } else {
+      logger.warn(
+        {
+          hasUrl: !!env.AZURE_THUMBHASH_FUNCTION_URL,
+          hasSecret: !!env.AZURE_FUNCTION_SECRET,
+        },
+        'Azure Function not triggered - missing env vars',
+      );
     }
 
     return created(res, 'media uploaded successfully', media);
   } catch (error) {
     logger.error(error, 'Failed to confirm upload');
     return serverError(res, 'failed to confirm upload');
+  }
+}
+
+function triggerThumbhashGeneration(payload: {
+  mediaId: string;
+  publicUrl: string;
+  size: number;
+}) {
+  try {
+    logger.info(
+      {
+        url: env.AZURE_THUMBHASH_FUNCTION_URL,
+        mediaId: payload.mediaId,
+      },
+      'Preparing Azure Function request',
+    );
+
+    const url = new URL(env.AZURE_THUMBHASH_FUNCTION_URL);
+    const data = JSON.stringify(payload);
+    const isHttps = url.protocol === 'https:';
+
+    const options: https.RequestOptions | http.RequestOptions = {
+      method: 'POST',
+      hostname: url.hostname,
+      port: url.port || (isHttps ? 443 : 80),
+      path: `${url.pathname}${url.search}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+        'x-azure-function-secret': env.AZURE_FUNCTION_SECRET,
+      },
+    };
+
+    const headers = options.headers as
+      | Record<string, string | string[] | undefined>
+      | undefined;
+    const secretHeader = headers?.['x-azure-function-secret'];
+    logger.info(
+      {
+        hostname: options.hostname,
+        port: options.port,
+        path: options.path,
+        protocol: url.protocol,
+        hasSecretHeader: !!secretHeader,
+        secretLength: secretHeader ? String(secretHeader).length : 0,
+      },
+      'Sending request to Azure Function',
+    );
+
+    const requestModule = isHttps ? https : http;
+    const req = requestModule.request(options, (res) => {
+      logger.info(
+        {
+          statusCode: res.statusCode,
+          statusMessage: res.statusMessage,
+        },
+        'Azure Function response received',
+      );
+      res.on('data', () => {});
+      res.on('end', () => {
+        logger.info('Azure Function request completed');
+      });
+    });
+
+    req.on('error', (err) => {
+      logger.error(err, 'Failed to trigger Azure thumbhash function');
+    });
+
+    req.write(data);
+    req.end();
+    logger.info('Azure Function request sent');
+  } catch (error) {
+    logger.error(
+      error,
+      'Failed to prepare request to Azure thumbhash function',
+    );
   }
 }
 
@@ -212,4 +331,67 @@ export async function deleteMediaController(req: Request, res: Response) {
   }
 
   return ok(res, 'media deleted successfully');
+}
+
+export async function updateMediaThumbhashController(
+  req: Request,
+  res: Response,
+) {
+  const secret = req.header('x-azure-function-secret');
+
+  if (!secret || secret !== env.AZURE_FUNCTION_SECRET) {
+    logger.warn(
+      {
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      },
+      'Invalid azure function secret attempt',
+    );
+    return forbidden(res, 'invalid azure function secret');
+  }
+
+  const mediaId = req.params.mediaId;
+
+  if (!UUID_REGEX.test(mediaId)) {
+    return validationError(res, 'invalid media id', [
+      {
+        path: ['mediaId'],
+        message: 'Media ID must be a valid UUID',
+        code: 'custom',
+      },
+    ]);
+  }
+
+  const validation = updateThumbhashSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    return validationError(
+      res,
+      'invalid request data',
+      validation.error.issues,
+    );
+  }
+
+  const { thumbhash_base64, aspect_ratio } = validation.data;
+
+  try {
+    const [error] = await updateMediaThumbhash(mediaId, {
+      thumbhashBase64: thumbhash_base64,
+      aspectRatio: aspect_ratio,
+    });
+
+    if (error) {
+      if ((error as Error).message === 'media not found') {
+        return notFound(res, 'media not found');
+      }
+
+      logger.error(error, 'error updating media thumbhash');
+      return serverError(res, 'failed to update media thumbhash');
+    }
+
+    return ok(res, 'media thumbhash updated successfully');
+  } catch (error) {
+    logger.error(error, 'failed to update media thumbhash');
+    return serverError(res, 'failed to update media thumbhash');
+  }
 }

@@ -1,0 +1,91 @@
+---
+title: API Versioning
+description: Understanding Hive Public API versions and migration paths
+---
+
+## Overview
+
+The Hive Public Content API uses semantic versioning to ensure stability and allow for improvements over time. This guide explains our versioning strategy and how it affects your integration.
+
+## Current Version
+
+**v1** is the current stable version of the Hive Public API. All endpoints are available under `/api/public/v1`.
+
+## URL Format
+
+The version is included in the URL path:
+
+```
+https://api.hivecms.online/api/public/{VERSION}/{API_KEY}/{ENDPOINT}
+```
+
+### Example
+
+```bash
+# Versioned URL (recommended)
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
+
+# Legacy URL (also works, auto-routes to v1)
+curl "https://api.hivecms.online/api/public/{API_KEY}/posts"
+```
+
+## Backward Compatibility
+
+- **New endpoints** and **additive changes** (new optional fields) are always backward compatible
+- **Breaking changes** (removed fields, changed behavior, new required parameters) trigger a new major version
+- Both versions coexist simultaneously during a transition period
+
+## Deprecation Policy
+
+When a major version is deprecated, we follow this timeline:
+
+1. **Announcement Phase**: You'll receive notification and documentation about what changed
+2. **Deprecation Phase** (typically 1-3 months):
+   - Old version continues to work
+   - Requests to old version return deprecation headers:
+     - `Deprecation: true`
+     - `Sunset: <date>` (when support ends)
+     - `X-API-Suggest: <new-version>`
+3. **Sunset Phase**: The old version stops working and returns `410 Gone`
+
+## What Triggers a New Version?
+
+A new version is created for:
+
+- **Field removals**: Endpoints no longer return a field
+- **Field renames**: Field names change (different JSON keys)
+- **Behavior changes**: Endpoint logic or filtering changes
+- **New required parameters**: Query parameters become required
+- **Response structure changes**: Envelope or layout changes
+- **Endpoint removals**: An endpoint is no longer available
+
+New versions are NOT created for:
+
+- New optional fields added to responses
+- New optional query parameters
+- Performance improvements
+- Bug fixes that correct behavior
+
+## Migration Guide: v1 → v2 (Future)
+
+When v2 is released, this section will document:
+- What changed from v1 to v2
+- Step-by-step migration instructions
+- Code examples showing before/after
+- Sunset date for v1
+
+Until then, v1 is stable and will not change in breaking ways.
+
+## Best Practices
+
+1. **Use explicit version in URLs**: Always use `/v1/` instead of relying on the legacy fallback
+2. **Monitor deprecation headers**: Parse response headers for `Deprecation` and `Sunset` warnings
+3. **Plan migrations early**: When a deprecation is announced, schedule time to migrate
+4. **Test against new versions**: When available, test your integration against new versions before sunset
+
+## Support & Questions
+
+If you have questions about API versioning or need help migrating:
+- Check [Troubleshooting](/docs/troubleshooting)
+- Review the [Response Shapes](/docs/response-shapes) documentation
+- Contact support through your workspace
