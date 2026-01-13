@@ -7,6 +7,8 @@ export interface Media {
   size: number;
   r2Key: string;
   publicUrl: string;
+  thumbhashBase64?: string | null;
+  aspectRatio?: number | null;
   createdAt: string;
 }
 
@@ -28,4 +30,3 @@ export interface ConfirmUploadRequest {
   contentType: string;
   size: number;
 }
-
