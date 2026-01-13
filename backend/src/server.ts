@@ -82,7 +82,6 @@ app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 app.use('/api/post', authMiddleware, postRouter);
-// Internal media route (no auth, uses secret header instead)
 app.post('/api/media/internal/:mediaId/thumbhash', updateMediaThumbhashController);
 app.use('/api/media', authMiddleware, mediaRouter);
 app.use('/api/public', publicRouter);

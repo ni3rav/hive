@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidBase64 } from './common';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -41,8 +42,14 @@ export const updateThumbhashSchema = z.object({
   thumbhash_base64: z
     .string()
     .trim()
-    .min(1, 'thumbhash_base64 is required'),
+    .min(1, 'thumbhash_base64 is required')
+    .max(200, 'thumbhash_base64 is too long')
+    .refine(isValidBase64, {
+      message: 'thumbhash_base64 must be valid base64',
+    }),
   aspect_ratio: z
     .number()
-    .positive('aspect_ratio must be positive'),
+    .positive('aspect_ratio must be positive')
+    .min(0.01, 'aspect_ratio must be at least 0.01')
+    .max(100, 'aspect_ratio must be at most 100'),
 });

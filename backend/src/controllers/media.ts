@@ -27,6 +27,7 @@ import {
   serverError,
   forbidden,
 } from '../utils/responses';
+import { UUID_REGEX } from '../utils/validations/common';
 import { env } from '../env';
 import logger from '../logger';
 import https from 'https';
@@ -277,10 +278,27 @@ export async function updateMediaThumbhashController(
   const secret = req.header('x-azure-function-secret');
 
   if (!secret || secret !== env.AZURE_FUNCTION_SECRET) {
+    logger.warn(
+      {
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      },
+      'Invalid azure function secret attempt',
+    );
     return forbidden(res, 'invalid azure function secret');
   }
 
   const mediaId = req.params.mediaId;
+
+  if (!UUID_REGEX.test(mediaId)) {
+    return validationError(res, 'invalid media id', [
+      {
+        path: ['mediaId'],
+        message: 'Media ID must be a valid UUID',
+        code: 'custom',
+      },
+    ]);
+  }
 
   const validation = updateThumbhashSchema.safeParse(req.body);
 
