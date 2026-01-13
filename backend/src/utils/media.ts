@@ -53,6 +53,8 @@ export async function createMedia(
     size: number;
     r2Key: string;
     publicUrl: string;
+    thumbhashBase64?: string;
+    aspectRatio?: number;
   },
 ): Promise<[null, Media] | [unknown, null]> {
   try {
@@ -68,6 +70,8 @@ export async function createMedia(
         size: data.size,
         r2Key: data.r2Key,
         publicUrl: data.publicUrl,
+        thumbhashBase64: data.thumbhashBase64,
+        aspectRatio: data.aspectRatio,
       })
       .returning();
 
@@ -75,6 +79,30 @@ export async function createMedia(
   } catch (error) {
     logger.error(error, 'Error creating media');
     return [error, null];
+  }
+}
+
+export async function updateMediaThumbhash(
+  mediaId: string,
+  data: { thumbhashBase64: string; aspectRatio: number },
+) {
+  try {
+    const result = await db
+      .update(mediaTable)
+      .set({
+        thumbhashBase64: data.thumbhashBase64,
+        aspectRatio: data.aspectRatio,
+      })
+      .where(eq(mediaTable.id, mediaId));
+
+    if (result.rowCount === 0) {
+      return [new Error('media not found'), null] as const;
+    }
+
+    return [null, result] as const;
+  } catch (error) {
+    logger.error(error, 'Error updating media thumbhash');
+    return [error, null] as const;
   }
 }
 

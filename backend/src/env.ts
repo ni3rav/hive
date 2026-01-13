@@ -12,6 +12,7 @@ const validatedEnv = cleanEnv(process.env, {
   R2_SECRET_ACCESS_KEY: str(),
   R2_BUCKET_NAME: str(),
   R2_PUBLIC_URL: str(),
+   AZURE_FUNCTION_SECRET: str(),
   DMA: bool({ default: false }),
   DEV_USER_ID: str({ default: '' }),
 });

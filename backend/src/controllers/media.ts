@@ -11,11 +11,13 @@ import {
   getMediaById,
   createMedia,
   deleteMedia,
+  updateMediaThumbhash,
 } from '../utils/media';
 import {
   generatePresignedUrlSchema,
   confirmUploadSchema,
   deleteMediaSchema,
+  updateThumbhashSchema,
 } from '../utils/validations/media';
 import {
   validationError,
@@ -25,6 +27,7 @@ import {
   serverError,
   forbidden,
 } from '../utils/responses';
+import { env } from '../env';
 import logger from '../logger';
 
 export async function generatePresignedUrlController(
@@ -212,4 +215,50 @@ export async function deleteMediaController(req: Request, res: Response) {
   }
 
   return ok(res, 'media deleted successfully');
+}
+
+export async function updateMediaThumbhashController(
+  req: Request,
+  res: Response,
+) {
+  const secret = req.header('x-azure-function-secret');
+
+  if (!secret || secret !== env.AZURE_FUNCTION_SECRET) {
+    return forbidden(res, 'invalid azure function secret');
+  }
+
+  const mediaId = req.params.mediaId;
+
+  const validation = updateThumbhashSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    return validationError(
+      res,
+      'invalid request data',
+      validation.error.issues,
+    );
+  }
+
+  const { thumbhash_base64, aspect_ratio } = validation.data;
+
+  try {
+    const [error] = await updateMediaThumbhash(mediaId, {
+      thumbhashBase64: thumbhash_base64,
+      aspectRatio: aspect_ratio,
+    });
+
+    if (error) {
+      if ((error as Error).message === 'media not found') {
+        return notFound(res, 'media not found');
+      }
+
+      logger.error(error, 'error updating media thumbhash');
+      return serverError(res, 'failed to update media thumbhash');
+    }
+
+    return ok(res, 'media thumbhash updated successfully');
+  } catch (error) {
+    logger.error(error, 'failed to update media thumbhash');
+    return serverError(res, 'failed to update media thumbhash');
+  }
 }

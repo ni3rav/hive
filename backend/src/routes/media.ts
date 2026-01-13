@@ -4,11 +4,14 @@ import {
   confirmUploadController,
   listMediaController,
   deleteMediaController,
+  updateMediaThumbhashController,
 } from '../controllers/media';
 import { verifyWorkspaceMembership } from '../middleware/workspace';
 import { requireMinRole } from '../middleware/workspace-role';
 
 export const router = Router();
+
+router.post('/internal/:mediaId/thumbhash', updateMediaThumbhashController);
 
 router.get(
   '/:workspaceSlug',

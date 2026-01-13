@@ -36,3 +36,13 @@ export const confirmUploadSchema = z.object({
 export const deleteMediaSchema = z.object({
   mediaId: z.uuid('invalid media id'),
 });
+
+export const updateThumbhashSchema = z.object({
+  thumbhash_base64: z
+    .string()
+    .trim()
+    .min(1, 'thumbhash_base64 is required'),
+  aspect_ratio: z
+    .number()
+    .positive('aspect_ratio must be positive'),
+});
