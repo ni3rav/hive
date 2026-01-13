@@ -177,12 +177,8 @@ function triggerThumbhashGeneration(payload: {
     };
 
     const req = https.request(options, (res) => {
-      res.on('data', () => {
-        // intentionally ignore body
-      });
-      res.on('end', () => {
-        // no-op
-      });
+      res.on('data', () => {});
+      res.on('end', () => {});
     });
 
     req.on('error', (err) => {

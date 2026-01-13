@@ -19,11 +19,20 @@ interface ThumbhashResult {
 }
 
 async function generateThumbhash(
-  imageBuffer: Buffer
+  imageBuffer: Buffer,
+  context: InvocationContext
 ): Promise<ThumbhashResult | null> {
   try {
-    // Decode image to RGBA using sharp
+    const originalMetadata = await sharp(imageBuffer).metadata();
+    const originalWidth = originalMetadata.width || 0;
+    const originalHeight = originalMetadata.height || 0;
+    const aspectRatio = originalWidth / originalHeight;
+
     const { data, info } = await sharp(imageBuffer)
+      .resize(100, 100, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
@@ -31,20 +40,18 @@ async function generateThumbhash(
     const { width, height } = info;
     const rgbaData = new Uint8Array(data);
 
-    // Generate thumbhash from RGBA data
     const thumbhash = rgbaToThumbHash(width, height, rgbaData);
-
-    // Convert thumbhash to base64
     const thumbhashBase64 = Buffer.from(thumbhash).toString("base64");
-
-    // Calculate aspect ratio
-    const aspectRatio = width / height;
 
     return {
       thumbhash_base64: thumbhashBase64,
       aspect_ratio: aspectRatio,
     };
   } catch (error) {
+    context.log("Failed to generate thumbhash:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.stack) {
+      context.log("Stack trace:", error.stack);
+    }
     return null;
   }
 }
@@ -70,11 +77,12 @@ async function callbackBackend(
   backendUrl: string,
   mediaId: string,
   thumbhash: ThumbhashResult,
-  secret: string
+  secret: string,
+  context: InvocationContext
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `${backendUrl}/media/internal/${mediaId}/thumbhash`,
+      `${backendUrl}/api/media/internal/${mediaId}/thumbhash`,
       {
         method: "POST",
         headers: {
@@ -84,8 +92,12 @@ async function callbackBackend(
         body: JSON.stringify(thumbhash),
       }
     );
+    if (!response.ok) {
+      context.log(`Backend callback failed for mediaId ${mediaId}: ${response.status} ${response.statusText}`);
+    }
     return response.ok;
   } catch (error) {
+    context.log(`Backend callback error for mediaId ${mediaId}:`, error instanceof Error ? error.message : String(error));
     return false;
   }
 }
@@ -95,7 +107,6 @@ export async function hiveThumbhash(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    // 1. Verify secret header
     const secret = request.headers.get("x-azure-function-secret");
     const expectedSecret = process.env.AZURE_FUNCTION_SECRET;
 
@@ -107,7 +118,6 @@ export async function hiveThumbhash(
       };
     }
 
-    // 2. Parse request body
     const bodyText = await request.text();
     let payload: ThumbhashPayload;
     try {
@@ -132,19 +142,13 @@ export async function hiveThumbhash(
       };
     }
 
-    // 3. Skip small files (<100KB)
     if (size < 100 * 1024) {
-      context.log(
-        `Skipping thumbhash generation for small file: ${mediaId} (${size} bytes)`
-      );
       return {
         status: 200,
         jsonBody: { message: "Skipped: file too small" },
       };
     }
 
-    // 4. Fetch image from R2
-    context.log(`Fetching image from ${publicUrl} for mediaId: ${mediaId}`);
     const imageBuffer = await fetchImage(publicUrl);
 
     if (!imageBuffer) {
@@ -155,9 +159,7 @@ export async function hiveThumbhash(
       };
     }
 
-    // 5. Generate thumbhash + aspect ratio
-    context.log(`Generating thumbhash for mediaId: ${mediaId}`);
-    const thumbhashResult = await generateThumbhash(imageBuffer);
+    const thumbhashResult = await generateThumbhash(imageBuffer, context);
 
     if (!thumbhashResult) {
       context.log(`Failed to generate thumbhash for mediaId: ${mediaId}`);
@@ -167,7 +169,6 @@ export async function hiveThumbhash(
       };
     }
 
-    // 6. Callback to backend
     const backendUrl = process.env.BACKEND_URL;
     if (!backendUrl) {
       context.log("BACKEND_URL environment variable not set");
@@ -181,7 +182,8 @@ export async function hiveThumbhash(
       backendUrl,
       mediaId,
       thumbhashResult,
-      expectedSecret!
+      expectedSecret!,
+      context
     );
 
     if (!success) {
@@ -192,7 +194,6 @@ export async function hiveThumbhash(
       };
     }
 
-    context.log(`Successfully processed thumbhash for mediaId: ${mediaId}`);
     return {
       status: 200,
       jsonBody: {
