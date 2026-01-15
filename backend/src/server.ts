@@ -55,6 +55,18 @@ app.use(
   }),
 );
 
+app.use(
+  '/api/media/internal',
+  cors({
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
+    methods: ['POST', 'OPTIONS'],
+    credentials: false,
+    allowedHeaders: ['Content-Type', 'x-azure-function-secret'],
+  }),
+);
+
 app.use(cookieParser());
 app.use(express.json());
 
@@ -82,7 +94,10 @@ app.use('/api/category', authMiddleware, categoryRouter);
 app.use('/api/tag', authMiddleware, tagRouter);
 app.use('/api/workspace', authMiddleware, workspaceRouter);
 app.use('/api/post', authMiddleware, postRouter);
-app.post('/api/media/internal/:mediaId/thumbhash', updateMediaThumbhashController);
+app.post(
+  '/api/media/internal/:mediaId/thumbhash',
+  updateMediaThumbhashController,
+);
 app.use('/api/media', authMiddleware, mediaRouter);
 app.use('/api/public', publicRouter);
 app.get('/api/health', async (_req: Request, res: Response) => {
