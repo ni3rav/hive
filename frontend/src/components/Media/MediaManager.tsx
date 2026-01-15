@@ -16,7 +16,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react';
+import {
+  Plus,
+  Image as ImageIcon,
+  Trash2,
+  Loader2,
+  Expand,
+} from 'lucide-react';
 import {
   Empty,
   EmptyContent,
@@ -38,44 +44,63 @@ import type { MemberRole } from '@/types/member';
 function MediaItemCard({
   media,
   onDelete,
+  onPreview,
   formatFileSize,
   canDelete,
 }: {
   media: Media;
   onDelete: (m: Media) => void;
+  onPreview: (m: Media) => void;
   formatFileSize: (bytes: number) => string;
   canDelete: boolean;
 }) {
   return (
-    <div className='group relative border border-foreground/5 rounded-lg overflow-hidden'>
-      {canDelete && (
+    <div className='group relative border border-foreground/5 rounded-lg overflow-hidden break-inside-avoid mb-3'>
+      <div className='absolute inset-0 z-[5] bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out pointer-events-none' />
+
+      <div className='absolute top-0 right-0 z-10 p-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out translate-y-1 group-hover:translate-y-0'>
         <Button
           size='icon'
-          variant='destructive'
-          aria-label='Delete image'
-          className='absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10'
-          onClick={() => onDelete(media)}
+          variant='secondary'
+          aria-label='Preview image'
+          className='h-7 w-7 transition-transform duration-200 hover:scale-105'
+          onClick={() => onPreview(media)}
         >
-          <Trash2 className='w-4 h-4' />
+          <Expand className='w-3.5 h-3.5' />
         </Button>
-      )}
+        {canDelete && (
+          <Button
+            size='icon'
+            variant='destructive'
+            aria-label='Delete image'
+            className='h-7 w-7 transition-transform duration-200 hover:scale-105'
+            onClick={() => onDelete(media)}
+          >
+            <Trash2 className='w-3.5 h-3.5' />
+          </Button>
+        )}
+      </div>
+
+      <div className='absolute bottom-0 left-0 right-0 z-10 p-3 pb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out translate-y-1 group-hover:translate-y-0'>
+        <p
+          className='text-sm font-medium truncate text-foreground'
+          title={media.filename}
+        >
+          {media.filename}
+        </p>
+        <p className='text-xs text-muted-foreground mt-0.5'>
+          {formatFileSize(media.size)}
+        </p>
+      </div>
 
       <ImagePreview
         src={media.publicUrl}
         alt={media.filename}
-        className='aspect-square bg-muted'
+        className='bg-muted'
         filename={media.filename}
         thumbhashBase64={media.thumbhashBase64}
         aspectRatio={media.aspectRatio}
       />
-      <div className='p-3 space-y-2'>
-        <p className='text-sm font-medium truncate' title={media.filename}>
-          {media.filename}
-        </p>
-        <p className='text-xs text-muted-foreground'>
-          {formatFileSize(media.size)}
-        </p>
-      </div>
     </div>
   );
 }
@@ -85,6 +110,7 @@ export default function MediaManager() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
 
   const { data: user } = useAuth();
   const { data: workspace } = useWorkspaceVerification(workspaceSlug);
@@ -126,6 +152,10 @@ export default function MediaManager() {
   const handleDeleteClick = (media: Media) => {
     setSelectedMedia(media);
     setIsDeleteOpen(true);
+  };
+
+  const handlePreviewClick = (media: Media) => {
+    setPreviewMedia(media);
   };
 
   const confirmDelete = () => {
@@ -284,12 +314,13 @@ export default function MediaManager() {
               </Empty>
             ) : (
               <ScrollArea className='h-[calc(100vh-16rem)] [&_[data-slot=scroll-area-thumb]]:bg-primary/15'>
-                <div className='grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 p-1'>
+                <div className='columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3 p-1 [column-width:180px]'>
                   {mediaItems.map((media) => (
                     <MediaItemCard
                       key={media.id}
                       media={media}
                       onDelete={handleDeleteClick}
+                      onPreview={handlePreviewClick}
                       formatFileSize={formatFileSize}
                       canDelete={canDeleteMedia(media)}
                     />
@@ -328,6 +359,18 @@ export default function MediaManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {previewMedia && (
+        <ImagePreview
+          src={previewMedia.publicUrl}
+          alt={previewMedia.filename}
+          filename={previewMedia.filename}
+          thumbhashBase64={previewMedia.thumbhashBase64}
+          aspectRatio={previewMedia.aspectRatio}
+          isOpen={true}
+          onOpenChange={(open) => !open && setPreviewMedia(null)}
+        />
+      )}
     </>
   );
 }

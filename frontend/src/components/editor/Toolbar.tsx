@@ -34,6 +34,8 @@ import {
   Trash2,
   Youtube,
   Image,
+  Expand,
+  X,
 } from 'lucide-react';
 import {
   useState,
@@ -54,6 +56,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { thumbHashToDataURL } from 'thumbhash';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -401,6 +405,114 @@ const YoutubeButton = memo(({ editor }: { editor: Editor }) => {
 
 YoutubeButton.displayName = 'YoutubeButton';
 
+function MediaThumbnail({
+  media,
+  onInsert,
+}: {
+  media: {
+    id: string;
+    publicUrl: string;
+    filename: string;
+    thumbhashBase64?: string | null;
+  };
+  onInsert: () => void;
+}) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [placeholderUrl, setPlaceholderUrl] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    if (media.thumbhashBase64 && !imageLoaded) {
+      try {
+        const thumbhashBytes = Uint8Array.from(
+          atob(media.thumbhashBase64),
+          (c) => c.charCodeAt(0),
+        );
+        const dataUrl = thumbHashToDataURL(thumbhashBytes);
+        setPlaceholderUrl(dataUrl);
+      } catch {
+        setPlaceholderUrl(null);
+      }
+    }
+  }, [media.thumbhashBase64, imageLoaded]);
+
+  return (
+    <>
+      <div
+        className='group relative aspect-square border border-foreground/5 rounded-lg overflow-hidden bg-muted'
+        title={media.filename}
+      >
+        <div className='absolute inset-0 z-[5] bg-background/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none' />
+
+        <div className='absolute top-1 right-1 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200'>
+          <button
+            type='button'
+            className='h-6 w-6 flex items-center justify-center rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors'
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPreviewOpen(true);
+            }}
+          >
+            <Expand className='w-3 h-3' />
+          </button>
+        </div>
+
+        <button
+          type='button'
+          className='w-full h-full relative'
+          onClick={onInsert}
+        >
+          {placeholderUrl && !imageLoaded && (
+            <img
+              src={placeholderUrl}
+              alt={media.filename}
+              className='absolute inset-0 w-full h-full object-cover'
+              aria-hidden='true'
+            />
+          )}
+          <img
+            src={media.publicUrl}
+            alt={media.filename}
+            className={cn(
+              'w-full h-full object-cover transition-opacity duration-300',
+              imageLoaded ? 'opacity-100' : 'opacity-0',
+            )}
+            onLoad={() => setImageLoaded(true)}
+          />
+        </button>
+      </div>
+
+      {isPreviewOpen && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm animate-in fade-in-0'
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <button
+            type='button'
+            className='absolute top-4 right-4 p-2 rounded-full bg-accent/10 hover:bg-accent/20 transition-colors text-foreground'
+            onClick={() => setIsPreviewOpen(false)}
+          >
+            <X className='w-6 h-6' />
+          </button>
+          <div
+            className='max-w-5xl max-h-[90vh] p-4 flex flex-col items-center gap-4'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={media.publicUrl}
+              alt={media.filename}
+              className='max-w-full max-h-[80vh] object-contain rounded-lg'
+            />
+            <p className='text-foreground text-sm font-medium bg-muted/90 px-4 py-2 rounded-lg max-w-full break-all'>
+              {media.filename}
+            </p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export interface ImageButtonRef {
   openDialog: () => void;
 }
@@ -588,22 +700,17 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                     Upload images from the Upload tab.
                   </div>
                 ) : (
-                  <div className='grid grid-cols-3 gap-2 max-h-64 overflow-y-auto'>
-                    {mediaItems.map((media) => (
-                      <button
-                        key={media.id}
-                        className='aspect-square border rounded-lg overflow-hidden hover:ring-2 hover:ring-primary transition-all'
-                        onClick={() => insertMediaImage(media.publicUrl)}
-                        title={media.filename}
-                      >
-                        <img
-                          src={media.publicUrl}
-                          alt={media.filename}
-                          className='w-full h-full object-cover'
+                  <ScrollArea className='h-64'>
+                    <div className='grid grid-cols-3 gap-2 p-1'>
+                      {mediaItems.map((media) => (
+                        <MediaThumbnail
+                          key={media.id}
+                          media={media}
+                          onInsert={() => insertMediaImage(media.publicUrl)}
                         />
-                      </button>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 )}
               </div>
             )}

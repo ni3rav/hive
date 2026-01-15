@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { thumbHashToDataURL } from 'thumbhash';
@@ -10,6 +10,8 @@ interface ImagePreviewProps {
   filename?: string;
   thumbhashBase64?: string | null;
   aspectRatio?: number | null;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ImagePreview({
@@ -19,11 +21,11 @@ export function ImagePreview({
   filename,
   thumbhashBase64,
   aspectRatio,
+  isOpen = false,
+  onOpenChange,
 }: ImagePreviewProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [placeholderUrl, setPlaceholderUrl] = useState<string | null>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     if (thumbhashBase64 && !imageLoaded) {
@@ -43,20 +45,18 @@ export function ImagePreview({
     setImageLoaded(true);
   };
 
-  const containerStyle =
-    aspectRatio && !imageLoaded
-      ? { aspectRatio: aspectRatio.toString() }
-      : undefined;
+  const handleClose = () => {
+    onOpenChange?.(false);
+  };
+
+  const computedAspectRatio = aspectRatio ?? 1;
+  const containerStyle = { aspectRatio: computedAspectRatio.toString() };
 
   return (
     <>
       <div
-        className={cn(
-          'cursor-pointer overflow-hidden rounded-lg transition-all hover:opacity-90 relative',
-          className,
-        )}
+        className={cn('overflow-hidden rounded-lg relative', className)}
         style={containerStyle}
-        onClick={() => setIsOpen(true)}
       >
         {placeholderUrl && !imageLoaded && (
           <img
@@ -67,7 +67,6 @@ export function ImagePreview({
           />
         )}
         <img
-          ref={imgRef}
           src={src}
           alt={alt}
           className={cn(
@@ -81,11 +80,11 @@ export function ImagePreview({
       {isOpen && (
         <div
           className='fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-sm animate-in fade-in-0'
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
         >
           <button
             className='absolute top-4 right-4 p-2 rounded-full bg-accent/10 hover:bg-accent/20 transition-colors text-foreground'
-            onClick={() => setIsOpen(false)}
+            onClick={handleClose}
           >
             <X className='w-6 h-6' />
           </button>
@@ -97,6 +96,7 @@ export function ImagePreview({
               src={src}
               alt={alt}
               className='max-w-full max-h-[80vh] object-contain rounded-lg'
+              style={{ aspectRatio: computedAspectRatio.toString() }}
             />
             {filename && (
               <p className='text-foreground text-sm font-medium bg-muted/90 px-4 py-2 rounded-lg max-w-full break-all'>
