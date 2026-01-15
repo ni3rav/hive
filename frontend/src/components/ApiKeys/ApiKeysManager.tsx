@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, Copy, Download, KeyRound, Trash2 } from 'lucide-react';
+import { Plus, Copy, Download, Trash2, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,6 @@ import {
   EmptyContent,
 } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { useWorkspaceVerification } from '@/hooks/useWorkspace';
@@ -39,6 +38,7 @@ import type {
   WorkspaceApiKey,
   CreateWorkspaceApiKeyResponse,
 } from '@/types/api-key';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 export default function ApiKeysManager() {
   const workspaceSlug = useWorkspaceSlug();
@@ -153,80 +153,24 @@ export default function ApiKeysManager() {
 
   return (
     <>
-    <ScrollArea className='h-full p-8'>
-      <div className='flex flex-col gap-10 pb-16 pr-4'>
-        <section className='space-y-2 px-4'>
-          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-            <div>
-              <h1 className='text-2xl font-semibold tracking-tight'>API Keys</h1>
-              <p className='text-muted-foreground text-sm'>
-                Issue workspace-scoped keys for accessing the Content
-              </p>
-            </div>
-            <div
-              className='inline-flex'
-              role='presentation'
-              onClick={handleCreateButtonPress}
-            >
-              <Button
-                disabled={hasReachedLimit || !workspaceSlug || !canManageApiKeys}
-                className={
-                  hasReachedLimit || !canManageApiKeys
-                    ? 'pointer-events-none'
-                    : undefined
-                }
-              >
-                <Plus className='size-4' />
-                Create API Key
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <section className='space-y-4 px-4'>
-          <Alert variant='default' className='border-dashed animate-in fade-in-50 zoom-in-95 duration-300'>
-          <KeyRound className='text-primary' />
-          <AlertTitle>Workspace access only</AlertTitle>
-          <AlertDescription>
-            Each workspace can have up to three API keys. Keys inherit the
-            workspace permissions of the creator and can be revoked at any time.
-            Only workspace owners and admins can create or delete keys; members
-            can view existing keys.
-          </AlertDescription>
-        </Alert>
-        </section>
-
-        <section className='space-y-4 px-4'>
-        {isLoading ? (
-          <div className='flex min-h-[320px] items-center justify-center rounded-lg border'>
-            <Spinner className='size-6 text-muted-foreground' />
-          </div>
-        ) : isError ? (
-          <Alert variant='destructive'>
-            <AlertTitle>Failed to load API keys</AlertTitle>
-            <AlertDescription>
-              Please refresh the page or try again later.
-            </AlertDescription>
-          </Alert>
-        ) : apiKeys.length === 0 ? (
-          <Empty className='border border-dashed animate-in fade-in-50 zoom-in-95 duration-300'>
-            <EmptyHeader>
-              <EmptyMedia variant='icon'>
-                <KeyRound className='h-5 w-5' />
-              </EmptyMedia>
-              <EmptyTitle>No API keys yet</EmptyTitle>
-              <EmptyDescription>
-                Create your first key to start integrating with the Content
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
+      <ScrollArea className='h-full p-8'>
+        <div className='flex flex-col gap-10 pb-16 pr-4'>
+          <section className='space-y-2 px-4'>
+            <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+              <div>
+                <h1 className='text-2xl font-semibold tracking-tight'>
+                  API Keys
+                </h1>
+                <p className='text-muted-foreground text-sm'>
+                  Issue workspace-scoped keys for accessing the Content
+                </p>
+              </div>
               <div
                 className='inline-flex'
                 role='presentation'
                 onClick={handleCreateButtonPress}
               >
                 <Button
-                  variant='outline'
                   disabled={
                     hasReachedLimit || !workspaceSlug || !canManageApiKeys
                   }
@@ -236,51 +180,126 @@ export default function ApiKeysManager() {
                       : undefined
                   }
                 >
+                  <Plus className='size-4' />
                   Create API Key
                 </Button>
               </div>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          <div className='rounded-md border border-foreground/10 bg-card/30 p-1 animate-in fade-in-50 zoom-in-95 duration-300'>
-            <div className='flex flex-col'>
-              {apiKeys.map((key, index) => (
-                <div key={key.id}>
-                  <div className='flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
-                    <div className='space-y-1'>
-                      <p className='text-base font-medium text-foreground'>
-                        {key.description || 'Untitled key'}
-                      </p>
-                      <p className='text-sm text-muted-foreground'>
-                        Created {formatDate(key.createdAt)} by{' '}
-                        {memberLookup.get(key.createdByUserId) ??
-                          'Unknown member'}
-                      </p>
-                    </div>
-                    {canManageApiKeys && (
-                      <Button
-                        variant='destructive'
-                        onClick={() => handleDeleteRequest(key)}
-                        disabled={
-                          deleteKey.isPending && keyPendingDelete?.id === key.id
-                        }
-                      >
-                        <Trash2 className='size-4' />
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-                  {index < apiKeys.length - 1 && (
-                    <Separator className='text-border/60 bg-accent/50' />
-                  )}
-                </div>
-              ))}
             </div>
-          </div>
-        )}
-        </section>
-      </div>
-    </ScrollArea>
+          </section>
+
+          <section className='space-y-4 px-4'>
+            <div className='rounded-lg border border-dashed border-foreground/10 bg-muted/40 p-4 animate-in fade-in-50 zoom-in-95 duration-300'>
+              <div className='flex gap-3'>
+                <div className='space-y-1'>
+                  <p className='font-semibold text-foreground'>
+                    Workspace access only
+                  </p>
+                  <p className='text-sm text-muted-foreground'>
+                    Each workspace can have up to three API keys. Keys inherit
+                    the workspace permissions of the creator and can be revoked
+                    at any time. Only workspace owners and admins can create or
+                    delete keys; members can view existing keys.{' '}
+                    <a
+                      href='https://hivecms.online/docs'
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='text-primary underline hover:text-primary/80 transition-colors'
+                    >
+                      Learn how to use API keys
+                    </a>{' '}
+                    in the documentation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className='space-y-4 px-4'>
+            {isLoading ? (
+              <div className='flex min-h-[320px] items-center justify-center rounded-lg border'>
+                <Spinner className='size-6 text-muted-foreground' />
+              </div>
+            ) : isError ? (
+              <Alert variant='destructive'>
+                <AlertTitle>Failed to load API keys</AlertTitle>
+                <AlertDescription>
+                  Please refresh the page or try again later.
+                </AlertDescription>
+              </Alert>
+            ) : apiKeys.length === 0 ? (
+              <Empty className='border border-dashed animate-in fade-in-50 zoom-in-95 duration-300'>
+                <EmptyHeader>
+                  <EmptyMedia variant='icon'>
+                    <KeyRound className='h-5 w-5' />
+                  </EmptyMedia>
+                  <EmptyTitle>No API keys yet</EmptyTitle>
+                  <EmptyDescription>
+                    Create your first key to start integrating with the Content
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <div
+                    className='inline-flex'
+                    role='presentation'
+                    onClick={handleCreateButtonPress}
+                  >
+                    <Button
+                      variant='outline'
+                      disabled={
+                        hasReachedLimit || !workspaceSlug || !canManageApiKeys
+                      }
+                      className={
+                        hasReachedLimit || !canManageApiKeys
+                          ? 'pointer-events-none'
+                          : undefined
+                      }
+                    >
+                      Create API Key
+                    </Button>
+                  </div>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              <div className='rounded-md border border-foreground/10 bg-card/30 p-1 animate-in fade-in-50 zoom-in-95 duration-300'>
+                <div className='flex flex-col'>
+                  {apiKeys.map((key, index) => (
+                    <div key={key.id}>
+                      <div className='flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between'>
+                        <div className='space-y-1'>
+                          <p className='text-base font-medium text-foreground'>
+                            {key.description || 'Untitled key'}
+                          </p>
+                          <p className='text-sm text-muted-foreground'>
+                            Created {formatDate(key.createdAt)} by{' '}
+                            {memberLookup.get(key.createdByUserId) ??
+                              'Unknown member'}
+                          </p>
+                        </div>
+                        {canManageApiKeys && (
+                          <Button
+                            variant='destructive'
+                            onClick={() => handleDeleteRequest(key)}
+                            disabled={
+                              deleteKey.isPending &&
+                              keyPendingDelete?.id === key.id
+                            }
+                          >
+                            <Trash2 className='size-4' />
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+                      {index < apiKeys.length - 1 && (
+                        <Separator className='text-border/60 bg-accent/50' />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      </ScrollArea>
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
