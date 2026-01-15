@@ -229,90 +229,27 @@ function triggerThumbhashGeneration(payload: {
     );
 
     const requestModule = isHttps ? https : http;
-    let responseBody = '';
-    let responseHeaders: Record<string, string | string[]> = {};
-
     const req = requestModule.request(options, (res) => {
-      responseHeaders = res.headers as Record<string, string | string[]>;
-
       logger.info(
         {
           statusCode: res.statusCode,
           statusMessage: res.statusMessage,
-          headers: responseHeaders,
         },
         'Azure Function response received',
       );
-
-      res.on('data', (chunk: Buffer) => {
-        responseBody += chunk.toString();
-      });
-
+      res.on('data', () => {});
       res.on('end', () => {
-        let parsedBody: unknown;
-        try {
-          parsedBody = JSON.parse(responseBody);
-        } catch {
-          parsedBody = responseBody;
-        }
-
-        logger.info(
-          {
-            statusCode: res.statusCode,
-            statusMessage: res.statusMessage,
-            responseBodyLength: responseBody.length,
-            responseBody: parsedBody,
-            mediaId: payload.mediaId,
-          },
-          '=== Azure Function request completed ===',
-        );
+        logger.info('Azure Function request completed');
       });
     });
 
     req.on('error', (err) => {
-      logger.error(
-        {
-          error: err.message,
-          errorStack: err.stack,
-          errorCode: (err as NodeJS.ErrnoException).code,
-          mediaId: payload.mediaId,
-          url: env.AZURE_THUMBHASH_FUNCTION_URL,
-        },
-        'Failed to trigger Azure thumbhash function',
-      );
+      logger.error(err, 'Failed to trigger Azure thumbhash function');
     });
-
-    req.on('timeout', () => {
-      logger.error(
-        {
-          mediaId: payload.mediaId,
-          url: env.AZURE_THUMBHASH_FUNCTION_URL,
-        },
-        'Azure Function request timeout',
-      );
-      req.destroy();
-    });
-
-    req.setTimeout(60000); // 60 second timeout
-
-    logger.info(
-      {
-        mediaId: payload.mediaId,
-        payloadSize: data.length,
-        url: env.AZURE_THUMBHASH_FUNCTION_URL,
-      },
-      'Sending Azure Function request',
-    );
 
     req.write(data);
     req.end();
-
-    logger.info(
-      {
-        mediaId: payload.mediaId,
-      },
-      'Azure Function request sent (awaiting response)',
-    );
+    logger.info('Azure Function request sent');
   } catch (error) {
     logger.error(
       error,
@@ -400,44 +337,13 @@ export async function updateMediaThumbhashController(
   req: Request,
   res: Response,
 ) {
-  logger.info(
-    {
-      method: req.method,
-      url: req.url,
-      path: req.path,
-      ip: req.ip,
-      userAgent: req.get('user-agent'),
-      headers: {
-        'content-type': req.get('content-type'),
-        'x-azure-function-secret': req.get('x-azure-function-secret')
-          ? 'present'
-          : 'missing',
-      },
-    },
-    '=== Backend callback endpoint called ===',
-  );
-
   const secret = req.header('x-azure-function-secret');
-  const expectedSecret = env.AZURE_FUNCTION_SECRET;
 
-  logger.info(
-    {
-      hasSecret: !!secret,
-      hasExpectedSecret: !!expectedSecret,
-      secretMatch: secret === expectedSecret,
-      receivedSecretLength: secret?.length || 0,
-      expectedSecretLength: expectedSecret?.length || 0,
-    },
-    'Secret validation check',
-  );
-
-  if (!secret || secret !== expectedSecret) {
+  if (!secret || secret !== env.AZURE_FUNCTION_SECRET) {
     logger.warn(
       {
         ip: req.ip,
         userAgent: req.get('user-agent'),
-        hasSecret: !!secret,
-        secretMatch: secret === expectedSecret,
       },
       'Invalid azure function secret attempt',
     );
@@ -445,22 +351,8 @@ export async function updateMediaThumbhashController(
   }
 
   const mediaId = req.params.mediaId;
-  logger.info(
-    {
-      mediaId,
-      isValidUUID: UUID_REGEX.test(mediaId),
-    },
-    'Processing thumbhash update request',
-  );
 
   if (!UUID_REGEX.test(mediaId)) {
-    logger.warn(
-      {
-        mediaId,
-        isValidUUID: false,
-      },
-      'Invalid media ID format',
-    );
     return validationError(res, 'invalid media id', [
       {
         path: ['mediaId'],
@@ -470,25 +362,9 @@ export async function updateMediaThumbhashController(
     ]);
   }
 
-  logger.info(
-    {
-      mediaId,
-      bodyKeys: Object.keys(req.body || {}),
-      bodySize: JSON.stringify(req.body || {}).length,
-    },
-    'Validating request body',
-  );
-
   const validation = updateThumbhashSchema.safeParse(req.body);
 
   if (!validation.success) {
-    logger.warn(
-      {
-        mediaId,
-        validationErrors: validation.error.issues,
-      },
-      'Request body validation failed',
-    );
     return validationError(
       res,
       'invalid request data',
@@ -498,15 +374,6 @@ export async function updateMediaThumbhashController(
 
   const { thumbhash_base64, aspect_ratio } = validation.data;
 
-  logger.info(
-    {
-      mediaId,
-      thumbhashLength: thumbhash_base64?.length || 0,
-      aspectRatio: aspect_ratio,
-    },
-    'Updating media thumbhash',
-  );
-
   try {
     const [error] = await updateMediaThumbhash(mediaId, {
       thumbhashBase64: thumbhash_base64,
@@ -514,44 +381,17 @@ export async function updateMediaThumbhashController(
     });
 
     if (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      logger.error(
-        {
-          mediaId,
-          error: errorMessage,
-          errorType:
-            error instanceof Error ? error.constructor.name : typeof error,
-        },
-        'Error updating media thumbhash',
-      );
-
-      if (errorMessage === 'media not found') {
-        logger.warn({ mediaId }, 'Media not found for thumbhash update');
+      if ((error as Error).message === 'media not found') {
         return notFound(res, 'media not found');
       }
 
+      logger.error(error, 'error updating media thumbhash');
       return serverError(res, 'failed to update media thumbhash');
     }
 
-    logger.info(
-      {
-        mediaId,
-        thumbhashLength: thumbhash_base64?.length || 0,
-        aspectRatio: aspect_ratio,
-      },
-      '=== Media thumbhash updated successfully ===',
-    );
     return ok(res, 'media thumbhash updated successfully');
   } catch (error) {
-    logger.error(
-      {
-        mediaId,
-        error: error instanceof Error ? error.message : String(error),
-        errorStack: error instanceof Error ? error.stack : undefined,
-      },
-      'Unexpected error updating media thumbhash',
-    );
+    logger.error(error, 'failed to update media thumbhash');
     return serverError(res, 'failed to update media thumbhash');
   }
 }

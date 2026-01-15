@@ -119,139 +119,29 @@ async function callbackBackend(
   secret: string,
   context: InvocationContext
 ): Promise<boolean> {
-  const callbackUrl = `${backendUrl}/api/media/internal/${mediaId}/thumbhash`;
-  context.log("=== Starting backend callback ===", {
-    callbackUrl,
-    mediaId,
-    hasSecret: !!secret,
-    secretLength: secret?.length || 0,
-    thumbhashLength: thumbhash.thumbhash_base64.length,
-    aspectRatio: thumbhash.aspect_ratio,
-  });
-
   try {
-    const requestBody = JSON.stringify(thumbhash);
-    context.log("Callback request details:", {
-      url: callbackUrl,
-      method: "POST",
-      bodyLength: requestBody.length,
-      bodyPreview: requestBody.substring(0, 200),
-    });
-
-    // Add timeout and better error handling
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      context.log("Callback request timeout after 30 seconds", { callbackUrl });
-    }, 30000); // 30 second timeout
-
-    let response: Response;
-    try {
-      response = await fetch(callbackUrl, {
+    const response = await fetch(
+      `${backendUrl}/api/media/internal/${mediaId}/thumbhash`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-azure-function-secret": secret,
         },
-        body: requestBody,
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      if (fetchError instanceof Error && fetchError.name === "AbortError") {
-        context.log("=== Callback request timeout ===", {
-          mediaId,
-          url: callbackUrl,
-          timeout: 30000,
-        });
-        throw new Error("Callback request timeout after 30 seconds");
+        body: JSON.stringify(thumbhash),
       }
-      throw fetchError;
-    }
-
-    context.log("Callback response received:", {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok,
-      redirected: response.redirected,
-      type: response.type,
-      url: response.url,
-      headers: Object.fromEntries(response.headers.entries()),
-    });
-
-    // Log if response was redirected
-    if (response.redirected) {
-      context.log("WARNING: Response was redirected", {
-        originalUrl: callbackUrl,
-        finalUrl: response.url,
-      });
-    }
-
-    const responseText = await response.text();
-    let responseBody: unknown;
-    try {
-      responseBody = JSON.parse(responseText);
-    } catch {
-      responseBody = responseText;
-    }
-
-    context.log("Callback response body:", {
-      bodyLength: responseText.length,
-      body: responseBody,
-    });
-
+    );
     if (!response.ok) {
-      context.log("=== Backend callback failed ===", {
-        mediaId,
-        status: response.status,
-        statusText: response.statusText,
-        responseBody,
-        url: callbackUrl,
-      });
-      return false;
+      context.log(
+        `Backend callback failed for mediaId ${mediaId}: ${response.status} ${response.statusText}`
+      );
     }
-
-    context.log("=== Backend callback succeeded ===", {
-      mediaId,
-      status: response.status,
-      responseBody,
-    });
-    return true;
+    return response.ok;
   } catch (error) {
-    const errorDetails: Record<string, unknown> = {
-      mediaId,
-      errorType: error instanceof Error ? error.constructor.name : typeof error,
-      errorMessage: error instanceof Error ? error.message : String(error),
-      url: callbackUrl,
-    };
-
-    // Add more specific error information
-    if (error instanceof Error) {
-      if (error.stack) {
-        errorDetails.errorStack = error.stack;
-      }
-      if ("code" in error) {
-        errorDetails.errorCode = (error as { code?: string }).code;
-      }
-      if ("cause" in error) {
-        errorDetails.errorCause = (error as { cause?: unknown }).cause;
-      }
-    }
-
-    // Check for specific error types
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      errorDetails.errorCategory = "Network/Fetch Error";
-      errorDetails.possibleCauses = [
-        "DNS resolution failed",
-        "Connection refused",
-        "SSL/TLS certificate issue",
-        "Network timeout",
-        "CORS blocked",
-      ];
-    }
-
-    context.log("=== Backend callback error ===", errorDetails);
+    context.log(
+      `Backend callback error for mediaId ${mediaId}:`,
+      error instanceof Error ? error.message : String(error)
+    );
     return false;
   }
 }
@@ -260,12 +150,7 @@ export async function hiveThumbhash(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  context.log("=== Function called ===", {
-    method: request.method,
-    url: request.url,
-    headers: Object.fromEntries(request.headers.entries()),
-    hasBody: !!request.body,
-  });
+  context.log("=== Function called ===");
   try {
     const secret = request.headers.get("x-azure-function-secret");
     const expectedSecret = process.env.AZURE_FUNCTION_SECRET;
@@ -369,40 +254,11 @@ export async function hiveThumbhash(
       };
     }
 
-    // Validate and normalize backend URL
-    let normalizedBackendUrl = backendUrl.trim();
-    if (
-      !normalizedBackendUrl.startsWith("http://") &&
-      !normalizedBackendUrl.startsWith("https://")
-    ) {
-      context.log("BACKEND_URL missing protocol, defaulting to https", {
-        originalUrl: normalizedBackendUrl,
-      });
-      normalizedBackendUrl = `https://${normalizedBackendUrl}`;
-    }
-
-    // Remove trailing slash
-    normalizedBackendUrl = normalizedBackendUrl.replace(/\/$/, "");
-
-    context.log("Backend URL configuration:", {
-      original: backendUrl,
-      normalized: normalizedBackendUrl,
-    });
-
-    context.log("=== Preparing backend callback ===", {
-      backendUrl: normalizedBackendUrl,
-      mediaId,
-      callbackEndpoint: `${normalizedBackendUrl}/api/media/internal/${mediaId}/thumbhash`,
-      hasSecret: !!expectedSecret,
-      secretLength: expectedSecret?.length || 0,
-      thumbhashData: {
-        thumbhashLength: thumbhashResult.thumbhash_base64.length,
-        aspectRatio: thumbhashResult.aspect_ratio,
-      },
-    });
-
+    context.log(
+      `Calling backend: ${backendUrl}/api/media/internal/${mediaId}/thumbhash`
+    );
     const success = await callbackBackend(
-      normalizedBackendUrl,
+      backendUrl,
       mediaId,
       thumbhashResult,
       expectedSecret!,
@@ -410,14 +266,7 @@ export async function hiveThumbhash(
     );
 
     if (!success) {
-      context.log(
-        "=== Backend callback failed - returning error response ===",
-        {
-          mediaId,
-          thumbhashGenerated: true,
-          callbackFailed: true,
-        }
-      );
+      context.log(`Failed to callback backend for mediaId: ${mediaId}`);
       return {
         status: 200,
         jsonBody: { message: "Thumbhash generated but callback failed" },
