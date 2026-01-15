@@ -170,7 +170,7 @@
   accent-color: var(--color-primary);
 }
 
-.tiptap .tiptap-task-item>div {
+.tiptap .tiptap-task-item > div {
   flex: 1;
 }
 
@@ -228,9 +228,11 @@
 .tiptap th {
   font-weight: 600;
   text-align: left;
-  background-color: color-mix(in srgb,
-      var(--color-muted) 65%,
-      var(--color-background));
+  background-color: color-mix(
+    in srgb,
+    var(--color-muted) 65%,
+    var(--color-background)
+  );
 }
 
 .tiptap table p {
@@ -245,7 +247,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-primary) 55%, transparent);
   pointer-events: none;
 }
 
@@ -449,28 +452,30 @@
 }
 
 /* Images */
+.tiptap .tiptap-image-wrapper {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.tiptap .tiptap-image-wrapper:first-child {
+  margin-top: 0;
+}
+
+.tiptap .tiptap-image-wrapper:last-child {
+  margin-bottom: 0;
+}
+
 .tiptap img,
 .tiptap .tiptap-image {
   max-width: 100%;
   height: auto;
   display: block;
-  margin-top: 1.5rem;
-  margin-bottom: 1.5rem;
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: opacity 0.2s ease;
   resize: both;
   overflow: auto;
-}
-
-.tiptap img:first-child,
-.tiptap .tiptap-image:first-child {
-  margin-top: 0;
-}
-
-.tiptap img:last-child,
-.tiptap .tiptap-image:last-child {
-  margin-bottom: 0;
 }
 
 .tiptap img:hover,

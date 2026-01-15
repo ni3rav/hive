@@ -415,7 +415,7 @@ function MediaThumbnail({
     filename: string;
     thumbhashBase64?: string | null;
   };
-  onInsert: () => void;
+  onInsert: (mediaId: string) => void;
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [placeholderUrl, setPlaceholderUrl] = useState<string | null>(null);
@@ -460,7 +460,7 @@ function MediaThumbnail({
         <button
           type='button'
           className='w-full h-full relative'
-          onClick={onInsert}
+          onClick={() => onInsert(media.id)}
         >
           {placeholderUrl && !imageLoaded && (
             <img
@@ -539,8 +539,12 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
       openDialog: () => setIsOpen(true),
     }));
 
-    const insertMediaImage = (url: string) => {
-      editor.chain().focus().setImage({ src: url }).run();
+    const insertMediaImage = (url: string, mediaId?: string) => {
+      const attrs: { src: string; 'data-media-id'?: string } = { src: url };
+      if (mediaId) {
+        attrs['data-media-id'] = mediaId;
+      }
+      editor.chain().focus().setImage(attrs).run();
       setIsOpen(false);
     };
 
@@ -706,7 +710,9 @@ const ImageButton = forwardRef<ImageButtonRef, { editor: Editor }>(
                         <MediaThumbnail
                           key={media.id}
                           media={media}
-                          onInsert={() => insertMediaImage(media.publicUrl)}
+                          onInsert={(mediaId) =>
+                            insertMediaImage(media.publicUrl, mediaId)
+                          }
                         />
                       ))}
                     </div>

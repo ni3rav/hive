@@ -11,4 +11,31 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'tiptap-core': ['@tiptap/react', '@tiptap/core'],
+          'tiptap-extensions': [
+            '@tiptap/starter-kit',
+            '@tiptap/extension-placeholder',
+            '@tiptap/extension-link',
+            '@tiptap/extension-underline',
+            '@tiptap/extension-text-align',
+            '@tiptap/extension-highlight',
+            '@tiptap/extension-text-style',
+            '@tiptap/extension-color',
+            '@tiptap/extension-table',
+            '@tiptap/extension-task-list',
+            '@tiptap/extension-task-item',
+            '@tiptap/extension-youtube',
+            '@tiptap/extension-image',
+          ],
+          'react-query': ['@tanstack/react-query'],
+          'react-table': ['@tanstack/react-table'],
+          'vendor-ui': ['sonner', 'thumbhash'],
+        },
+      },
+    },
+  },
 });

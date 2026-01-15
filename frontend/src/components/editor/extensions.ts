@@ -11,8 +11,10 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Youtube from '@tiptap/extension-youtube';
 import Image from '@tiptap/extension-image';
+import { ReactNodeViewRenderer } from '@tiptap/react';
 import { SlashCommand } from './slash-command/extension';
 import { getSuggestionItems, renderItems } from './slash-command/suggestion';
+import { ImageNodeView } from './ImageNodeView';
 
 /**
  * Shared extensions list used by both the editor and HTML utilities
@@ -103,16 +105,36 @@ export const getEditorExtensions = () => [
     addAttributes() {
       return {
         ...this.parent?.(),
+        src: {
+          default: null,
+          parseHTML: (element) => element.getAttribute('src'),
+          renderHTML: (attributes) => {
+            if (!attributes.src) {
+              return {};
+            }
+            return { src: attributes.src };
+          },
+        },
+        'data-media-id': {
+          default: null,
+          parseHTML: (element) => element.getAttribute('data-media-id'),
+          renderHTML: () => {
+            return {};
+          },
+        },
         class: {
           default: 'tiptap-image',
-          parseHTML: element => element.getAttribute('class'),
-          renderHTML: attributes => {
+          parseHTML: (element) => element.getAttribute('class'),
+          renderHTML: (attributes) => {
             return {
               class: attributes.class,
             };
           },
         },
       };
+    },
+    addNodeView() {
+      return ReactNodeViewRenderer(ImageNodeView);
     },
   }),
   SlashCommand.configure({
