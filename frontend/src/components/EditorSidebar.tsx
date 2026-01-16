@@ -53,7 +53,10 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
-import { Sparkles } from 'lucide-react';
+import { AIWriterSummary } from '@/components/editor/ai-writer-summary';
+import { AITagSuggester } from '@/components/editor/ai-tag-suggester';
+import { AIDescriptionGenerator } from '@/components/editor/ai-description-generator';
+import { AISettingsDialog } from '@/components/editor/ai-settings-dialog';
 
 export function EditorSidebar() {
   const {
@@ -578,6 +581,15 @@ export function EditorSidebar() {
                     {errors.excerpt.message}
                   </p>
                 )}
+                {/* AI Description Generator */}
+                <AIDescriptionGenerator
+                  editorText={editorText}
+                  currentExcerpt={watch('excerpt') || ''}
+                  onSelectDescription={(description) => {
+                    setValue('excerpt', description, { shouldValidate: true });
+                    syncToParent();
+                  }}
+                />
               </div>
 
               {/* Slug */}
@@ -705,6 +717,20 @@ export function EditorSidebar() {
                       allowCreate
                     />
                   )}
+                />
+                {/* AI Tag Suggester */}
+                <AITagSuggester
+                  editorText={editorText}
+                  currentTags={watch('tagSlugs') || []}
+                  onAddTag={(tagSlug) => {
+                    const currentTags = watch('tagSlugs') || [];
+                    if (!currentTags.includes(tagSlug)) {
+                      setValue('tagSlugs', [...currentTags, tagSlug], {
+                        shouldValidate: true,
+                      });
+                      syncToParent();
+                    }
+                  }}
                 />
               </div>
 
@@ -846,20 +872,14 @@ export function EditorSidebar() {
 
               <div className='space-y-4'>
                 <Separator className='bg-foreground/10' />
-                <div className='space-y-2'>
-                  <div className='flex items-center gap-2'>
-                    <Sparkles className='h-4 w-4 text-primary' />
-                    <h3 className='text-base font-semibold text-foreground'>
-                      AI Analysis
-                    </h3>
-                  </div>
-                  <p className='text-xs text-muted-foreground'>Coming soon</p>
-                  <p className='text-sm text-muted-foreground'>
-                    Get AI-powered insights for readability, SEO optimization,
-                    and content structure to enhance your post before
-                    publishing.
-                  </p>
-                </div>
+                {/* AI Writer Summary */}
+                <AIWriterSummary
+                  editorText={editorText}
+                  wordCount={analysisStats.wordCount}
+                />
+                <Separator className='bg-foreground/10' />
+                {/* AI Settings */}
+                <AISettingsDialog />
               </div>
             </div>
           </ScrollArea>

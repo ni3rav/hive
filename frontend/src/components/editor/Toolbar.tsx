@@ -75,6 +75,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
+import { AIEditorTools } from '@/components/editor/ai-editor-tools';
 
 interface ToolbarProps {
   editor: Editor;
@@ -273,7 +274,7 @@ const ColorPicker = memo(
               'p-2 rounded hover:bg-muted transition-colors',
               ((type === 'text' && editor.getAttributes('textStyle').color) ||
                 (type === 'highlight' && editor.isActive('highlight'))) &&
-                'bg-muted text-primary',
+              'bg-muted text-primary',
             )}
           >
             {type === 'text' ? (
@@ -1187,6 +1188,8 @@ export function Toolbar({ editor }: ToolbarProps) {
         >
           <RemoveFormatting className='w-4 h-4' />
         </ToolbarButton>
+        <Divider />
+        <AIEditorTools editor={editor} />
       </div>
     </div>
   );
