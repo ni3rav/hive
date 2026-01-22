@@ -11,7 +11,6 @@ interface AIDescriptionGeneratorProps {
 
 export function AIDescriptionGenerator({
     editorText,
-    currentExcerpt,
     onSelectDescription,
 }: AIDescriptionGeneratorProps) {
     const [isGenerating, setIsGenerating] = useState(false);
@@ -28,13 +27,13 @@ export function AIDescriptionGenerator({
             // Generate 3 different style descriptions
             const mockDescriptions = [
                 // Concise version
-                `A comprehensive guide covering the essential aspects of the topic. Perfect for readers looking to understand the fundamentals and key takeaways.`,
+                `A comprehensive guide to modern web development covering JavaScript, React, TypeScript, and best practices. Perfect for developers looking to master frontend technologies and build performant web applications.`,
 
                 // Engaging version
-                `Discover the insights and practical tips that will transform your understanding. This article breaks down complex concepts into actionable advice you can use today.`,
+                `Discover powerful techniques for building modern web applications with React, TypeScript, and cutting-edge tools. This tutorial explores state management, hooks, API integration, and clean code practices that will transform your development workflow.`,
 
                 // SEO-optimized version
-                `Learn everything you need to know about this important topic. This detailed ${wordCount > 500 ? 'in-depth' : 'focused'} article provides expert insights, real-world examples, and proven strategies.`,
+                `Learn everything about web development, JavaScript, React, and TypeScript in this ${wordCount > 500 ? 'in-depth' : 'focused'} tutorial. Master frontend development with practical examples covering hooks, components, Redux, Next.js, responsive design, code optimization, and debugging techniques for building production-ready applications.`,
             ];
 
             setDescriptions(mockDescriptions);
