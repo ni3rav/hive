@@ -37,18 +37,16 @@ export default function EditPost() {
   const { postSlug } = useParams<{ postSlug: string }>();
 
   const {
+    metadata,
     setMetadata,
     editorRef,
     setOriginalMetadata: setContextOriginalMetadata,
     setOriginalContent: setContextOriginalContent,
+    originalMetadata,
+    originalContent,
     shouldSkipBlocker,
   } = useEditorContext();
-  const [localMetadata, setLocalMetadata] = useState<PostMetadata | null>(null);
-  const [originalMetadata, setOriginalMetadataState] =
-    useState<PostMetadata | null>(null);
-  const [originalContent, setOriginalContentState] = useState<string | null>(
-    null,
-  );
+
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<
     (() => void) | null
@@ -86,11 +84,8 @@ export default function EditPost() {
         ? JSON.stringify(post.content.contentJson)
         : null;
 
-      setLocalMetadata(postMetadata);
       setMetadata(postMetadata);
-      setOriginalMetadataState(postMetadata);
       setContextOriginalMetadata(postMetadata);
-      setOriginalContentState(serializedContent);
       setContextOriginalContent(serializedContent);
     }
   }, [
@@ -132,7 +127,7 @@ export default function EditPost() {
   );
 
   const hasUnsavedChanges = useCallback(() => {
-    if (!originalMetadata || !localMetadata) return false;
+    if (!originalMetadata || !metadata) return false;
 
     const editor = editorRef.current?.editor;
     if (!editor) return false;
@@ -141,20 +136,20 @@ export default function EditPost() {
     const contentChanged = currentContent !== originalContent;
 
     const metadataChanged =
-      localMetadata.title !== originalMetadata.title ||
-      localMetadata.slug !== originalMetadata.slug ||
-      localMetadata.excerpt !== originalMetadata.excerpt ||
-      localMetadata.authorId !== originalMetadata.authorId ||
-      localMetadata.categorySlug !== originalMetadata.categorySlug ||
-      JSON.stringify(localMetadata.tagSlugs) !==
+      metadata.title !== originalMetadata.title ||
+      metadata.slug !== originalMetadata.slug ||
+      metadata.excerpt !== originalMetadata.excerpt ||
+      metadata.authorId !== originalMetadata.authorId ||
+      metadata.categorySlug !== originalMetadata.categorySlug ||
+      JSON.stringify(metadata.tagSlugs) !==
         JSON.stringify(originalMetadata.tagSlugs) ||
-      localMetadata.visible !== originalMetadata.visible ||
-      localMetadata.status !== originalMetadata.status ||
-      localMetadata.publishedAt?.getTime() !==
+      metadata.visible !== originalMetadata.visible ||
+      metadata.status !== originalMetadata.status ||
+      metadata.publishedAt?.getTime() !==
         originalMetadata.publishedAt?.getTime();
 
     return contentChanged || metadataChanged;
-  }, [editorRef, localMetadata, originalMetadata, originalContent]);
+  }, [editorRef, metadata, originalMetadata, originalContent]);
 
   const handleGoBack = () => {
     if (hasUnsavedChanges()) {
@@ -256,7 +251,7 @@ export default function EditPost() {
     );
   }
 
-  if (!localMetadata) {
+  if (!metadata) {
     return (
       <div className='flex h-full items-center justify-center'>
         <Spinner className='h-8 w-8' />

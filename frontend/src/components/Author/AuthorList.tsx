@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { MoreHorizontal, Plus, Pencil, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card,
   CardContent,
@@ -30,6 +31,7 @@ type Props = {
   authors: Author[];
   onEditAuthor: (a: Author) => void;
   onDeleteAuthor: (authorId: string) => void; // ensure this prop exists
+  onDeleteSelected?: (authorIds: string[]) => void;
   onAddAuthor?: () => void;
 };
 
@@ -38,8 +40,10 @@ export default function AuthorList({
   onAddAuthor,
   onEditAuthor,
   onDeleteAuthor,
+  onDeleteSelected,
 }: Props) {
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -60,6 +64,31 @@ export default function AuthorList({
     onDeleteAuthor(id);
   };
 
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((a) => a.id!)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  const handleDeleteSelected = () => {
+    if (onDeleteSelected && selectedIds.size > 0) {
+      onDeleteSelected(Array.from(selectedIds));
+      setSelectedIds(new Set());
+    }
+  };
+
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
       <CardHeader>
@@ -77,7 +106,17 @@ export default function AuthorList({
               placeholder='Search authors...'
               className='sm:w-64'
             />
-            <Button onClick={onAddAuthor} className='whitespace-nowrap'>
+            {selectedIds.size > 0 && onDeleteSelected && (
+              <Button
+                variant='destructive'
+                onClick={handleDeleteSelected}
+                className='whitespace-nowrap'
+              >
+                <Trash2 size={16} className='mr-1' />
+                Delete ({selectedIds.size})
+              </Button>
+            )}
+            <Button onClick={onAddAuthor} className='whitespace-nowrap ml-auto'>
               <Plus size={16} className='mr-1' />
               Add Author
             </Button>
@@ -104,14 +143,36 @@ export default function AuthorList({
             </EmptyContent>
           </Empty>
         ) : (
-          <div className='divide-y'>
+          <div className='divide-y rounded-md border'>
+            <div className='flex items-center py-3 px-3 bg-muted/50 rounded-t-lg'>
+              <Checkbox
+                checked={
+                  selectedIds.size === filtered.length ||
+                  (selectedIds.size > 0 && 'indeterminate')
+                }
+                onCheckedChange={toggleSelectAll}
+                aria-label='Select all authors'
+              />
+              <span className='ml-3 text-sm text-muted-foreground'>
+                {selectedIds.size > 0
+                  ? `${selectedIds.size} selected`
+                  : 'Select all'}
+              </span>
+            </div>
             {filtered.map((author, idx) => (
               <div
                 key={author.id ?? idx}
-                className='group flex items-center justify-between py-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300'
+                className='group flex items-center justify-between py-3 px-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300 hover:bg-muted/30 cursor-pointer'
                 style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
+                onClick={() => onEditAuthor(author)}
               >
                 <div className='flex min-w-0 items-center gap-3'>
+                  <Checkbox
+                    checked={selectedIds.has(author.id!)}
+                    onCheckedChange={() => toggleSelect(author.id!)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label='Select author'
+                  />
                   <Avatar className='h-9 w-9'>
                     <AvatarFallback>
                       {author.name
@@ -135,7 +196,10 @@ export default function AuthorList({
                     <Button
                       variant='outline'
                       size='sm'
-                      onClick={() => onEditAuthor(author)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditAuthor(author);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Pencil size={16} className='mr-1' />
@@ -144,7 +208,10 @@ export default function AuthorList({
                     <Button
                       variant='destructive'
                       size='sm'
-                      onClick={() => handleDeleteClick(author.id!)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(author.id!);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Trash2 size={16} className='mr-1' />
@@ -161,6 +228,7 @@ export default function AuthorList({
                           size='icon'
                           aria-label='Actions'
                           className='hover:bg-muted/60'
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <MoreHorizontal size={18} />
                         </Button>
