@@ -35,22 +35,19 @@ export function SocialLinksInput({
 }: {
   className?: string;
   defaultValue?: SocialLinksValue;
-  onChange?: (value: SocialLinksValue) => void;
+  onChange?: (value: SocialLinksValue | undefined) => void;
   onValidationChange?: (hasErrors: boolean) => void;
   label?: string;
 }) {
   const [rows, setRows] = React.useState<SocialEntry[]>(() => {
-    if (!defaultValue)
-      return [{ id: crypto.randomUUID(), platform: '', link: '', error: null }];
+    if (!defaultValue || Object.keys(defaultValue).length === 0) return [];
     const entries = Object.entries(defaultValue).map(([platform, link]) => ({
       id: crypto.randomUUID(),
       platform: normalizeKey(platform),
       link,
       error: null,
     }));
-    return entries.length
-      ? entries
-      : [{ id: crypto.randomUUID(), platform: '', link: '', error: null }];
+    return entries;
   });
 
   React.useEffect(() => {
@@ -64,9 +61,8 @@ export function SocialLinksInput({
       obj[key] = r.link;
     });
 
-    if (Object.keys(obj).length > 0) {
-      onChange?.(obj);
-    }
+    const hasLinks = Object.keys(obj).length > 0;
+    onChange?.(hasLinks ? obj : undefined);
 
     onValidationChange?.(hasErrors || hasEmptyRows);
   }, [rows, onChange, onValidationChange]);
@@ -164,6 +160,11 @@ export function SocialLinksInput({
               + Add Link
             </Button>
           </div>
+          {rows.length === 0 && (
+            <div className='rounded-md border border-dotted border-foreground/20 bg-muted/10 px-3 py-2 text-sm text-muted-foreground text-center'>
+              No social links yet. Click “Add Link” to include one.
+            </div>
+          )}
 
           {rows.map((row) => {
             const { icon: Icon, platform } = detectPlatform(row.link);

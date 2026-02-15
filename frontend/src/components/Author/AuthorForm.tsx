@@ -90,7 +90,7 @@ export default function AuthorForm({
   };
 
   const handleSocialLinksChange = useCallback(
-    (value: Author['socialLinks']) => {
+    (value: Author['socialLinks'] | undefined) => {
       setSocialLinks(value);
     },
     [],
@@ -120,7 +120,7 @@ export default function AuthorForm({
         name: values.name,
         email: values.email,
         about: values.about,
-        socialLinks,
+        ...(socialLinks ? { socialLinks } : {}),
       });
       return;
     }
@@ -140,18 +140,26 @@ export default function AuthorForm({
     const socialLinksChanged =
       JSON.stringify(socialLinks) !== JSON.stringify(initialData?.socialLinks);
     if (socialLinksChanged) {
-      changedFields.socialLinks = socialLinks;
+      if (socialLinks) {
+        changedFields.socialLinks = socialLinks;
+      } else if (initialData?.socialLinks) {
+        changedFields.socialLinks = {};
+      }
     }
 
     onSave(changedFields);
   };
 
+  const watchedName = watch('name');
+  const watchedEmail = watch('email');
+  const watchedAbout = watch('about');
+
   const hasChanges = useMemo(() => {
     if (!isEditing) return true;
     const current = {
-      name: watch('name'),
-      email: watch('email'),
-      about: watch('about') || '',
+      name: watchedName,
+      email: watchedEmail,
+      about: watchedAbout || '',
     };
     const base = {
       name: initialData?.name || '',
@@ -166,7 +174,14 @@ export default function AuthorForm({
       current.email !== base.email ||
       current.about !== base.about
     );
-  }, [isEditing, initialData, socialLinks, watch]);
+  }, [
+    isEditing,
+    initialData,
+    socialLinks,
+    watchedName,
+    watchedEmail,
+    watchedAbout,
+  ]);
 
   return (
     <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
