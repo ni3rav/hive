@@ -1,4 +1,4 @@
-name: fin1 auto deployment for hive-backend
+name: deployment for hive-backend
 
 on:
   push:
@@ -50,4 +50,5 @@ jobs:
           # Optional
           buildArguments: |
             NODE_ENV=production
+
 
