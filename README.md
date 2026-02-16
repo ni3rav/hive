@@ -1,6 +1,6 @@
 # Hive
 
-Full-stack content collaboration platform composed of an Express/Drizzle API (`backend/`) and a Vite/React client (`frontend/`). The codebase is organized as a lightweight monorepo where each package can be developed independently while sharing a common architecture and conventions.
+Full-stack headless content collaboration platform composed of an Express/Drizzle API (`backend/`) and a Vite/React client (`frontend/`). The codebase is organized as a lightweight monorepo where each package can be developed independently while sharing a common architecture and conventions.
 
 ## Architecture at a Glance
 
