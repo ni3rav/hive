@@ -52,6 +52,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles } from 'lucide-react';
 
@@ -406,6 +414,7 @@ export function EditorSidebar() {
 
   const [activeTab, setActiveTab] = useQueryParam('tab', 'metadata');
   const [editorText, setEditorText] = React.useState('');
+  const [showClearDialog, setShowClearDialog] = React.useState(false);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -866,7 +875,7 @@ export function EditorSidebar() {
         </TabsContent>
       </SidebarContent>
       <SidebarFooter>
-        <div className='flex gap-2 p-4 pt-2'>
+        <div className='flex justify-start gap-2 p-4 pt-2'>
           <Button
             className='flex-1'
             size='sm'
@@ -886,13 +895,39 @@ export function EditorSidebar() {
             variant='outline'
             size='sm'
             className='flex-1'
-            onClick={handleClear}
+            onClick={() => setShowClearDialog(true)}
             disabled={isSaving}
           >
             Clear
           </Button>
         </div>
       </SidebarFooter>
+
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Clear everything?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to clear everything? This will reset the
+              editor content and all metadata. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setShowClearDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={() => {
+                handleClear();
+                setShowClearDialog(false);
+              }}
+            >
+              Clear everything
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Tabs>
   );
 }

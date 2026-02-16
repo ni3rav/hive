@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -111,6 +111,8 @@ export default function MediaManager() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const { data: user } = useAuth();
   const { data: workspace } = useWorkspaceVerification(workspaceSlug);
@@ -124,6 +126,7 @@ export default function MediaManager() {
   const deleteMedia = useDeleteMedia(workspaceSlug || '');
   const {
     uploadImage,
+    uploadImageAsync,
     isPending: isUploading,
     progress,
     uploadStage,
@@ -148,6 +151,56 @@ export default function MediaManager() {
     uploadImage(file);
     e.target.value = '';
   };
+
+  const getImageFiles = (files: FileList | undefined): File[] => {
+    if (!files) return [];
+    return Array.from(files).filter((f) => f.type.startsWith('image/'));
+  };
+
+  const processDroppedFiles = useCallback(
+    async (files: File[]) => {
+      if (!workspaceSlug || files.length === 0) return;
+      for (const file of files) {
+        try {
+          await uploadImageAsync(file);
+        } catch {
+          // Error already shown by mutation
+        }
+      }
+    },
+    [workspaceSlug, uploadImageAsync],
+  );
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    setIsDraggingOver(true);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    const related = e.relatedTarget as Node | null;
+    if (related && dropZoneRef.current?.contains(related)) return;
+    e.preventDefault();
+    setIsDraggingOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDraggingOver(false);
+      const imageFiles = getImageFiles(e.dataTransfer?.files);
+      if (imageFiles.length > 0) {
+        processDroppedFiles(imageFiles);
+      }
+    },
+    [processDroppedFiles],
+  );
 
   const handleDeleteClick = (media: Media) => {
     setSelectedMedia(media);
@@ -232,7 +285,29 @@ export default function MediaManager() {
 
   return (
     <>
-      <div className='p-6'>
+      <div
+        ref={dropZoneRef}
+        className='relative p-6'
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {isDraggingOver && (
+          <div className='absolute inset-0 z-[100] flex items-center justify-center m-6 rounded-lg border-2 border-dashed border-primary bg-primary/20 backdrop-blur-md ring-4 ring-primary/20 ring-inset'>
+            <div className='flex flex-col items-center gap-3 rounded-xl bg-background/90 px-10 py-8 shadow-lg ring-1 ring-primary/30'>
+              <div className='rounded-full bg-primary/30 p-4 ring-2 ring-primary/50'>
+                <ImageIcon className='h-10 w-10 text-primary' strokeWidth={2} />
+              </div>
+              <p className='text-lg font-semibold text-foreground'>
+                Drop images to upload
+              </p>
+              <p className='text-sm text-muted-foreground'>
+                Supports common image formats
+              </p>
+            </div>
+          </div>
+        )}
         <Card className='animate-in fade-in-50 zoom-in-95 duration-300'>
           <CardHeader>
             <div className='flex items-center justify-between'>

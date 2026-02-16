@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, FileDown } from 'lucide-react';
 import {
   Empty,
   EmptyContent,
@@ -28,6 +28,7 @@ import {
 import { useWorkspaceSlug } from '@/hooks/useWorkspaceSlug';
 import { useWorkspacePosts, useDeletePost } from '@/hooks/usePost';
 import { DataTable } from './data-table';
+import { ImportMarkdownDialog } from './ImportMarkdownDialog';
 import { createColumns } from './columns';
 import { useNavigate } from 'react-router-dom';
 import type { Post } from '@/types/post';
@@ -40,9 +41,16 @@ export default function PostsManager() {
 
   const [pendingDeleteSlugs, setPendingDeleteSlugs] = useState<string[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const handleNewPost = () => {
     navigate(`/dashboard/${workspaceSlug}/editor`);
+  };
+
+  const handleImportMarkdown = (raw: string) => {
+    navigate(`/dashboard/${workspaceSlug}/editor`, {
+      state: { markdownImport: { raw } },
+    });
   };
 
   const handleEdit = (postSlug: string) => {
@@ -160,10 +168,20 @@ export default function PostsManager() {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button onClick={handleNewPost} size='sm'>
-                    <Plus />
-                    Create Post
-                  </Button>
+                  <div className='flex gap-2'>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => setIsImportOpen(true)}
+                    >
+                      <FileDown />
+                      Import
+                    </Button>
+                    <Button onClick={handleNewPost} size='sm'>
+                      <Plus />
+                      Create Post
+                    </Button>
+                  </div>
                 </EmptyContent>
               </Empty>
             ) : (
@@ -171,6 +189,7 @@ export default function PostsManager() {
                 columns={tableColumns}
                 data={postsArray}
                 onNewPost={handleNewPost}
+                onImportMarkdown={() => setIsImportOpen(true)}
                 onEdit={handleEdit}
                 onDeleteSelected={handleDeleteSelected}
                 getRowSlug={getRowSlug}
@@ -179,6 +198,12 @@ export default function PostsManager() {
           </CardContent>
         </Card>
       </div>
+
+      <ImportMarkdownDialog
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        onFileReady={handleImportMarkdown}
+      />
 
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
