@@ -42,7 +42,7 @@ export default function AuthorsManager() {
   const updateAuthorMutation = useUpdateAuthor(workspaceSlug!);
   const deleteAuthorMutation = useDeleteAuthor(workspaceSlug!);
 
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleAddAuthor = () => {
@@ -56,21 +56,28 @@ export default function AuthorsManager() {
   };
 
   const onDeleteAuthor = (authorId: string) => {
-    setPendingDeleteId(authorId);
+    setPendingDeleteIds([authorId]);
     setIsDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (!pendingDeleteId) return;
-    const id = pendingDeleteId;
+  const onDeleteSelected = (authorIds: string[]) => {
+    setPendingDeleteIds(authorIds);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteIds.length === 0) return;
+    
+    for (const id of pendingDeleteIds) {
+      await deleteAuthorMutation.mutateAsync(id);
+    }
     setIsDeleteOpen(false);
-    setPendingDeleteId(null);
-    deleteAuthorMutation.mutate(id);
+    setPendingDeleteIds([]);
   };
 
   const cancelDelete = () => {
     setIsDeleteOpen(false);
-    setPendingDeleteId(null);
+    setPendingDeleteIds([]);
   };
 
   const handleSaveAuthor = (
@@ -160,6 +167,7 @@ export default function AuthorsManager() {
             onAddAuthor={handleAddAuthor}
             onEditAuthor={handleEditAuthor}
             onDeleteAuthor={onDeleteAuthor}
+            onDeleteSelected={onDeleteSelected}
           />
         ) : (
           <AuthorForm
@@ -176,18 +184,32 @@ export default function AuthorsManager() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete author</DialogTitle>
+            <DialogTitle>
+              {pendingDeleteIds.length > 1
+                ? `Delete ${pendingDeleteIds.length} authors`
+                : 'Delete author'}
+            </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the
-              author.
+              This action cannot be undone. This will permanently delete{' '}
+              {pendingDeleteIds.length > 1
+                ? `${pendingDeleteIds.length} authors.`
+                : 'the author.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant='outline' onClick={cancelDelete}>
               Cancel
             </Button>
-            <Button variant='destructive' onClick={confirmDelete}>
-              Delete
+            <Button
+              variant='destructive'
+              onClick={confirmDelete}
+              disabled={deleteAuthorMutation.isPending}
+            >
+              {deleteAuthorMutation.isPending
+                ? 'Deleting...'
+                : pendingDeleteIds.length > 1
+                  ? `Delete ${pendingDeleteIds.length} authors`
+                  : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

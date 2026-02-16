@@ -37,9 +37,7 @@ export default function TagsManager() {
   const updateTagMutation = useUpdateTag(workspaceSlug!);
   const deleteTagMutation = useDeleteTag(workspaceSlug!);
 
-  const [pendingDeleteSlug, setPendingDeleteSlug] = useState<string | null>(
-    null,
-  );
+  const [pendingDeleteSlugs, setPendingDeleteSlugs] = useState<string[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleAddTag = () => {
@@ -53,23 +51,28 @@ export default function TagsManager() {
   };
 
   const onDeleteTag = (tagSlug: string) => {
-    setPendingDeleteSlug(tagSlug);
+    setPendingDeleteSlugs([tagSlug]);
     setIsDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (!pendingDeleteSlug) return;
-    deleteTagMutation.mutate(pendingDeleteSlug, {
-      onSuccess: () => {
-        setIsDeleteOpen(false);
-        setPendingDeleteSlug(null);
-      },
-    });
+  const onDeleteSelected = (tagSlugs: string[]) => {
+    setPendingDeleteSlugs(tagSlugs);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteSlugs.length === 0) return;
+
+    for (const slug of pendingDeleteSlugs) {
+      await deleteTagMutation.mutateAsync(slug);
+    }
+    setIsDeleteOpen(false);
+    setPendingDeleteSlugs([]);
   };
 
   const cancelDelete = () => {
     setIsDeleteOpen(false);
-    setPendingDeleteSlug(null);
+    setPendingDeleteSlugs([]);
   };
 
   const handleSaveTag = async (tagData: CreateTagData) => {
@@ -150,6 +153,7 @@ export default function TagsManager() {
             onAddTag={handleAddTag}
             onEditTag={handleEditTag}
             onDeleteTag={onDeleteTag}
+            onDeleteSelected={onDeleteSelected}
           />
         ) : (
           <TagForm
@@ -166,10 +170,16 @@ export default function TagsManager() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete tag</DialogTitle>
+            <DialogTitle>
+              {pendingDeleteSlugs.length > 1
+                ? `Delete ${pendingDeleteSlugs.length} tags`
+                : 'Delete tag'}
+            </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the tag
-              and remove it from any associated posts.
+              This action cannot be undone. This will permanently delete{' '}
+              {pendingDeleteSlugs.length > 1
+                ? `${pendingDeleteSlugs.length} tags and remove them from any associated posts.`
+                : 'the tag and remove it from any associated posts.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -185,7 +195,11 @@ export default function TagsManager() {
               onClick={confirmDelete}
               disabled={deleteTagMutation.isPending}
             >
-              {deleteTagMutation.isPending ? 'Deleting...' : 'Delete'}
+              {deleteTagMutation.isPending
+                ? 'Deleting...'
+                : pendingDeleteSlugs.length > 1
+                  ? `Delete ${pendingDeleteSlugs.length} tags`
+                  : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -193,4 +207,3 @@ export default function TagsManager() {
     </>
   );
 }
-

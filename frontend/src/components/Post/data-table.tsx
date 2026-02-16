@@ -4,6 +4,7 @@ import * as React from 'react';
 import type {
   ColumnDef,
   ColumnFiltersState,
+  RowSelectionState,
   SortingState,
 } from '@tanstack/react-table';
 import {
@@ -16,6 +17,7 @@ import {
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -25,38 +27,89 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onNewPost?: () => void;
+  onEdit?: (postSlug: string) => void;
+  onDeleteSelected?: (postSlugs: string[]) => void;
+  getRowSlug: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onNewPost,
+  onEdit,
+  onDeleteSelected,
+  getRowSlug,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+
+  const selectionColumn: ColumnDef<TData, unknown> = {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label='Select all'
+        onClick={(e) => e.stopPropagation()}
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label='Select row'
+        onClick={(e) => e.stopPropagation()}
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  };
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [selectionColumn, ...columns],
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
+      rowSelection,
     },
   });
+
+  const selectedRows = table.getSelectedRowModel().rows;
+  const selectedSlugs = selectedRows.map((row) => getRowSlug(row.original));
+  const hasSelection = selectedRows.length > 0;
+
+  const handleRowClick = (row: { original: TData }) => {
+    const slug = getRowSlug(row.original);
+    if (onEdit && slug) {
+      onEdit(slug);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (onDeleteSelected && selectedSlugs.length > 0) {
+      onDeleteSelected(selectedSlugs);
+    }
+  };
 
   return (
     <div className='space-y-4'>
@@ -69,8 +122,18 @@ export function DataTable<TData, TValue>({
           }
           className='max-w-sm'
         />
+        {hasSelection && onDeleteSelected && (
+          <Button
+            variant='destructive'
+            onClick={handleDeleteSelected}
+            className='whitespace-nowrap'
+          >
+            <Trash2 size={16} className='mr-1' />
+            Delete ({selectedSlugs.length})
+          </Button>
+        )}
         {onNewPost && (
-          <Button onClick={onNewPost} className='whitespace-nowrap'>
+          <Button onClick={onNewPost} className='whitespace-nowrap ml-auto'>
             <Plus size={16} className='mr-1' />
             New Post
           </Button>
@@ -104,6 +167,8 @@ export function DataTable<TData, TValue>({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && 'selected'}
+                      onClick={() => handleRowClick(row)}
+                      className='cursor-pointer'
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
@@ -118,7 +183,7 @@ export function DataTable<TData, TValue>({
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length}
+                      colSpan={columns.length + 1}
                       className='h-24 text-center'
                     >
                       No results.
@@ -134,7 +199,9 @@ export function DataTable<TData, TValue>({
       </div>
       <div className='flex items-center justify-end space-x-2 py-4'>
         <div className='flex-1 text-sm text-muted-foreground'>
-          {table.getFilteredRowModel().rows.length} post(s) total.
+          {hasSelection
+            ? `${selectedSlugs.length} of ${table.getFilteredRowModel().rows.length} row(s) selected.`
+            : `${table.getFilteredRowModel().rows.length} post(s) total.`}
         </div>
         <Button
           variant='outline'

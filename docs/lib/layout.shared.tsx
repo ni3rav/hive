@@ -4,6 +4,13 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: 'Hive API',
+      url: '/',
     },
+    links: [
+      {
+        text: 'Docs',
+        url: '/docs',
+      },
+    ],
   };
 }
