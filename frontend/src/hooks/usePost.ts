@@ -79,6 +79,10 @@ export function useCreatePost(workspaceSlug: string) {
     },
     onSuccess: (data) => {
       toast.success('Post created successfully');
+      
+      queryClient.invalidateQueries({
+        queryKey: postsKey(workspaceSlug),
+      });
 
       const statsKey = QueryKeys.workspaceKeys().dashboardStats(workspaceSlug);
       queryClient.setQueryData<DashboardStatsPayload>(statsKey, (oldData) => {

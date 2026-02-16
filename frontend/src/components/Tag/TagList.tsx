@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card,
   CardContent,
@@ -35,6 +36,7 @@ type Props = {
   tags: Tag[];
   onEditTag: (t: Tag) => void;
   onDeleteTag: (tagSlug: string) => void;
+  onDeleteSelected?: (tagSlugs: string[]) => void;
   onAddTag?: () => void;
 };
 
@@ -43,8 +45,11 @@ export default function TagList({
   onAddTag,
   onEditTag,
   onDeleteTag,
+  onDeleteSelected,
 }: Props) {
   const [search, setSearch] = useState('');
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return tags;
@@ -56,6 +61,31 @@ export default function TagList({
 
   const handleDeleteClick = (slug: string) => {
     onDeleteTag(slug);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedSlugs.size === filtered.length) {
+      setSelectedSlugs(new Set());
+    } else {
+      setSelectedSlugs(new Set(filtered.map((t) => t.slug!)));
+    }
+  };
+
+  const toggleSelect = (slug: string) => {
+    const newSet = new Set(selectedSlugs);
+    if (newSet.has(slug)) {
+      newSet.delete(slug);
+    } else {
+      newSet.add(slug);
+    }
+    setSelectedSlugs(newSet);
+  };
+
+  const handleDeleteSelected = () => {
+    if (onDeleteSelected && selectedSlugs.size > 0) {
+      onDeleteSelected(Array.from(selectedSlugs));
+      setSelectedSlugs(new Set());
+    }
   };
 
   return (
@@ -75,7 +105,17 @@ export default function TagList({
               placeholder='Search tags...'
               className='sm:w-64'
             />
-            <Button onClick={onAddTag} className='whitespace-nowrap'>
+            {selectedSlugs.size > 0 && onDeleteSelected && (
+              <Button
+                variant='destructive'
+                onClick={handleDeleteSelected}
+                className='whitespace-nowrap'
+              >
+                <Trash2 size={16} className='mr-1' />
+                Delete ({selectedSlugs.size})
+              </Button>
+            )}
+            <Button onClick={onAddTag} className='whitespace-nowrap ml-auto'>
               <Plus size={16} className='mr-1' />
               Add Tag
             </Button>
@@ -102,14 +142,36 @@ export default function TagList({
             </EmptyContent>
           </Empty>
         ) : (
-          <div className='divide-y'>
+          <div className='divide-y rounded-md border'>
+            <div className='flex items-center py-3 px-3 bg-muted/50 rounded-t-lg'>
+              <Checkbox
+                checked={
+                  selectedSlugs.size === filtered.length ||
+                  (selectedSlugs.size > 0 && 'indeterminate')
+                }
+                onCheckedChange={toggleSelectAll}
+                aria-label='Select all tags'
+              />
+              <span className='ml-3 text-sm text-muted-foreground'>
+                {selectedSlugs.size > 0
+                  ? `${selectedSlugs.size} selected`
+                  : 'Select all'}
+              </span>
+            </div>
             {filtered.map((tag, idx) => (
               <div
                 key={tag.slug ?? idx}
-                className='group flex items-center justify-between py-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300'
+                className='group flex items-center justify-between py-3 px-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300 hover:bg-muted/30 cursor-pointer'
                 style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
+                onClick={() => onEditTag(tag)}
               >
                 <div className='flex min-w-0 items-center gap-3'>
+                  <Checkbox
+                    checked={selectedSlugs.has(tag.slug!)}
+                    onCheckedChange={() => toggleSelect(tag.slug!)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label='Select tag'
+                  />
                   <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
                     <TagIcon className='h-5 w-5' />
                   </div>
@@ -125,7 +187,10 @@ export default function TagList({
                     <Button
                       variant='outline'
                       size='sm'
-                      onClick={() => onEditTag(tag)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditTag(tag);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Pencil size={16} className='mr-1' />
@@ -134,7 +199,10 @@ export default function TagList({
                     <Button
                       variant='destructive'
                       size='sm'
-                      onClick={() => handleDeleteClick(tag.slug!)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(tag.slug!);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Trash2 size={16} className='mr-1' />
@@ -149,6 +217,7 @@ export default function TagList({
                           size='icon'
                           aria-label='Actions'
                           className='hover:bg-muted/60'
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <MoreHorizontal size={18} />
                         </Button>

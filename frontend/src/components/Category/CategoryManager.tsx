@@ -38,8 +38,8 @@ export default function CategoriesManager() {
   const createCategoryMutation = useCreateCategory(workspaceSlug!);
   const updateCategoryMutation = useUpdateCategory(workspaceSlug!);
   const deleteCategoryMutation = useDeleteCategory(workspaceSlug!);
-  
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const [pendingDeleteSlugs, setPendingDeleteSlugs] = useState<string[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleAddCategory = () => {
@@ -53,23 +53,28 @@ export default function CategoriesManager() {
   };
 
   const onDeleteCategory = (categorySlug: string) => {
-    setPendingDeleteId(categorySlug); 
+    setPendingDeleteSlugs([categorySlug]);
     setIsDeleteOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (!pendingDeleteId) return;
-    deleteCategoryMutation.mutate(pendingDeleteId, {
-      onSuccess: () => {
-        setIsDeleteOpen(false);
-        setPendingDeleteId(null);
-      },
-    });
+  const onDeleteSelected = (categorySlugs: string[]) => {
+    setPendingDeleteSlugs(categorySlugs);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (pendingDeleteSlugs.length === 0) return;
+
+    for (const slug of pendingDeleteSlugs) {
+      await deleteCategoryMutation.mutateAsync(slug);
+    }
+    setIsDeleteOpen(false);
+    setPendingDeleteSlugs([]);
   };
 
   const cancelDelete = () => {
     setIsDeleteOpen(false);
-    setPendingDeleteId(null);
+    setPendingDeleteSlugs([]);
   };
 
   const handleSaveCategory = async (categoryData: CreateCategoryData) => {
@@ -81,7 +86,7 @@ export default function CategoriesManager() {
     } else if (view === 'edit' && selectedCategory) {
       await updateCategoryMutation.mutateAsync({
         categorySlug: selectedCategory.slug,
-        data: categoryData
+        data: categoryData,
       });
       setSelectedCategory(null);
       setView('list');
@@ -150,6 +155,7 @@ export default function CategoriesManager() {
             onAddCategory={handleAddCategory}
             onEditCategory={handleEditCategory}
             onDeleteCategory={onDeleteCategory}
+            onDeleteSelected={onDeleteSelected}
           />
         ) : (
           <CategoryForm
@@ -166,10 +172,16 @@ export default function CategoriesManager() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete category</DialogTitle>
+            <DialogTitle>
+              {pendingDeleteSlugs.length > 1
+                ? `Delete ${pendingDeleteSlugs.length} categories`
+                : 'Delete category'}
+            </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the
-              category and remove it from any associated posts.
+              This action cannot be undone. This will permanently delete{' '}
+              {pendingDeleteSlugs.length > 1
+                ? `${pendingDeleteSlugs.length} categories and remove them from any associated posts.`
+                : 'the category and remove it from any associated posts.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -185,7 +197,11 @@ export default function CategoriesManager() {
               onClick={confirmDelete}
               disabled={deleteCategoryMutation.isPending}
             >
-              {deleteCategoryMutation.isPending ? 'Deleting...' : 'Delete'}
+              {deleteCategoryMutation.isPending
+                ? 'Deleting...'
+                : pendingDeleteSlugs.length > 1
+                  ? `Delete ${pendingDeleteSlugs.length} categories`
+                  : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

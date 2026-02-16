@@ -30,6 +30,7 @@ import { useWorkspacePosts, useDeletePost } from '@/hooks/usePost';
 import { DataTable } from './data-table';
 import { createColumns } from './columns';
 import { useNavigate } from 'react-router-dom';
+import type { Post } from '@/types/post';
 
 export default function PostsManager() {
   const workspaceSlug = useWorkspaceSlug();
@@ -37,9 +38,7 @@ export default function PostsManager() {
   const { data: posts, isLoading, isError } = useWorkspacePosts(workspaceSlug!);
   const deletePostMutation = useDeletePost(workspaceSlug!);
 
-  const [pendingDeleteSlug, setPendingDeleteSlug] = useState<string | null>(
-    null,
-  );
+  const [pendingDeleteSlugs, setPendingDeleteSlugs] = useState<string[]>([]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleNewPost = () => {
@@ -51,7 +50,12 @@ export default function PostsManager() {
   };
 
   const handleDelete = (postSlug: string) => {
-    setPendingDeleteSlug(postSlug);
+    setPendingDeleteSlugs([postSlug]);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteSelected = (postSlugs: string[]) => {
+    setPendingDeleteSlugs(postSlugs);
     setIsDeleteOpen(true);
   };
 
@@ -60,20 +64,22 @@ export default function PostsManager() {
     onDelete: handleDelete,
   });
 
-  const confirmDelete = () => {
-    if (!pendingDeleteSlug) return;
-    deletePostMutation.mutate(pendingDeleteSlug, {
-      onSuccess: () => {
-        setIsDeleteOpen(false);
-        setPendingDeleteSlug(null);
-      },
-    });
+  const confirmDelete = async () => {
+    if (pendingDeleteSlugs.length === 0) return;
+    
+    for (const slug of pendingDeleteSlugs) {
+      await deletePostMutation.mutateAsync(slug);
+    }
+    setIsDeleteOpen(false);
+    setPendingDeleteSlugs([]);
   };
 
   const cancelDelete = () => {
     setIsDeleteOpen(false);
-    setPendingDeleteSlug(null);
+    setPendingDeleteSlugs([]);
   };
+
+  const getRowSlug = (row: Post) => row.slug;
 
   if (isLoading || !workspaceSlug) {
     return (
@@ -165,6 +171,9 @@ export default function PostsManager() {
                 columns={tableColumns}
                 data={postsArray}
                 onNewPost={handleNewPost}
+                onEdit={handleEdit}
+                onDeleteSelected={handleDeleteSelected}
+                getRowSlug={getRowSlug}
               />
             )}
           </CardContent>
@@ -174,10 +183,16 @@ export default function PostsManager() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete post</DialogTitle>
+            <DialogTitle>
+              {pendingDeleteSlugs.length > 1
+                ? `Delete ${pendingDeleteSlugs.length} posts`
+                : 'Delete post'}
+            </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete the
-              post and all its content.
+              This action cannot be undone. This will permanently delete{' '}
+              {pendingDeleteSlugs.length > 1
+                ? `${pendingDeleteSlugs.length} posts and all their content.`
+                : 'the post and all its content.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -193,7 +208,11 @@ export default function PostsManager() {
               onClick={confirmDelete}
               disabled={deletePostMutation.isPending}
             >
-              {deletePostMutation.isPending ? 'Deleting...' : 'Delete'}
+              {deletePostMutation.isPending
+                ? 'Deleting...'
+                : pendingDeleteSlugs.length > 1
+                  ? `Delete ${pendingDeleteSlugs.length} posts`
+                  : 'Delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

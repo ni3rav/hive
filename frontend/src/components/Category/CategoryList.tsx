@@ -1,8 +1,9 @@
 import type { Category } from '@/types/category';
 import { useMemo, useState } from 'react';
-import { MoreHorizontal, Plus, Pencil, Trash2, Tag } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, Tag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card,
   CardContent,
@@ -30,6 +31,7 @@ type Props = {
   onEditCategory: (c: Category) => void;
   // FIX: This prop should expect the category SLUG
   onDeleteCategory: (categorySlug: string) => void;
+  onDeleteSelected?: (categorySlugs: string[]) => void;
   onAddCategory?: () => void;
 };
 
@@ -38,8 +40,11 @@ export default function CategoryList({
   onAddCategory,
   onEditCategory,
   onDeleteCategory,
+  onDeleteSelected,
 }: Props) {
   const [search, setSearch] = useState('');
+  const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return categories;
@@ -52,6 +57,31 @@ export default function CategoryList({
   // FIX: This handler now correctly receives a slug
   const handleDeleteClick = (slug: string) => {
     onDeleteCategory(slug);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedSlugs.size === filtered.length) {
+      setSelectedSlugs(new Set());
+    } else {
+      setSelectedSlugs(new Set(filtered.map((c) => c.slug!)));
+    }
+  };
+
+  const toggleSelect = (slug: string) => {
+    const newSet = new Set(selectedSlugs);
+    if (newSet.has(slug)) {
+      newSet.delete(slug);
+    } else {
+      newSet.add(slug);
+    }
+    setSelectedSlugs(newSet);
+  };
+
+  const handleDeleteSelected = () => {
+    if (onDeleteSelected && selectedSlugs.size > 0) {
+      onDeleteSelected(Array.from(selectedSlugs));
+      setSelectedSlugs(new Set());
+    }
   };
 
   return (
@@ -71,7 +101,17 @@ export default function CategoryList({
               placeholder='Search categories...'
               className='sm:w-64'
             />
-            <Button onClick={onAddCategory} className='whitespace-nowrap'>
+            {selectedSlugs.size > 0 && onDeleteSelected && (
+              <Button
+                variant='destructive'
+                onClick={handleDeleteSelected}
+                className='whitespace-nowrap'
+              >
+                <Trash2 size={16} className='mr-1' />
+                Delete ({selectedSlugs.size})
+              </Button>
+            )}
+            <Button onClick={onAddCategory} className='whitespace-nowrap ml-auto'>
               <Plus size={16} className='mr-1' />
               Add Category
             </Button>
@@ -82,7 +122,7 @@ export default function CategoryList({
             {/* ... (empty state) ... */}
             <EmptyHeader>
               <EmptyMedia variant='icon'>
-                <Tag />
+                <Layers />
               </EmptyMedia>
               <EmptyTitle>No Categories Yet</EmptyTitle>
               <EmptyDescription>
@@ -99,15 +139,37 @@ export default function CategoryList({
             </EmptyContent>
           </Empty>
         ) : (
-          <div className='divide-y'>
+          <div className='divide-y rounded-md border'>
+            <div className='flex items-center py-3 px-3 bg-muted/50 rounded-t-lg'>
+              <Checkbox
+                checked={
+                  selectedSlugs.size === filtered.length ||
+                  (selectedSlugs.size > 0 && 'indeterminate')
+                }
+                onCheckedChange={toggleSelectAll}
+                aria-label='Select all categories'
+              />
+              <span className='ml-3 text-sm text-muted-foreground'>
+                {selectedSlugs.size > 0
+                  ? `${selectedSlugs.size} selected`
+                  : 'Select all'}
+              </span>
+            </div>
             {filtered.map((category, idx) => (
               <div
                 key={category.id ?? idx}
-                className='group flex items-center justify-between py-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300'
+                className='group flex items-center justify-between py-3 px-3 animate-in fade-in-50 slide-in-from-bottom-1 duration-300 hover:bg-muted/30 cursor-pointer'
                 style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
+                onClick={() => onEditCategory(category)}
               >
                 <div className='flex min-w-0 items-center gap-3'>
                   {/* ... (category info) ... */}
+                  <Checkbox
+                    checked={selectedSlugs.has(category.slug!)}
+                    onCheckedChange={() => toggleSelect(category.slug!)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label='Select category'
+                  />
                   <div className='flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground'>
                     <Tag className='h-5 w-5' />
                   </div>
@@ -123,7 +185,10 @@ export default function CategoryList({
                     <Button
                       variant='outline'
                       size='sm'
-                      onClick={() => onEditCategory(category)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditCategory(category);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Pencil size={16} className='mr-1' />
@@ -133,7 +198,10 @@ export default function CategoryList({
                       variant='destructive'
                       size='sm'
                       // FIX: Pass category.slug, NOT category.id
-                      onClick={() => handleDeleteClick(category.slug!)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(category.slug!);
+                      }}
                       className='whitespace-nowrap'
                     >
                       <Trash2 size={16} className='mr-1' />
@@ -148,6 +216,7 @@ export default function CategoryList({
                           size='icon'
                           aria-label='Actions'
                           className='hover:bg-muted/60'
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <MoreHorizontal size={18} />
                         </Button>
