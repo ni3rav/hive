@@ -912,11 +912,8 @@ export function EditorSidebar() {
               editor content and all metadata. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className='sm:justify-start'>
-            <Button
-              variant='outline'
-              onClick={() => setShowClearDialog(false)}
-            >
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setShowClearDialog(false)}>
               Cancel
             </Button>
             <Button

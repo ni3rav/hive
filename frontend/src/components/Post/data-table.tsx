@@ -27,12 +27,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, FileDown } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onNewPost?: () => void;
+  onImportMarkdown?: () => void;
   onEdit?: (postSlug: string) => void;
   onDeleteSelected?: (postSlugs: string[]) => void;
   getRowSlug: (row: TData) => string;
@@ -42,6 +43,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   onNewPost,
+  onImportMarkdown,
   onEdit,
   onDeleteSelected,
   getRowSlug,
@@ -132,12 +134,24 @@ export function DataTable<TData, TValue>({
             Delete ({selectedSlugs.length})
           </Button>
         )}
-        {onNewPost && (
-          <Button onClick={onNewPost} className='whitespace-nowrap ml-auto'>
-            <Plus size={16} className='mr-1' />
-            New Post
-          </Button>
-        )}
+        <div className='flex items-center gap-2 ml-auto'>
+          {onImportMarkdown && (
+            <Button
+              variant='outline'
+              onClick={onImportMarkdown}
+              className='whitespace-nowrap'
+            >
+              <FileDown size={16} className='mr-1' />
+              Import Markdown
+            </Button>
+          )}
+          {onNewPost && (
+            <Button onClick={onNewPost} className='whitespace-nowrap'>
+              <Plus size={16} className='mr-1' />
+              New Post
+            </Button>
+          )}
+        </div>
       </div>
       <div className='rounded-md border overflow-hidden'>
         <ScrollArea className='w-full'>
