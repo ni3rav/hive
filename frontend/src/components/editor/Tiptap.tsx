@@ -37,11 +37,12 @@ import './tiptap.css';
 const IMAGE_WARNING =
   'Images in markdown are not supported. Raw text inserted—add images manually.';
 
+// Only treat real files as markdown drops so internal
+// editor drags (used for node reordering) are never intercepted.
 function isMarkdownDrop(event: DragEvent): boolean {
   const types = event.dataTransfer?.types;
   if (!types) return false;
-  if (types.includes('Files')) return true;
-  return types.includes('text/plain');
+  return types.includes('Files');
 }
 
 function isMarkdownPaste(text: string): boolean {
