@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 import {
   listWorkspacePostsController,
   getPostWithContentController,
@@ -14,6 +15,15 @@ router.use('/:workspaceSlug', verifyWorkspaceMembership);
 
 router.get('/:workspaceSlug', listWorkspacePostsController);
 router.get('/:workspaceSlug/:postSlug', getPostWithContentController);
-router.post('/:workspaceSlug', createPostController);
-router.patch('/:workspaceSlug/:postSlug', updatePostController);
+// Increase body size limit for large payloads on POST and PATCH
+router.post(
+  '/:workspaceSlug',
+  express.json({ limit: '5mb' }),
+  createPostController,
+);
+router.patch(
+  '/:workspaceSlug/:postSlug',
+  express.json({ limit: '5mb' }),
+  updatePostController,
+);
 router.delete('/:workspaceSlug/:postSlug', deletePostController);
