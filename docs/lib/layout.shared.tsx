@@ -3,10 +3,14 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: 'Hive API',
-      url: '/',
+      title: 'Hive API Docs',
+      url: '/docs',
     },
     links: [
+      {
+        text: 'Go Home',
+        url: '/',
+      },
       {
         text: 'Docs',
         url: '/docs',
