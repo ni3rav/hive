@@ -158,6 +158,14 @@ export class QueryKeys {
     },
   };
 
+  private static ai = {
+    base: ['ai'] as const,
+
+    provider() {
+      return [...this.base, 'provider'] as const;
+    },
+  };
+
   public static userKeys() {
     return this.user;
   }
@@ -190,6 +198,10 @@ export class QueryKeys {
     return this.media;
   }
 
+  public static aiKeys() {
+    return this.ai;
+  }
+
   public static allKeys() {
     return {
       user: this.user.base,
@@ -200,6 +212,7 @@ export class QueryKeys {
       workspace: this.workspace.base,
       apiKeys: this.apiKeys.base,
       media: this.media.base,
+      ai: this.ai.base,
     };
   }
 }

@@ -1,26 +1,35 @@
 import { useAuth, useLogout } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Edit, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { EditProfileForm } from '@/components/EditProfileForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHead } from '@unhead/react';
 import { createSEOMetadata } from '@/lib/seo';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { getLastWorkspaceSlugs } from '@/lib/utils';
+import {
+  useAIProvider,
+  useDeleteAIProvider,
+  useSaveAIProvider,
+} from '@/hooks/useAIProvider';
+import { ProfileOverviewCard } from '@/components/Profile/ProfileOverviewCard';
+import { ProfileSettingsList } from '@/components/Profile/ProfileSettingsList';
+import { AISettingsPanel } from '@/components/Profile/AISettingsPanel';
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: user, isLoading, isError } = useAuth();
   const logoutMutation = useLogout();
-  const [isEditing, setIsEditing] = useState(false);
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [model, setModel] = useState('gemini-2.5-flash');
+  const { data: aiProvider, isLoading: isAiLoading } = useAIProvider();
+  const saveAIProviderMutation = useSaveAIProvider();
+  const deleteAIProviderMutation = useDeleteAIProvider();
+  const isEditingView = searchParams.has('edit');
+  const isAiView = searchParams.has('ai') && !isEditingView;
 
   useHead(
     createSEOMetadata({
@@ -38,89 +47,191 @@ export function ProfilePage() {
     });
   };
 
-  const handleEditSuccess = () => {
-    setIsEditing(false);
+  const openEdit = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('ai');
+    next.set('edit', 'true');
+    setSearchParams(next);
+  };
+
+  const closeEdit = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('edit');
+    setSearchParams(next);
+  };
+
+  useEffect(() => {
+    if (aiProvider?.model) {
+      setModel(aiProvider.model);
+    }
+  }, [aiProvider?.model]);
+
+  const handleSaveGeminiKey = () => {
+    const trimmedKey = geminiApiKey.trim();
+    const trimmedModel = model.trim();
+
+    if (!trimmedKey) {
+      return;
+    }
+
+    saveAIProviderMutation.mutate(
+      {
+        apiKey: trimmedKey,
+        model: trimmedModel || undefined,
+      },
+      {
+        onSuccess: () => {
+          setGeminiApiKey('');
+        },
+      },
+    );
+  };
+
+  const handleDeleteGeminiKey = () => {
+    deleteAIProviderMutation.mutate();
+  };
+
+  const openAiSettings = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('edit');
+    next.set('ai', 'true');
+    setSearchParams(next);
+  };
+
+  const closeAiSettings = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('ai');
+    setSearchParams(next);
+  };
+
+  const aiStatusText = isAiLoading
+    ? 'Checking...'
+    : aiProvider?.hasKey
+      ? 'Configured'
+      : 'Not configured';
+
+  const handleBack = () => {
+    if (isEditingView) {
+      closeEdit();
+      return;
+    }
+
+    if (isAiView) {
+      closeAiSettings();
+      return;
+    }
+
+    const { current, previous } = getLastWorkspaceSlugs();
+    const targetWorkspaceSlug = current ?? previous;
+
+    if (targetWorkspaceSlug) {
+      navigate(`/dashboard/${targetWorkspaceSlug}`);
+      return;
+    }
+
+    navigate('/workspaces');
   };
 
   return (
-    <div className='flex min-h-screen w-full items-center justify-center bg-background p-4'>
-      {isLoading && (
-        <Skeleton className='h-[400px] w-full max-w-xl rounded-lg' />
-      )}
-      {isError && !isLoading && (
-        <div className='text-center text-destructive'>
-          <h2>Error Loading Profile</h2>
-        </div>
-      )}
-      {user && (
-        <>
-          {isEditing ? (
-            <EditProfileForm
-              user={user}
-              onCancel={() => setIsEditing(false)}
-              onSuccess={handleEditSuccess}
-            />
-          ) : (
-            <Card className='w-full max-w-xl rounded-lg'>
-              <CardHeader>
-                <div className='flex items-start justify-between gap-4'>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='mt-1'
-                    onClick={() => navigate(-1)}
-                  >
-                    <ArrowLeft className='h-4 w-4' />
-                  </Button>
-                  <div className='flex flex-1 flex-wrap items-center justify-between gap-4'>
-                    <div className='flex items-center gap-4'>
-                      <Avatar className='h-14 w-14'>
-                        <AvatarImage src={undefined} alt={user.name} />
-                        <AvatarFallback className='bg-primary text-xl font-medium text-primary-foreground'>
-                          {user.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className='text-lg font-semibold'>
-                          {user.name}
-                        </CardTitle>
-                        <CardDescription>{user.email}</CardDescription>
-                      </div>
-                    </div>
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <Edit className='mr-2 h-4 w-4' />
-                        Edit
-                      </Button>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={handleLogout}
-                        disabled={logoutMutation.isPending}
-                      >
-                        {logoutMutation.isPending ? (
-                          'Logging out...'
-                        ) : (
-                          <>
-                            <LogOut className='mr-2 h-4 w-4' />
-                            Logout
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
+    <ScrollArea className='h-screen'>
+      <div className='h-screen w-screen p-8'>
+        <div className='mx-auto flex min-h-full w-full max-w-2xl items-center justify-center'>
+          <div className='w-full space-y-8'>
+            <section className='space-y-2'>
+              <div className='flex items-center gap-2'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-8 w-8'
+                  onClick={handleBack}
+                >
+                  <ArrowLeft className='h-4 w-4' />
+                </Button>
+                <div>
+                  <h1 className='text-2xl font-semibold tracking-tight'>
+                    {isAiView ? 'AI Settings' : 'Profile'}
+                  </h1>
+                  <p className='text-sm text-muted-foreground'>
+                    {isAiView
+                      ? 'Manage your Gemini BYOK configuration.'
+                      : 'Manage your account and personal settings.'}
+                  </p>
                 </div>
-              </CardHeader>
+              </div>
+            </section>
 
-              <CardContent />
-            </Card>
-          )}
-        </>
-      )}
-    </div>
+            {isLoading && (
+              <section>
+                <Skeleton className='h-[320px] w-full rounded-lg' />
+              </section>
+            )}
+            {isError && !isLoading && (
+              <section>
+                <div className='rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive'>
+                  Error loading profile.
+                </div>
+              </section>
+            )}
+            {user && (
+              <>
+                {isEditingView ? (
+                  <section>
+                    <div className='mx-auto w-full max-w-2xl'>
+                      <EditProfileForm
+                        user={user}
+                        onCancel={closeEdit}
+                        onSuccess={closeEdit}
+                      />
+                    </div>
+                  </section>
+                ) : (
+                  <>
+                    {!isAiView && (
+                      <>
+                        <section>
+                          <ProfileOverviewCard
+                            name={user.name}
+                            email={user.email}
+                            isLoggingOut={logoutMutation.isPending}
+                            onEdit={openEdit}
+                            onLogout={handleLogout}
+                          />
+                        </section>
+
+                        <section>
+                          <ProfileSettingsList
+                            aiStatusText={aiStatusText}
+                            onOpenAiSettings={openAiSettings}
+                          />
+                        </section>
+                      </>
+                    )}
+
+                    {isAiView && (
+                      <section>
+                        <div className='space-y-4'>
+                          <AISettingsPanel
+                            geminiApiKey={geminiApiKey}
+                            model={model}
+                            statusText={aiStatusText}
+                            isSaving={saveAIProviderMutation.isPending}
+                            isRemoving={deleteAIProviderMutation.isPending}
+                            hasKey={Boolean(aiProvider?.hasKey)}
+                            onApiKeyChange={setGeminiApiKey}
+                            onModelChange={setModel}
+                            onSave={handleSaveGeminiKey}
+                            onRemove={handleDeleteGeminiKey}
+                          />
+                        </div>
+                      </section>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </ScrollArea>
   );
 }

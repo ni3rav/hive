@@ -102,7 +102,7 @@ export function EditProfileForm({
   };
 
   return (
-    <Card className='w-full max-w-xl'>
+    <Card className='w-full'>
       <CardHeader>
         <CardTitle>Edit Profile</CardTitle>
         <CardDescription>Update your name and email address</CardDescription>
