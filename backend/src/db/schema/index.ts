@@ -8,3 +8,4 @@ export * from './workspace-invitation';
 export * from './workspace-api-key';
 export * from './email-rate-limit';
 export * from './media';
+export * from './ai';

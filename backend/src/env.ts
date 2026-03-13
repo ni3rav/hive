@@ -14,6 +14,7 @@ const validatedEnv = cleanEnv(process.env, {
   R2_PUBLIC_URL: str(),
   AZURE_FUNCTION_SECRET: str(),
   AZURE_THUMBHASH_FUNCTION_URL: str(),
+  AI_ENCRYPTION_KEY: str(),
   DMA: bool({ default: false }),
   DEV_USER_ID: str({ default: '' }),
 });

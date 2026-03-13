@@ -148,6 +148,13 @@
       "when": 1768298202768,
       "tag": "0020_free_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1773381140705,
+      "tag": "0021_gifted_onslaught",
+      "breakpoints": true
     }
   ]
 }
