@@ -20,6 +20,10 @@ import {
 } from '../utils/responses';
 
 const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
+const HTML_PRESERVATION_RULES = `If the input contains HTML tags:
+- Preserve all existing HTML tags and hierarchy.
+- Rewrite only the textual content inside tags.
+- Return valid HTML only, with no markdown fences or extra commentary.`;
 
 function getToneInstruction(tone?: string): string {
   if (!tone) {
@@ -36,18 +40,23 @@ function getTransformInstruction(
   switch (action) {
     case 'change_tone':
       return `${getToneInstruction(tone)}
+${HTML_PRESERVATION_RULES}
 Return only the rewritten text.`;
     case 'fix_grammar':
       return `Fix grammar, spelling, punctuation, and readability while preserving the original meaning and voice.
+${HTML_PRESERVATION_RULES}
 Return only the corrected text.`;
     case 'elaborate':
       return `Expand the text with useful detail and clarity while preserving core meaning.
+${HTML_PRESERVATION_RULES}
 Return only the rewritten text.`;
     case 'concise':
       return `Make the text concise while preserving core meaning and key facts.
+${HTML_PRESERVATION_RULES}
 Return only the rewritten text.`;
     default:
       return `Fix grammar, spelling, punctuation, and readability while preserving the original meaning and voice.
+${HTML_PRESERVATION_RULES}
 Return only the corrected text.`;
   }
 }

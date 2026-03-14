@@ -75,6 +75,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { z } from 'zod';
+import { AISelectionControls } from './AISelectionControls';
 
 interface ToolbarProps {
   editor: Editor;
@@ -1165,6 +1166,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         <LinkButton editor={editor} />
         <YoutubeButton editor={editor} />
         <ImageButton ref={imageButtonRef} editor={editor} />
+        <AISelectionControls editor={editor} />
         <Divider />
         <FontFamilySelect editor={editor} />
         <Divider />

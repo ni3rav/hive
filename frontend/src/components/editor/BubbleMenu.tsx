@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { memo, type ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
+import { AISelectionControls } from './AISelectionControls';
 
 interface EditorBubbleMenuProps {
   editor: Editor;
@@ -100,6 +101,8 @@ export const EditorBubbleMenu = memo(({ editor }: EditorBubbleMenuProps) => {
         isActive={editor.isActive('code')}
         icon={Code}
       />
+      <div className='mx-1 h-5 w-px bg-foreground/15' />
+      <AISelectionControls editor={editor} />
     </TiptapBubbleMenu>
   );
 });
