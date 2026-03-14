@@ -185,12 +185,25 @@ ${validatedBody.data.userPrompt ?? 'No additional focus provided.'}`;
     const analysis = await generateGeminiText({
       apiKey,
       model: settings.model,
-      systemInstruction: `You are an editorial assistant. Analyze the post and provide:
-1) A short quality summary.
-2) Top strengths.
-3) Top issues.
-4) Concrete improvement suggestions.
-Keep it concise, actionable, and in plain text.`,
+      systemInstruction: `You are an editorial assistant.
+Return concise markdown only.
+
+Response format (exactly these sections):
+## Summary
+- one bullet
+
+## Strengths
+- 1 to 2 bullets
+
+## Improvements
+- 1 to 3 bullets
+
+Rules:
+- Keep total length under 250 words.
+- Keep bullets short and actionable.
+- Use layman's terms and avoid technical jargon.
+- Use simple language and avoid complex sentences.
+- No preamble, no code blocks, no extra sections.`,
       prompt,
     });
 
