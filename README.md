@@ -39,8 +39,8 @@ Full-stack headless content collaboration platform composed of an Express/Drizzl
    docker run --name hive-postgres -e POSTGRES_PASSWORD=password -d -p 5432:5432 postgres:16
    ```
 3. **Configure environment**
-   - Backend `.env` (see table below) inside `backend/`
-   - Frontend `.env` inside `frontend/`
+   - Copy `backend/.env.example` to `backend/.env` and fill values.
+   - Copy `frontend/.env.example` to `frontend/.env` and fill values.
 4. **Apply database schema**
    ```bash
    cd backend
@@ -54,29 +54,28 @@ Full-stack headless content collaboration platform composed of an Express/Drizzl
 
 ### Backend (`backend/.env`)
 
-| Variable         | Required | Description                                                           |
-| ---------------- | -------- | --------------------------------------------------------------------- |
-| `DATABASE_URL`   | ✅       | Full Postgres connection string                                       |
-| `PORT`           | ✅       | API port (e.g., `3000`)                                               |
-| `NODE_ENV`       | ✅       | `development` / `production`                                          |
-| `FRONTEND_URL`   | ✅       | Allowed origin for CORS + auth links                                  |
-| `RESEND_API_KEY` | ✅       | API key for Resend transactional emails                               |
-| `DMA`            | optional | Enable DMA-specific safeguards (defaults to `false`)                  |
-| `DEV_USER_ID`    | optional | Seeded ID used for local fixtures                                     |
-| `EMAIL_DOMAIN`   | optional | Domain used for transactional senders (`emails.ni3rav.me` by default) |
+| Variable                        | Required | Description                                                                 |
+| ------------------------------- | -------- | --------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | ✅       | Full Postgres connection string                                             |
+| `PORT`                          | ✅       | API port (e.g., `3000`)                                                     |
+| `NODE_ENV`                      | ✅       | `development` / `production`                                                |
+| `FRONTEND_URL`                  | ✅       | Allowed origin for CORS + auth links                                        |
+| `RESEND_API_KEY`                | ✅       | API key for Resend transactional emails                                     |
+| `EMAIL_DOMAIN`                  | ✅       | Domain used for transactional senders                                       |
+| `R2_ACCOUNT_ID`                 | ✅       | Cloudflare R2 account id                                                    |
+| `R2_ACCESS_KEY_ID`              | ✅       | R2 access key id                                                            |
+| `R2_SECRET_ACCESS_KEY`          | ✅       | R2 secret key                                                               |
+| `R2_BUCKET_NAME`                | ✅       | R2 bucket for media uploads                                                 |
+| `R2_PUBLIC_URL`                 | ✅       | Public base URL for uploaded media                                          |
+| `AZURE_FUNCTION_SECRET`         | ✅       | Shared secret used when calling Azure Functions                             |
+| `AZURE_THUMBHASH_FUNCTION_URL`  | ✅       | URL of thumbhash generation Azure Function                                  |
+| `AI_ENCRYPTION_KEY`             | ✅       | Server-side encryption key for per-user BYOK Gemini keys (keep stable)      |
+| `DMA`                           | optional | Enable DMA-specific safeguards (defaults to `false`)                        |
+| `DEV_USER_ID`                   | optional | Seeded ID used for local fixtures                                           |
 
 Example:
 
-```
-DATABASE_URL=postgres://postgres:password@localhost:5432/postgres
-PORT=3000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
-RESEND_API_KEY=re_123
-DMA=false
-DEV_USER_ID=
-EMAIL_DOMAIN=emails.ni3rav.me
-```
+Use `backend/.env.example` as the source of truth for backend env setup.
 
 ### Frontend (`frontend/.env`)
 
@@ -87,10 +86,16 @@ EMAIL_DOMAIN=emails.ni3rav.me
 
 Example:
 
-```
-VITE_HIVE_API_BASE_URL=http://localhost:3000
-VITE_APP_URL=http://localhost:5173
-```
+Use `frontend/.env.example` as the source of truth for frontend env setup.
+
+## BYOK AI (Gemini)
+
+- Keys are configured by users at `/profile?ai`.
+- Keys are encrypted server-side before storage (`user_ai_settings` table).
+- The raw key is never returned to the frontend after save.
+- AI features currently include:
+  - Post analysis in the editor sidebar.
+  - Selection-based rewrite tools in the editor (grammar, concise, elaborate, tone).
 
 ## Helpful Scripts
 
