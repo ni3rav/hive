@@ -54,9 +54,6 @@ import {
 } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import { Sparkles } from 'lucide-react';
-import { useAIProvider } from '@/hooks/useAIProvider';
-import { usePostAnalysis } from '@/hooks/usePostAnalysis';
-import ReactMarkdown from 'react-markdown';
 
 export function EditorSidebar() {
   const {
@@ -72,8 +69,6 @@ export function EditorSidebar() {
 
   const createPostMutation = useCreatePost(workspaceSlug);
   const updatePostMutation = useUpdatePost(workspaceSlug, postSlug || '');
-  const { data: aiProvider, isLoading: isAiProviderLoading } = useAIProvider();
-  const postAnalysisMutation = usePostAnalysis();
   const navigate = useNavigate();
 
   const defaultValues = useMemo<PostMetadataFormData>(
@@ -411,8 +406,6 @@ export function EditorSidebar() {
 
   const [activeTab, setActiveTab] = useQueryParam('tab', 'metadata');
   const [editorText, setEditorText] = React.useState('');
-  const [analysisPrompt, setAnalysisPrompt] = React.useState('');
-  const [analysisResult, setAnalysisResult] = React.useState('');
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -478,37 +471,6 @@ export function EditorSidebar() {
       readingTime,
     };
   }, [editor, editorText]);
-
-  const hasAiKey = Boolean(aiProvider?.hasKey);
-
-  const handleAnalyzePost = async () => {
-    if (!hasAiKey) {
-      navigate('/profile?ai');
-      return;
-    }
-
-    if (!editor) {
-      toast.error('Editor is not ready');
-      return;
-    }
-
-    const content = editor.getText().trim();
-
-    if (!content) {
-      toast.error('Add some content before running analysis');
-      return;
-    }
-
-    try {
-      const response = await postAnalysisMutation.mutateAsync({
-        content,
-        userPrompt: analysisPrompt.trim() || undefined,
-      });
-      setAnalysisResult(response.analysis);
-    } catch {
-      // Error handling is done in usePostAnalysis with toasts.
-    }
-  };
 
   return (
     <Tabs
@@ -891,78 +853,12 @@ export function EditorSidebar() {
                       AI Analysis
                     </h3>
                   </div>
+                  <p className='text-xs text-muted-foreground'>Coming soon</p>
                   <p className='text-sm text-muted-foreground'>
                     Get AI-powered insights for readability, SEO optimization,
                     and content structure to enhance your post before
                     publishing.
                   </p>
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium text-foreground'>
-                    Analysis prompt (optional)
-                  </label>
-                  <Textarea
-                    value={analysisPrompt}
-                    onChange={(e) => setAnalysisPrompt(e.target.value)}
-                    placeholder='Example: Focus on SEO and readability for beginners.'
-                    className='min-h-[92px]'
-                  />
-                </div>
-
-                {!hasAiKey && !isAiProviderLoading && (
-                  <div className='rounded-md border border-dashed border-foreground/20 bg-muted/30 p-3'>
-                    <p className='text-xs text-muted-foreground'>
-                      Configure your Gemini key in profile settings to use AI
-                      analysis.
-                    </p>
-                    <Button
-                      type='button'
-                      size='sm'
-                      variant='outline'
-                      className='mt-3'
-                      onClick={() => navigate('/profile?ai')}
-                    >
-                      Configure AI
-                    </Button>
-                  </div>
-                )}
-
-                <Button
-                  type='button'
-                  size='sm'
-                  onClick={handleAnalyzePost}
-                  disabled={
-                    isAiProviderLoading ||
-                    postAnalysisMutation.isPending ||
-                    !editorText.trim()
-                  }
-                >
-                  {postAnalysisMutation.isPending ? (
-                    <>
-                      <Loader2 className='mr-2 h-3 w-3 animate-spin' />
-                      Analyzing...
-                    </>
-                  ) : (
-                    'Analyze post'
-                  )}
-                </Button>
-
-                <div className='space-y-2'>
-                  <label className='text-sm font-medium text-foreground'>
-                    Analysis result
-                  </label>
-                  <div className='min-h-[140px] rounded-md border border-foreground/10 bg-muted/20 p-3 text-sm'>
-                    {analysisResult ? (
-                      <div className='space-y-2 text-sm leading-relaxed [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1 [&_p]:text-muted-foreground [&_li]:text-muted-foreground'>
-                        <ReactMarkdown>{analysisResult}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <span className='text-muted-foreground'>
-                        No analysis yet.
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
