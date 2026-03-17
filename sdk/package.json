@@ -1,15 +1,30 @@
 {
   "name": "hive-cms",
   "type": "module",
-  "version": "0.0.0",
-  "private": true,
-  "description": "A simple example library built by tsdown",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Type-safe Node.js SDK for Hive CMS public API.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "browser": false,
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
