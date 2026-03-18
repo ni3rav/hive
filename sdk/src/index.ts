@@ -18,7 +18,7 @@ import type {
   PublicTag,
 } from "./internal/types";
 
-const DEFAULT_BASE_URL = "https://hivecms.online/api/public";
+const DEFAULT_BASE_URL = "https://api.hivecms.online/api/public";
 const DEFAULT_VERSION = "v1";
 
 let hasWarnedBrowserUsage = false;
