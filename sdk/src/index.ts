@@ -1,4 +1,12 @@
 import { HiveApiError } from "./internal/errors";
+import {
+  parseAuthorsResponse,
+  parseCategoriesResponse,
+  parsePostDetail,
+  parsePostsListResponse,
+  parseStatsResponse,
+  parseTagsResponse,
+} from "./internal/parsers";
 import type {
   HiveClientOptions,
   PostListFilters,
@@ -111,12 +119,8 @@ export class Hive {
         const query = params.toString();
         const path = query ? `/posts?${query}` : "/posts";
 
-        return this.request<{
-          data: PublicPostSummary[];
-          total: number;
-          offset: number;
-          limit: number;
-        }>(path);
+        const payload = await this.request(path);
+        return parsePostsListResponse(payload);
       },
       get: async (postSlug: string) => {
         if (!postSlug || postSlug.trim().length === 0) {
@@ -126,39 +130,39 @@ export class Hive {
             "INVALID_SDK_CONFIG",
           );
         }
-        return this.request<PublicPostDetail>(
+        const payload = await this.request(
           `/posts/${encodeURIComponent(postSlug)}`,
         );
+        return parsePostDetail(payload);
       },
     };
 
     this.tags = {
       list: async () => {
-        const response = await this.request<{ data: PublicTag[] }>("/tags");
-        return response.data;
+        const payload = await this.request("/tags");
+        return parseTagsResponse(payload);
       },
     };
 
     this.categories = {
       list: async () => {
-        const response = await this.request<{ data: PublicCategory[] }>(
-          "/categories",
-        );
-        return response.data;
+        const payload = await this.request("/categories");
+        return parseCategoriesResponse(payload);
       },
     };
 
     this.authors = {
       list: async () => {
-        const response = await this.request<{ data: PublicAuthor[] }>(
-          "/authors",
-        );
-        return response.data;
+        const payload = await this.request("/authors");
+        return parseAuthorsResponse(payload);
       },
     };
 
     this.stats = {
-      get: async () => this.request<PublicStats>("/stats"),
+      get: async () => {
+        const payload = await this.request("/stats");
+        return parseStatsResponse(payload);
+      },
     };
   }
 
@@ -166,7 +170,7 @@ export class Hive {
     return `${this.baseUrl}/${this.version}/${encodeURIComponent(this.apiKey)}${path}`;
   }
 
-  private async request<T>(path: string): Promise<T> {
+  private async request(path: string): Promise<unknown> {
     const response = await this.fetchImpl(this.endpoint(path), {
       method: "GET",
       headers: {
@@ -176,7 +180,6 @@ export class Hive {
 
     const payload = (await response.json().catch(() => undefined)) as
       | ApiErrorPayload
-      | T
       | undefined;
 
     if (!response.ok) {
@@ -204,7 +207,7 @@ export class Hive {
       );
     }
 
-    return payload as T;
+    return payload;
   }
 }
 
