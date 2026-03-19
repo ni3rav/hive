@@ -1,0 +1,37 @@
+{
+  "name": "hive-cms",
+  "type": "module",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Type-safe Node.js SDK for Hive CMS public API.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "browser": false,
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "test": "pnpm build && node --test tests/**/*.test.mjs"
+  },
+  "devDependencies": {
+    "tsdown": "^0.21.3",
+    "typescript": "^5.9.3"
+  }
+}

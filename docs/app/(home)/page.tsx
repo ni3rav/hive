@@ -55,7 +55,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <Navbar />
-      <Hero badgeText="Just released v1! 🎉" />
+      <Hero badgeText="AI powered text editing and analysis now available🤖" />
       <Features />
       <FAQ />
       <Cta

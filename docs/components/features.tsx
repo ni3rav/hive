@@ -16,14 +16,14 @@ const features = [
   },
   {
     icon: PenTool,
-    title: "Writing Experience",
+    title: "Writing Experience with AI",
     description:
-      "Smooth writing experience with just the right tools of formatting.",
+      "Smooth writing experience with just the right tools of formatting and AI powered text editing and analysis.",
   },
   {
     icon: Users,
     title: "Collaboration",
-    description: "Seamless workspace-based collaboration.",
+    description: "Seamless workspace-based collaboration and media management.",
   },
   {
     icon: Code2,
