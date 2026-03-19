@@ -48,6 +48,13 @@ test("logs browser warning once when window is present", () => {
   }
 });
 
+test("exposes selectable base URLs and versions on Hive", () => {
+  assert.ok(Array.isArray(Hive.BASE_URLS));
+  assert.ok(Array.isArray(Hive.VERSIONS));
+  assert.ok(Hive.BASE_URLS.length > 0);
+  assert.ok(Hive.VERSIONS.includes("v1"));
+});
+
 test("posts.list returns typed list and forwards query params", async () => {
   const requested = [];
   const fetchMock = async (url) => {
@@ -123,6 +130,30 @@ test("posts.get encodes slug and returns detail", async () => {
   assert.equal(
     requested[0],
     "https://example.com/api/public/v1/my%20key/posts/hello%20world",
+  );
+});
+
+test("supports custom version string in endpoint path", async () => {
+  const requested = [];
+  const client = new Hive({
+    apiKey: "my-key",
+    baseUrl: "https://example.com/api/public",
+    version: "v2-beta",
+    fetch: async (url) => {
+      requested.push(String(url));
+      return jsonResponse({
+        totalPosts: 1,
+        totalAuthors: 1,
+        totalCategories: 1,
+        totalTags: 1,
+      });
+    },
+  });
+
+  await client.stats.get();
+  assert.equal(
+    requested[0],
+    "https://example.com/api/public/v2-beta/my-key/stats",
   );
 });
 
@@ -206,6 +237,12 @@ test("throws HiveApiError on non-2xx response", async () => {
       assert.equal(error.status, 401);
       assert.equal(error.code, "INVALID_API_KEY");
       assert.deepEqual(error.details, { hint: "rotate key" });
+      assert.match(error.message, /\[hive-cms\] request error/i);
+      assert.match(error.message, /status\s*: 401/i);
+      assert.match(error.message, /code\s*: INVALID_API_KEY/i);
+      assert.match(error.message, /method\s*: GET/i);
+      assert.match(error.message, /url\s*:/i);
+      assert.match(error.message, /hint\s*:/i);
       return true;
     },
   );

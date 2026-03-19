@@ -1,7 +1,15 @@
+export const HIVE_BASE_URLS = [
+  "https://api.hivecms.online/api/public",
+] as const;
+export type HiveBaseUrl = (typeof HIVE_BASE_URLS)[number];
+
+export const HIVE_API_VERSIONS = ["v1"] as const;
+export type HiveApiVersion = (typeof HIVE_API_VERSIONS)[number];
+
 export type HiveClientOptions = {
   apiKey: string;
-  baseUrl?: string;
-  version?: string;
+  baseUrl?: HiveBaseUrl | string;
+  version?: HiveApiVersion | string;
   fetch?: typeof fetch;
 };
 

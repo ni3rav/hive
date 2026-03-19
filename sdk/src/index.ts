@@ -8,6 +8,8 @@ import {
   parseTagsResponse,
 } from "./internal/parsers";
 import type {
+  HiveApiVersion,
+  HiveBaseUrl,
   HiveClientOptions,
   PostListFilters,
   PublicAuthor,
@@ -17,9 +19,10 @@ import type {
   PublicStats,
   PublicTag,
 } from "./internal/types";
+import { HIVE_API_VERSIONS, HIVE_BASE_URLS } from "./internal/types";
 
-const DEFAULT_BASE_URL = "https://api.hivecms.online/api/public";
-const DEFAULT_VERSION = "v1";
+const DEFAULT_BASE_URL: HiveBaseUrl = HIVE_BASE_URLS[0];
+const DEFAULT_VERSION: HiveApiVersion = HIVE_API_VERSIONS[0];
 
 let hasWarnedBrowserUsage = false;
 
@@ -70,6 +73,9 @@ type ApiErrorPayload = {
 };
 
 export class Hive {
+  public static readonly BASE_URLS = [...HIVE_BASE_URLS] as const;
+  public static readonly VERSIONS = [...HIVE_API_VERSIONS] as const;
+
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly version: string;
@@ -171,7 +177,8 @@ export class Hive {
   }
 
   private async request(path: string): Promise<unknown> {
-    const response = await this.fetchImpl(this.endpoint(path), {
+    const requestUrl = this.endpoint(path);
+    const response = await this.fetchImpl(requestUrl, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -189,6 +196,12 @@ export class Hive {
         response.status,
         errorPayload.code ?? "API_REQUEST_FAILED",
         errorPayload.details,
+        {
+          method: "GET",
+          path,
+          url: requestUrl,
+          hint: "Check baseUrl, version, and API key route format.",
+        },
       );
     }
 
@@ -204,6 +217,12 @@ export class Hive {
         response.status,
         errorPayload.code ?? "API_REQUEST_FAILED",
         errorPayload.details,
+        {
+          method: "GET",
+          path,
+          url: requestUrl,
+          hint: "API returned success=false payload.",
+        },
       );
     }
 
@@ -212,6 +231,8 @@ export class Hive {
 }
 
 export type {
+  HiveApiVersion,
+  HiveBaseUrl,
   HiveClientOptions,
   PostListFilters,
   PublicAuthor,
@@ -222,3 +243,4 @@ export type {
   PublicTag,
 } from "./internal/types";
 export { HiveApiError } from "./internal/errors";
+export { HIVE_API_VERSIONS, HIVE_BASE_URLS } from "./internal/types";
