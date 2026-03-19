@@ -35,7 +35,7 @@ export type PublicAuthor = {
   id: string;
   name: string;
   about: string;
-  socialLinks: Record<string, unknown>;
+  socialLinks: Record<string, string>;
 };
 
 export type PublicPostSummary = {
@@ -54,6 +54,13 @@ export type PublicPostSummary = {
 
 export type PublicPostDetail = PublicPostSummary & {
   htmlContent: string;
+};
+
+export type PublicPostListResponse = {
+  data: PublicPostSummary[];
+  total: number;
+  offset: number;
+  limit: number;
 };
 
 export type PublicStats = {

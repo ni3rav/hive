@@ -3,6 +3,7 @@ import type {
   PublicAuthor,
   PublicCategory,
   PublicPostDetail,
+  PublicPostListResponse,
   PublicPostSummary,
   PublicStats,
   PublicTag,
@@ -118,12 +119,7 @@ function parsePostSummary(value: unknown, context: string): PublicPostSummary {
   };
 }
 
-export function parsePostsListResponse(value: unknown): {
-  data: PublicPostSummary[];
-  total: number;
-  offset: number;
-  limit: number;
-} {
+export function parsePostsListResponse(value: unknown): PublicPostListResponse {
   const object = asObject(value, "posts.list response");
 
   return {
@@ -175,11 +171,21 @@ export function parseAuthorsResponse(value: unknown): PublicAuthor[] {
       );
     }
 
+    const socialLinksEntries = Object.entries(socialLinks);
+    const typedSocialLinks: Record<string, string> = {};
+
+    for (const [key, value] of socialLinksEntries) {
+      typedSocialLinks[key] = asString(
+        value,
+        `authors.list.data[${index}].socialLinks.${key}`,
+      );
+    }
+
     return {
       id: asString(author.id, `authors.list.data[${index}].id`),
       name: asString(author.name, `authors.list.data[${index}].name`),
       about: asString(author.about, `authors.list.data[${index}].about`),
-      socialLinks,
+      socialLinks: typedSocialLinks,
     };
   });
 }

@@ -15,6 +15,7 @@ import type {
   PublicAuthor,
   PublicCategory,
   PublicPostDetail,
+  PublicPostListResponse,
   PublicPostSummary,
   PublicStats,
   PublicTag,
@@ -82,12 +83,7 @@ export class Hive {
   private readonly fetchImpl: typeof fetch;
 
   public readonly posts: {
-    list: (filters?: PostListFilters) => Promise<{
-      data: PublicPostSummary[];
-      total: number;
-      offset: number;
-      limit: number;
-    }>;
+    list: (filters?: PostListFilters) => Promise<PublicPostListResponse>;
     get: (postSlug: string) => Promise<PublicPostDetail>;
   };
 
@@ -238,6 +234,7 @@ export type {
   PublicAuthor,
   PublicCategory,
   PublicPostDetail,
+  PublicPostListResponse,
   PublicPostSummary,
   PublicStats,
   PublicTag,

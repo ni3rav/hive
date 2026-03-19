@@ -11,10 +11,6 @@ export function baseOptions(): BaseLayoutProps {
         text: 'Go Home',
         url: '/',
       },
-      {
-        text: 'Docs',
-        url: '/docs',
-      },
     ],
   };
 }
