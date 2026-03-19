@@ -1,0 +1,38 @@
+---
+title: Authors API
+description: Endpoint reference for author profiles
+---
+
+## Endpoint
+
+```text
+GET /authors
+```
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/authors"
+```
+
+### Response shape
+
+```json
+{
+  "data": [
+    {
+      "id": "auth_01",
+      "name": "Ava Stone",
+      "about": "Editor-in-chief",
+      "socialLinks": {
+        "twitter": "https://twitter.com/avastone"
+      }
+    }
+  ]
+}
+```
+
+## Errors
+
+- `401` invalid API key
+- `500` server/internal error

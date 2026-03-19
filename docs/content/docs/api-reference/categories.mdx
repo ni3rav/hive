@@ -1,0 +1,31 @@
+---
+title: Categories API
+description: Endpoint reference for workspace categories
+---
+
+## Endpoint
+
+```text
+GET /categories
+```
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/categories"
+```
+
+### Response shape
+
+```json
+{
+  "data": [
+    { "name": "Product", "slug": "product" }
+  ]
+}
+```
+
+## Errors
+
+- `401` invalid API key
+- `500` server/internal error

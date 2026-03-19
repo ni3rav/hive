@@ -1,19 +1,47 @@
 ---
 title: API Versioning
-description: Understanding Hive Public API versions and migration paths
+description: How SDK version selection works and when to use custom versions
 ---
 
-## Overview
+Prefer SDK defaults unless you are integrating against a custom host/version.
 
-The Hive Public Content API uses semantic versioning to ensure stability and allow for improvements over time. This guide explains our versioning strategy and how it affects your integration.
+## Defaults
 
-## Current Version
+- Base URL defaults to `https://api.hivecms.online/api/public`
+- Version defaults to `v1`
 
-**v1** is the current stable version of the Hive Public API. All endpoints are available under `/api/public/v1`.
+```ts
+import { Hive } from 'hive-cms';
 
-## URL Format
+const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+```
 
-The version is included in the URL path:
+## Select from known presets
+
+```ts
+Hive.BASE_URLS; // readonly array
+Hive.VERSIONS; // readonly array, currently ['v1']
+```
+
+## Custom overrides
+
+```ts
+const hive = new Hive({
+  apiKey: process.env.HIVE_API_KEY!,
+  baseUrl: 'https://your-domain.com/api/public',
+  version: 'v1',
+});
+```
+
+## Technical notes
+
+- You can pass a custom version string if your environment requires it.
+- Raw API version deprecation and sunset policy is documented separately.
+
+## Full policy details
+
+See [API Reference: Versioning](/docs/api-reference/versioning).
+
 
 ```
 https://api.hivecms.online/api/public/{VERSION}/{API_KEY}/{ENDPOINT}

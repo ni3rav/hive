@@ -1,0 +1,40 @@
+---
+title: Versioning API
+description: Public API versioning and deprecation policy
+---
+
+## Current version
+
+- `v1` is the current stable version.
+- Recommended format:
+
+```text
+/api/public/v1/{API_KEY}/...
+```
+
+## Legacy format
+
+```text
+/api/public/{API_KEY}/...
+```
+
+Legacy format auto-routes to `v1`, but explicit `/v1/` is recommended.
+
+## Breaking changes
+
+A new major version is introduced for breaking changes such as:
+
+- removed fields
+- renamed fields
+- changed response behavior
+- new required parameters
+
+## Deprecation policy
+
+When a version is deprecated, responses may include headers such as:
+
+- `Deprecation`
+- `Sunset`
+- `X-API-Suggest`
+
+After sunset, deprecated versions can return `410 Gone`.

@@ -1,43 +1,58 @@
 ---
-title: Hive Public Content API
-description: Complete guide to integrating Hive content into your website, landing page, or newsletter
+title: Overview
+description: SDK-first guides for integrating Hive content, with a separate API Reference for raw endpoint details
 ---
 
-This handoff guide is meant for people who simply want to pull live Hive content onto a website, landing page, or newsletter. Everything runs against the production host `https://api.hivecms.online`, and every request uses your workspace's public API key.
+This documentation is organized for production integrations.
 
-## Quick Start
+- Start with **Guides** to ship quickly using the `hive-cms` SDK.
+- Use **API Reference** when you need raw endpoint details.
+
+## Guides
 
 <Cards>
-  <Card title="Getting Started" href="/docs/getting-started" description="Learn about authentication and base URLs" />
-  <Card title="Posts" href="/docs/posts" description="Browse and fetch individual posts" />
-  <Card title="Tags & Categories" href="/docs/tags" description="Retrieve tags and categories for filtering" />
-  <Card title="Authors" href="/docs/authors" description="Get author information and profiles" />
-  <Card title="Workspace Stats" href="/docs/stats" description="Display workspace statistics" />
-  <Card title="API Versioning" href="/docs/versioning" description="Understand versioning and deprecation policy" />
-  <Card title="Response Shapes" href="/docs/response-shapes" description="TypeScript type definitions" />
+  <Card title="Getting Started" href="/docs/getting-started" description="Install the SDK and make your first request" />
+  <Card title="Posts" href="/docs/posts" description="Read posts using Hive.posts methods" />
+  <Card title="Tags" href="/docs/tags" description="Read tags with SDK-first examples" />
+  <Card title="Categories" href="/docs/categories" description="Read categories with SDK-first examples" />
+  <Card title="Authors" href="/docs/authors" description="Read author profiles from the SDK" />
+  <Card title="Stats" href="/docs/stats" description="Read workspace counters from the SDK" />
+  <Card title="Response Shapes" href="/docs/response-shapes" description="TypeScript types exposed by the SDK" />
+  <Card title="Versioning" href="/docs/versioning" description="SDK and API version behavior" />
+  <Card title="Troubleshooting" href="/docs/troubleshooting" description="Common integration issues and fixes" />
 </Cards>
 
-## Base URL
+## API Reference
 
-All API requests are made to:
+For complete endpoint contracts, URL formats, query parameters, and response payloads:
+
+<Cards>
+  <Card title="API Reference" href="/docs/api-reference" description="Raw endpoint and schema reference" />
+  <Card title="Posts API" href="/docs/api-reference/posts" description="List and detail post endpoints" />
+  <Card title="Tags API" href="/docs/api-reference/tags" description="Tags endpoint details" />
+  <Card title="Categories API" href="/docs/api-reference/categories" description="Categories endpoint details" />
+  <Card title="Authors API" href="/docs/api-reference/authors" description="Authors endpoint details" />
+  <Card title="Stats API" href="/docs/api-reference/stats" description="Workspace stats endpoint details" />
+  <Card title="Versioning" href="/docs/api-reference/versioning" description="Versioning and deprecation policy" />
+  <Card title="Response Shapes" href="/docs/api-reference/response-shapes" description="Full payload reference" />
+</Cards>
+
+## Recommended Flow
+
+1. Integrate with the SDK from [Getting Started](/docs/getting-started).
+2. Build features using SDK guides (`posts`, `tags`, `categories`, `authors`, `stats`).
+3. Use API Reference pages only when you need lower-level HTTP details.
+
+## SDK-First Note
+
+The SDK wraps error handling, base URL/version management, and payload validation.
+
+Direct API calls remain supported, but should be treated as a secondary integration path.
+
+## Production Host
 
 ```
-https://api.hivecms.online/api/public/v1
+https://api.hivecms.online/api/public
 ```
 
-> **Note**: The API is versioned. `v1` is the current stable version. Both `/v1/` and the legacy format (without version) are supported for backward compatibility, but using `/v1/` explicitly is recommended.
-
-## Authentication
-
-Replace `{API_KEY}` in each URL with the key provided to you (or you can issue one from your workspace). Keep it private—even though it's read-only, it maps directly to your workspace.
-
-## Headers
-
-None required. The public API is configured for simple GET requests, so you can call it straight from the browser or curl without setting anything special.
-
-## What's Next?
-
-- Start with [Getting Started](/docs/getting-started) to learn about authentication
-- Explore the [Posts API](/docs/posts) to fetch content
-- Check out [Response Shapes](/docs/response-shapes) for TypeScript types
-- Review [Troubleshooting](/docs/troubleshooting) if you encounter issues
+The SDK defaults to the production host and `v1`.

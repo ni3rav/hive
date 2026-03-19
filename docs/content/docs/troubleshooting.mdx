@@ -1,263 +1,66 @@
 ---
 title: Troubleshooting
-description: Common issues and solutions when using the Hive Public Content API
+description: Common integration issues and fixes when using the hive-cms SDK
 ---
 
-This guide helps you resolve common issues when working with the Hive Public Content API.
+This page focuses on SDK-based integrations.
 
-## Common Errors
+## 1. Request failed with 401
 
-### Invalid API Key (401 Unauthorized)
 
-**What you see:**
-```json
-{
-  "message": "Invalid API key"
-}
-```
+Cause: invalid/revoked key or wrong host/version path.
 
-**Status Code:** `401 Unauthorized`
+Fix:
 
-**Possible causes:**
-- The API key is missing from the URL
-- The API key is incorrect or has been revoked
-- The API key contains extra spaces or characters
+- confirm `HIVE_API_KEY`
+- confirm `baseUrl` is `/api/public` root
+- confirm `version` is `v1`
 
-**Solutions:**
-1. Verify you copied the API key exactly as provided
-2. Check that the key is included in the URL path: `/api/public/{API_KEY}/...`
-3. Ensure there are no extra spaces or line breaks in the key
-4. Generate a new API key from your workspace if needed
+## 2. Request failed with 404
 
-**Example:**
-```bash
-# ❌ Wrong - missing API key
-curl "https://api.hivecms.online/api/public/v1/posts"
+Cause: route mismatch (often duplicated `/v1` or wrong host).
 
-# ❌ Wrong - incorrect key format
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
+Fix:
 
-# ✅ Correct - actual API key
-curl "https://api.hivecms.online/api/public/v1/your-actual-key-here/posts"
-```
+- use `new Hive({ apiKey })` with defaults first
+- if overriding `baseUrl`, keep it as `/api/public` only
+- test with `await hive.stats.get()` to verify connectivity
 
-### Post Not Found (404 Not Found)
+## 3. INVALID_API_RESPONSE
 
-**What you see:**
-```json
-{
-  "message": "Post not found"
-}
-```
+Cause: endpoint returned an unexpected payload shape.
 
-**Status Code:** `404 Not Found`
+Fix:
 
-**Possible causes:**
-- The post slug doesn't exist
-- The post slug is misspelled
-- The post has been deleted or unpublished
+- check that your API host is actually Hive-compatible
+- verify endpoint path and version
+- inspect `HiveApiError.details` and `error.message` context fields
 
-**Solutions:**
-1. Verify the post slug in your Hive workspace
-2. Check for typos in the slug (case-sensitive)
-3. Ensure the post is published
-4. Use the [Posts list endpoint](/docs/posts#browse-all-posts) to get valid slugs
+## 4. Reading SDK errors clearly
 
-**Example:**
-```bash
-# First, get a list of posts to find valid slugs
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
+`HiveApiError` includes formatted lines with `status`, `code`, `method`, `path`, and `url`.
 
-# Then use a valid slug from the response
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts/valid-slug-here"
-```
+```ts
+import { HiveApiError } from 'hive-cms';
 
-### Server Error (500 Internal Server Error)
-
-**What you see:**
-```json
-{
-  "message": "Failed to fetch ..."
-}
-```
-
-**Status Code:** `500 Internal Server Error`
-
-**Possible causes:**
-- Temporary server issue
-- Database connection problem
-- Unexpected error on the server
-
-**Solutions:**
-1. Wait a moment and try the request again
-2. Check if the issue persists with a simple endpoint (e.g., `/stats`)
-3. If the problem continues, contact Hive support with:
-   - The endpoint you're calling
-   - The error message
-   - The timestamp of the error
-
-### Rate Limiting
-
-**What you see:**
-```json
-{
-  "message": "Rate limit exceeded"
-}
-```
-
-**Status Code:** `429 Too Many Requests`
-
-**Solutions:**
-1. Reduce the frequency of your API calls
-2. Implement request caching on your side
-3. Use pagination to fetch data in batches rather than making many small requests
-
-### API Version Not Found (404)
-
-**What you see:**
-```json
-{
-  "success": false,
-  "code": "VERSION_NOT_FOUND",
-  "message": "API version v99 not found"
-}
-```
-
-**Status Code:** `404 Not Found`
-
-**Possible causes:**
-- You're using an invalid or unsupported API version
-- Typo in the version number in the URL
-
-**Solutions:**
-1. Check the URL format: `/api/public/{VERSION}/{API_KEY}/...`
-2. Verify you're using a supported version (currently `v1`)
-3. See [API Versioning](/docs/versioning) for current version information
-
-**Example:**
-```bash
-# ❌ Wrong - unsupported version
-curl "https://api.hivecms.online/api/public/v99/{API_KEY}/posts"
-
-# ✅ Correct - use v1
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
-```
-
-### API Version Gone (410)
-
-**What you see:**
-```json
-{
-  "success": false,
-  "code": "API_VERSION_GONE",
-  "message": "API version v1 is no longer supported",
-  "migrate_to": "v2",
-  "sunset_date": "2026-12-31T23:59:59Z"
-}
-```
-
-**Status Code:** `410 Gone`
-
-**Cause:**
-- The API version you're using has reached its sunset date and is no longer available
-- This only happens after a deprecation period when clients have been warned
-
-**Solutions:**
-1. Update your integration to use the recommended version (see `migrate_to` in the error)
-2. See [API Versioning](/docs/versioning) for migration guides
-3. Review deprecation warnings in response headers before this occurs
-
-### Deprecation Warnings
-
-**What you see:**
-```
-HTTP/1.1 200 OK
-Deprecation: true
-Sunset: Mon, 31 Dec 2026 23:59:59 GMT
-X-API-Suggest: v2
-```
-
-**Meaning:**
-- Your API version is still working but will be sunset on the `Sunset` date
-- You should plan to migrate to the suggested version
-- After the sunset date, requests to this version will return `410 Gone`
-
-**Solutions:**
-1. Monitor response headers for `Deprecation: true`
-2. Plan migration to the version in `X-API-Suggest`
-3. Reference [API Versioning](/docs/versioning) for migration details
-4. Update your integration before the `Sunset` date
-
-## Best Practices
-
-### Caching Responses
-
-Cache API responses on your side to reduce requests and improve performance:
-
-```js
-// Simple caching example
-const cache = new Map();
-
-async function getCachedPosts(apiKey) {
-  const cacheKey = 'posts';
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey);
-  }
-
-  const response = await fetch(
-    `https://api.hivecms.online/api/public/v1/${apiKey}/posts`
-  );
-  const data = await response.json();
-  
-  // Cache for 5 minutes
-  cache.set(cacheKey, data);
-  setTimeout(() => cache.delete(cacheKey), 5 * 60 * 1000);
-  
-  return data;
-}
-```
-
-### Error Handling
-
-Always handle errors gracefully:
-
-```js
-async function fetchPosts(apiKey) {
-  try {
-    const response = await fetch(
-      `https://api.hivecms.online/api/public/v1/${apiKey}/posts`
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch posts');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    // Handle error appropriately (show message, retry, etc.)
-    throw error;
+try {
+  await hive.posts.list();
+} catch (error) {
+  if (error instanceof HiveApiError) {
+    console.error(error.message);
   }
 }
 ```
 
-### Validating Responses
+## 5. Next.js and Express best practice
 
-Validate API responses before using them:
+- call SDK in server runtime only (route handlers/controllers)
+- avoid client-bundling API keys
+- add caching where needed on your server boundary
 
-```js
-function validatePostListResponse(data) {
-  if (!data || !Array.isArray(data.data)) {
-    throw new Error('Invalid response format');
-  }
-  return data;
-}
-```
+## Raw API troubleshooting
 
-## Getting Help
-
-If you continue to experience issues:
+For HTTP-level errors, status codes, and versioning/sunset behavior, see [API Reference](/docs/api-reference).
 
 1. **Check the documentation**: Review the relevant endpoint documentation
 2. **Verify your setup**: Ensure your API key is correct and the base URL is accurate

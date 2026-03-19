@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "title": "Hive Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "posts",
+    "tags",
+    "categories",
+    "authors",
+    "stats",
+    "response-shapes",
+    "versioning",
+    "troubleshooting",
+    "api-reference"
+  ]
+}

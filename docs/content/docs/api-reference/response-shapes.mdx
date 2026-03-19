@@ -1,0 +1,73 @@
+---
+title: Response Shapes API
+description: Complete payload contract for public endpoints
+---
+
+## PostSummary
+
+```ts
+type PostSummary = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  publishedAt: string | null;
+  updatedAt: string | null;
+  category: { name: string; slug: string } | null;
+  tags: Array<{ name: string; slug: string }>;
+  author: { id: string; name: string } | null;
+};
+```
+
+## PostDetail
+
+```ts
+type PostDetail = PostSummary & { htmlContent: string };
+```
+
+## PostListResponse
+
+```ts
+type PostListResponse = {
+  data: PostSummary[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+```
+
+## Tag and Category
+
+```ts
+type Tag = { name: string; slug: string };
+type Category = { name: string; slug: string };
+```
+
+## Author
+
+```ts
+type Author = {
+  id: string;
+  name: string;
+  about: string;
+  socialLinks: Record<string, unknown>;
+};
+```
+
+## Stats
+
+```ts
+type Stats = {
+  totalPosts: number;
+  totalAuthors: number;
+  totalCategories: number;
+  totalTags: number;
+};
+```
+
+## Error payload
+
+```ts
+type ErrorResponse = {
+  message: string;
+};
+```

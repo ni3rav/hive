@@ -1,0 +1,49 @@
+---
+title: Posts API
+description: Endpoint reference for listing posts and fetching post details
+---
+
+## List posts
+
+```text
+GET /posts
+```
+
+### Query parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `limit` | number | Max posts to return |
+| `offset` | number | Items to skip |
+| `category` | string | Filter by category slug |
+| `tags` | string | Comma-separated tag slugs |
+| `author` | string | Filter by author id |
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts?limit=5&tags=guides,updates"
+```
+
+## Get one post
+
+```text
+GET /posts/{postSlug}
+```
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts/welcome-to-hive"
+```
+
+## Response notes
+
+- List response includes pagination metadata (`total`, `offset`, `limit`).
+- Detail response includes `htmlContent`.
+
+## Errors
+
+- `401` invalid API key
+- `404` post not found
+- `500` server/internal error

@@ -1,17 +1,167 @@
 ---
 title: Getting Started
-description: Learn how to authenticate and make your first API request
+description: Install and integrate the hive-cms SDK with Next.js or Express.js
 ---
 
-## Base URL
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-All API requests are made to the following base URL:
+This guide is the recommended way to integrate Hive content.
+
+## 1. Install
+
+```bash
+npm install hive-cms
+```
+
+## 2. Configure
+
+Create an environment variable on your server runtime:
 
 ```
-https://api.hivecms.online/api/public/v1
+HIVE_API_KEY=your_public_api_key
 ```
 
-## API Versioning
+The SDK is server-first. If loaded in a browser runtime, it logs a warning.
+
+## 3. Create a client
+
+```ts
+import { Hive } from 'hive-cms';
+
+const hive = new Hive({
+  apiKey: process.env.HIVE_API_KEY!,
+  // Optional overrides:
+  // baseUrl: Hive.BASE_URLS[0],
+  // version: Hive.VERSIONS[0],
+});
+```
+
+## 4. Next.js integration
+
+Use the SDK inside Route Handlers or Server Components.
+
+<Tabs items={['Route Handler', 'Server Component']}>
+  <Tab value="Route Handler">
+
+```ts
+// app/api/posts/route.ts
+import { NextResponse } from 'next/server';
+import { Hive } from 'hive-cms';
+
+const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+
+export async function GET() {
+  try {
+    const posts = await hive.posts.list({ limit: 10 });
+    return NextResponse.json(posts);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ message }, { status: 500 });
+  }
+}
+```
+
+  </Tab>
+  <Tab value="Server Component">
+
+```tsx
+// app/blog/page.tsx
+import { Hive } from 'hive-cms';
+
+const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+
+export default async function BlogPage() {
+  const posts = await hive.posts.list({ limit: 10 });
+
+  return (
+    <main>
+      <h1>Blog</h1>
+      <ul>
+        {posts.data.map((post) => (
+          <li key={post.slug}>{post.title}</li>
+        ))}
+      </ul>
+    </main>
+  );
+}
+```
+
+  </Tab>
+</Tabs>
+
+## 5. Express.js integration
+
+```ts
+import express from 'express';
+import { Hive } from 'hive-cms';
+
+const app = express();
+const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+
+app.get('/content/posts', async (_req, res) => {
+  try {
+    const posts = await hive.posts.list({ limit: 10 });
+    res.json(posts);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ message });
+  }
+});
+```
+
+## 6. Common calls
+
+```ts
+await hive.posts.list({ limit: 10 });
+await hive.posts.get('welcome-to-hive');
+await hive.tags.list();
+await hive.categories.list();
+await hive.authors.list();
+await hive.stats.get();
+```
+
+## Error handling
+
+The SDK throws `HiveApiError` with structured context.
+
+```ts
+import { HiveApiError } from 'hive-cms';
+
+try {
+  await hive.posts.list();
+} catch (error) {
+  if (error instanceof HiveApiError) {
+    console.error(error.message); // pretty, multi-line message
+    console.error(error.status, error.code, error.details);
+  }
+}
+```
+
+## Technical notes
+
+- Default base URL: `https://api.hivecms.online/api/public`
+- Default version: `v1`
+- You can override with custom strings:
+
+```ts
+const custom = new Hive({
+  apiKey: process.env.HIVE_API_KEY!,
+  baseUrl: 'https://your-domain.com/api/public',
+  version: 'v1',
+});
+```
+
+## API fallback (secondary)
+
+If you need raw HTTP details, use [API Reference](/docs/api-reference).
+
+Direct endpoint style:
+
+```text
+GET /api/public/v1/{API_KEY}/posts
+```
+
+SDK should remain your primary integration path.
 
 The Hive Public Content API is versioned. `v1` is the current stable version. The version should be included in the URL path immediately after `/api/public`.
 

@@ -1,0 +1,13 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "posts",
+    "tags",
+    "categories",
+    "authors",
+    "stats",
+    "response-shapes",
+    "versioning"
+  ]
+}

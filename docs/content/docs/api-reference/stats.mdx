@@ -1,0 +1,32 @@
+---
+title: Stats API
+description: Endpoint reference for workspace totals
+---
+
+## Endpoint
+
+```text
+GET /stats
+```
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/stats"
+```
+
+### Response shape
+
+```json
+{
+  "totalPosts": 42,
+  "totalAuthors": 5,
+  "totalCategories": 6,
+  "totalTags": 18
+}
+```
+
+## Errors
+
+- `401` invalid API key
+- `500` server/internal error

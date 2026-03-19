@@ -1,76 +1,38 @@
 ---
 title: Categories
-description: Retrieve all available categories from your Hive workspace
+description: Retrieve categories with the hive-cms SDK
 ---
 
-The Categories API provides a list of all categories used in your workspace. Use this to build navigation menus, category filters, or organize content by category.
+Use categories to power nav, sidebars, and content grouping.
 
-## Endpoint
+## SDK usage
 
-```
-GET https://api.hivecms.online/api/public/v1/{API_KEY}/categories
-```
+```ts
+import { Hive } from 'hive-cms';
 
-## Example Request
-
-```bash
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/categories"
+const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+const categories = await hive.categories.list();
 ```
 
-## Example Response
+## Example
 
-```json
-{
-  "data": [
-    { "name": "Announcements", "slug": "announcements" },
-    { "name": "How-To", "slug": "how-to" },
-    { "name": "Product", "slug": "product" }
-  ]
-}
+```ts
+const links = categories.map((category) => ({
+  href: `/category/${category.slug}`,
+  label: category.name,
+}));
 ```
 
-## Response Fields
+## Error handling
 
-Each category object contains:
+`hive.categories.list()` throws `HiveApiError` on API/network issues and malformed payloads.
 
-- `name` (string): The display name of the category
-- `slug` (string): The URL-friendly identifier for the category
+## Technical notes
 
-## Use Cases
+- Feed category slugs into `hive.posts.list({ category: 'slug' })`.
+- SDK validates category payloads before returning data.
 
-- **Navigation Menus**: Build main navigation with category links
-- **Category Filters**: Create dropdown or sidebar filters for posts
-- **Category Pages**: Display all posts in a specific category
-- **Content Organization**: Group and organize content by category
+## Full API details
 
-## Example Usage
-
-### Building a Category Navigation
-
-```js
-// Fetch categories
-const response = await fetch(
-  'https://api.hivecms.online/api/public/v1/{API_KEY}/categories'
-);
-const { data: categories } = await response.json();
-
-// Render navigation menu
-categories.forEach(category => {
-  console.log(`<a href="/category/${category.slug}">${category.name}</a>`);
-});
-```
-
-### Filtering Posts by Category
-
-Once you have the category slugs, you can use them to filter posts:
-
-```bash
-# Filter posts by category
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts?category=product"
-```
-
-## Related Endpoints
-
-- [Posts](/docs/posts) - Filter posts by category
-- [Tags](/docs/tags) - Get tag information
+See [API Reference: Categories](/docs/api-reference/categories).
 

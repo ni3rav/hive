@@ -1,0 +1,31 @@
+---
+title: Tags API
+description: Endpoint reference for workspace tags
+---
+
+## Endpoint
+
+```text
+GET /tags
+```
+
+### Example
+
+```bash
+curl "https://api.hivecms.online/api/public/v1/{API_KEY}/tags"
+```
+
+### Response shape
+
+```json
+{
+  "data": [
+    { "name": "Guides", "slug": "guides" }
+  ]
+}
+```
+
+## Errors
+
+- `401` invalid API key
+- `500` server/internal error

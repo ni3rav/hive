@@ -1,124 +1,63 @@
 ---
 title: Response Shapes
-description: TypeScript type definitions for all API responses
+description: TypeScript shapes used by the hive-cms SDK
 ---
 
-This page provides TypeScript type definitions for all API responses. Use these as a reference when wiring data into your site.
+Use SDK-exported types in your app code to keep integrations type-safe.
 
-## Posts
-
-### PostSummary
-
-Used in post lists and includes basic post information.
+## Import types
 
 ```ts
-type PostSummary = {
-  title: string;
-  slug: string;
-  excerpt: string;
-  publishedAt: string | null; // ISO timestamp
-  updatedAt: string | null; // ISO timestamp
-  category: { name: string; slug: string } | null;
-  tags: Array<{ name: string; slug: string }>;
-  author: { id: string; name: string } | null;
-};
+import type {
+  PublicAuthor,
+  PublicCategory,
+  PublicPostDetail,
+  PublicPostSummary,
+  PublicStats,
+  PublicTag,
+} from 'hive-cms';
 ```
 
-### PostDetail
-
-Used when fetching a single post. Includes all fields from `PostSummary` plus the full HTML content.
+## Common shapes
 
 ```ts
-type PostDetail = PostSummary & { htmlContent: string };
-```
-
-### PostListResponse
-
-Response shape for post list endpoints.
-
-```ts
-type PostListResponse = {
-  data: PostSummary[];
+type PostList = {
+  data: PublicPostSummary[];
   total: number;
   offset: number;
   limit: number;
 };
+
+type PostDetail = PublicPostDetail;
+type Tags = PublicTag[];
+type Categories = PublicCategory[];
+type Authors = PublicAuthor[];
+type Stats = PublicStats;
 ```
 
-## Tags & Categories
-
-### Tag
+## Error shape
 
 ```ts
-type Tag = { name: string; slug: string };
+import { HiveApiError } from 'hive-cms';
+
+try {
+  // SDK call
+} catch (error) {
+  if (error instanceof HiveApiError) {
+    console.error(error.status, error.code, error.details);
+  }
+}
 ```
 
-### Category
+## Technical notes
 
-```ts
-type Category = { name: string; slug: string };
-```
+- SDK validates API payloads at runtime before returning typed data.
+- Invalid payloads throw `HiveApiError` with code `INVALID_API_RESPONSE`.
 
-### TagCategoryResponse
+## Full payload reference
 
-Response shape for tags and categories endpoints.
+See [API Reference: Response Shapes](/docs/api-reference/response-shapes).
 
-```ts
-type TagCategoryResponse = { data: Tag[] }; // or Category[]
-```
-
-## Authors
-
-### Author
-
-```ts
-type Author = {
-  id: string;
-  name: string;
-  about: string;
-  socialLinks: Record<string, unknown>;
-};
-```
-
-### AuthorResponse
-
-Response shape for authors endpoint.
-
-```ts
-type AuthorResponse = { data: Author[] };
-```
-
-## Workspace Stats
-
-### Stats
-
-```ts
-type Stats = {
-  totalPosts: number;
-  totalAuthors: number;
-  totalCategories: number;
-  totalTags: number;
-};
-```
-
-## Error Responses
-
-All error responses follow this format:
-
-```ts
-type ErrorResponse = {
-  message: string;
-};
-```
-
-Common status codes:
-- `401` - Invalid or missing API key
-- `404` - Resource not found
-- `500` - Server error
-
-## Example Usage
-
-Here's how you might use these types in TypeScript:
 
 ```ts
 // Fetch posts
