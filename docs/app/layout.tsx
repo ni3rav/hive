@@ -110,6 +110,15 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   const organizationData = generateOrganizationData();
   const websiteData = generateWebSiteData();
+  const searchLinks: [string, string][] = [
+    ["Getting Started", "/docs/getting-started"],
+    ["Posts", "/docs/posts"],
+    ["Tags", "/docs/tags"],
+    ["Categories", "/docs/categories"],
+    ["Authors", "/docs/authors"],
+    ["Stats", "/docs/stats"],
+    ["API Reference", "/docs/api-reference"],
+  ];
 
   return (
     <html lang="en" className={geist.className} suppressHydrationWarning>
@@ -125,7 +134,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="flex flex-col min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <RootProvider>{children}</RootProvider>
+          <RootProvider search={{ links: searchLinks }}>{children}</RootProvider>
         </ThemeProvider>
         <Analytics />
       </body>

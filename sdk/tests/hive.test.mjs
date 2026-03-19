@@ -265,6 +265,43 @@ test("throws HiveApiError when API payload marks success false", async () => {
   );
 });
 
+test("wraps network-level fetch failures as HiveApiError", async () => {
+  const client = new Hive({
+    apiKey: "k",
+    fetch: async () => {
+      throw new TypeError("fetch failed");
+    },
+  });
+
+  await assert.rejects(
+    () => client.stats.get(),
+    (error) => {
+      assert.ok(error instanceof HiveApiError);
+      assert.equal(error.status, 503);
+      assert.equal(error.code, "NETWORK_ERROR");
+      assert.match(error.message, /connectivity/i);
+      return true;
+    },
+  );
+});
+
+test("wraps unknown runtime failures as HiveApiError", async () => {
+  const client = new Hive({
+    apiKey: "k",
+    fetch: async () => ({}),
+  });
+
+  await assert.rejects(
+    () => client.tags.list(),
+    (error) => {
+      assert.ok(error instanceof HiveApiError);
+      assert.equal(error.status, 500);
+      assert.equal(error.code, "SDK_RUNTIME_ERROR");
+      return true;
+    },
+  );
+});
+
 test("throws HiveApiError on invalid response shape", async () => {
   const client = new Hive({
     apiKey: "k",

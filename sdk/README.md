@@ -2,6 +2,10 @@
 
 Type-safe SDK for consuming Hive CMS public API endpoints from Node.js runtimes.
 
+## Documentation
+
+- https://hivecms.online/docs
+
 ## Status
 
 Early development.

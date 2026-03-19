@@ -120,9 +120,16 @@ export class Hive {
         const params = toSearchParams(filters);
         const query = params.toString();
         const path = query ? `/posts?${query}` : "/posts";
+        const normalizedPath = "/posts";
 
-        const payload = await this.request(path);
-        return parsePostsListResponse(payload);
+        return this.executeWithGuard(
+          normalizedPath,
+          "Failed to list posts. Verify filter values and API route configuration.",
+          async () => {
+            const payload = await this.request(path);
+            return parsePostsListResponse(payload);
+          },
+        );
       },
       get: async (postSlug: string) => {
         if (!postSlug || postSlug.trim().length === 0) {
@@ -132,38 +139,64 @@ export class Hive {
             "INVALID_SDK_CONFIG",
           );
         }
-        const payload = await this.request(
-          `/posts/${encodeURIComponent(postSlug)}`,
+        const path = `/posts/${encodeURIComponent(postSlug)}`;
+
+        return this.executeWithGuard(
+          path,
+          "Failed to fetch post detail. Ensure postSlug exists and is URL-safe.",
+          async () => {
+            const payload = await this.request(path);
+            return parsePostDetail(payload);
+          },
         );
-        return parsePostDetail(payload);
       },
     };
 
     this.tags = {
       list: async () => {
-        const payload = await this.request("/tags");
-        return parseTagsResponse(payload);
+        return this.executeWithGuard(
+          "/tags",
+          "Failed to list tags.",
+          async () => {
+            const payload = await this.request("/tags");
+            return parseTagsResponse(payload);
+          },
+        );
       },
     };
 
     this.categories = {
       list: async () => {
-        const payload = await this.request("/categories");
-        return parseCategoriesResponse(payload);
+        return this.executeWithGuard(
+          "/categories",
+          "Failed to list categories.",
+          async () => {
+            const payload = await this.request("/categories");
+            return parseCategoriesResponse(payload);
+          },
+        );
       },
     };
 
     this.authors = {
       list: async () => {
-        const payload = await this.request("/authors");
-        return parseAuthorsResponse(payload);
+        return this.executeWithGuard(
+          "/authors",
+          "Failed to list authors.",
+          async () => {
+            const payload = await this.request("/authors");
+            return parseAuthorsResponse(payload);
+          },
+        );
       },
     };
 
     this.stats = {
       get: async () => {
-        const payload = await this.request("/stats");
-        return parseStatsResponse(payload);
+        return this.executeWithGuard("/stats", "Failed to fetch stats.", async () => {
+          const payload = await this.request("/stats");
+          return parseStatsResponse(payload);
+        });
       },
     };
   }
@@ -172,14 +205,66 @@ export class Hive {
     return `${this.baseUrl}/${this.version}/${encodeURIComponent(this.apiKey)}${path}`;
   }
 
+  private toHiveApiError(
+    error: unknown,
+    context: {
+      path: string;
+      url: string;
+      hint: string;
+    },
+  ): HiveApiError {
+    if (error instanceof HiveApiError) {
+      return error;
+    }
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unexpected SDK runtime error occurred";
+
+    return new HiveApiError(
+      message,
+      500,
+      "SDK_RUNTIME_ERROR",
+      {
+        cause: error,
+      },
+      {
+        method: "GET",
+        path: context.path,
+        url: context.url,
+        hint: context.hint,
+      },
+    );
+  }
+
   private async request(path: string): Promise<unknown> {
     const requestUrl = this.endpoint(path);
-    const response = await this.fetchImpl(requestUrl, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    });
+    let response: Response;
+
+    try {
+      response = await this.fetchImpl(requestUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+    } catch (error) {
+      throw new HiveApiError(
+        "Network request failed before receiving a response",
+        503,
+        "NETWORK_ERROR",
+        {
+          cause: error instanceof Error ? error.message : error,
+        },
+        {
+          method: "GET",
+          path,
+          url: requestUrl,
+          hint: "Check connectivity and Hive API availability.",
+        },
+      );
+    }
 
     const payload = (await response.json().catch(() => undefined)) as
       | ApiErrorPayload
@@ -223,6 +308,22 @@ export class Hive {
     }
 
     return payload;
+  }
+
+  private async executeWithGuard<T>(
+    path: string,
+    hint: string,
+    execute: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await execute();
+    } catch (error) {
+      throw this.toHiveApiError(error, {
+        path,
+        url: this.endpoint(path),
+        hint,
+      });
+    }
   }
 }
 
