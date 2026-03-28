@@ -13,7 +13,7 @@ Prefer SDK defaults unless you are integrating against a custom host/version.
 ```ts
 import { Hive } from 'hive-cms';
 
-const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+const hive = new Hive();
 ```
 
 ## Select from known presets
@@ -27,7 +27,7 @@ Hive.VERSIONS; // readonly array, currently ['v1']
 
 ```ts
 const hive = new Hive({
-  apiKey: process.env.HIVE_API_KEY!,
+  apiKeyEnvVarName: 'MY_HIVE_KEY',
   baseUrl: 'https://your-domain.com/api/public',
   version: 'v1',
 });

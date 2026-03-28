@@ -3,6 +3,26 @@ import assert from "node:assert/strict";
 
 import { Hive, HiveApiError } from "../dist/index.mjs";
 
+async function withEnv(key, value, run) {
+  const previous = process.env[key];
+
+  if (value === undefined) {
+    delete process.env[key];
+  } else {
+    process.env[key] = value;
+  }
+
+  try {
+    return await run();
+  } finally {
+    if (previous === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = previous;
+    }
+  }
+}
+
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -10,12 +30,80 @@ function jsonResponse(body, status = 200) {
   });
 }
 
-test("constructor throws for missing apiKey", () => {
+test("constructor throws when apiKey is missing and env fallback is not set", async () => {
+  await withEnv("HIVE_API_KEY", undefined, async () => {
+    assert.throws(
+      () => new Hive({}),
+      (error) => {
+        assert.ok(error instanceof HiveApiError);
+        assert.equal(error.code, "INVALID_SDK_CONFIG");
+        assert.match(error.message, /HIVE_API_KEY/i);
+        return true;
+      },
+    );
+  });
+});
+
+test("constructor reads apiKey automatically from HIVE_API_KEY", async () => {
+  const requested = [];
+
+  await withEnv("HIVE_API_KEY", "env-key", async () => {
+    const client = new Hive({
+      baseUrl: "https://example.com/api/public",
+      fetch: async (url) => {
+        requested.push(String(url));
+        return jsonResponse({
+          totalPosts: 1,
+          totalAuthors: 1,
+          totalCategories: 1,
+          totalTags: 1,
+        });
+      },
+    });
+
+    await client.stats.get();
+  });
+
+  assert.equal(requested[0], "https://example.com/api/public/v1/env-key/stats");
+});
+
+test("constructor supports custom apiKeyEnvVarName", async () => {
+  const requested = [];
+
+  await withEnv("HIVE_API_KEY", undefined, async () => {
+    await withEnv("MY_HIVE_KEY", "custom-env-key", async () => {
+      const client = new Hive({
+        apiKeyEnvVarName: "MY_HIVE_KEY",
+        baseUrl: "https://example.com/api/public",
+        fetch: async (url) => {
+          requested.push(String(url));
+          return jsonResponse({
+            totalPosts: 1,
+            totalAuthors: 1,
+            totalCategories: 1,
+            totalTags: 1,
+          });
+        },
+      });
+
+      await client.stats.get();
+    });
+  });
+
+  assert.equal(
+    requested[0],
+    "https://example.com/api/public/v1/custom-env-key/stats",
+  );
+});
+
+test("constructor validates apiKeyEnvVarName", () => {
   assert.throws(
-    () => new Hive({ apiKey: "" }),
+    // Runtime guard for plain JavaScript consumers.
+    () => new Hive({ apiKeyEnvVarName: "" }),
     (error) => {
       assert.ok(error instanceof HiveApiError);
       assert.equal(error.code, "INVALID_SDK_CONFIG");
+      assert.match(error.message, /apiKeyEnvVarName/i);
       return true;
     },
   );

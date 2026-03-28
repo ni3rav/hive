@@ -10,7 +10,7 @@ Use SDK methods for post listing and detail pages.
 ```ts
 import { Hive } from 'hive-cms';
 
-const hive = new Hive({ apiKey: process.env.HIVE_API_KEY! });
+const hive = new Hive();
 
 const posts = await hive.posts.list({
   limit: 10,

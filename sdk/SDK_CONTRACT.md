@@ -3,10 +3,11 @@
 ## Constructor
 
 ```ts
-new Hive({ apiKey, baseUrl?, version?, fetch? })
+new Hive({ apiKey?, apiKeyEnvVarName?, baseUrl?, version?, fetch? })
 ```
 
-- `apiKey`: required
+- `apiKey`: optional (if omitted, reads from `HIVE_API_KEY`)
+- `apiKeyEnvVarName`: optional custom env var name for API key lookup
 - `baseUrl`: optional, defaults to `https://hivecms.online/api/public`
 - `version`: optional, defaults to `v1`
 - `fetch`: optional custom fetch implementation
@@ -59,7 +60,7 @@ new Hive({ apiKey, baseUrl?, version?, fetch? })
 - Throws `HiveApiError` for:
   - non-2xx responses
   - explicit API failure payloads
-  - local SDK config errors (for example missing `apiKey`)
+  - local SDK config errors (for example missing both explicit `apiKey` and env fallback)
 
 `HiveApiError` shape:
 

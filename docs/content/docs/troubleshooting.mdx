@@ -22,7 +22,7 @@ Cause: route mismatch (often duplicated `/v1` or wrong host).
 
 Fix:
 
-- use `new Hive({ apiKey })` with defaults first
+- use `new Hive()` with default `HIVE_API_KEY` first
 - if overriding `baseUrl`, keep it as `/api/public` only
 - test with `await hive.stats.get()` to verify connectivity
 

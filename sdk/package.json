@@ -1,7 +1,7 @@
 {
   "name": "hive-cms",
   "type": "module",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": false,
   "description": "Type-safe Node.js SDK for Hive CMS public API.",
   "homepage": "https://hivecms.online/docs",
@@ -32,6 +32,7 @@
     "test": "pnpm build && node --test tests/**/*.test.mjs"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "tsdown": "^0.21.3",
     "typescript": "^5.9.3"
   }

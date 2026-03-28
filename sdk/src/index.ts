@@ -24,6 +24,7 @@ import { HIVE_API_VERSIONS, HIVE_BASE_URLS } from "./internal/types";
 
 const DEFAULT_BASE_URL: HiveBaseUrl = HIVE_BASE_URLS[0];
 const DEFAULT_VERSION: HiveApiVersion = HIVE_API_VERSIONS[0];
+const DEFAULT_API_KEY_ENV_VAR_NAME = "HIVE_API_KEY";
 
 let hasWarnedBrowserUsage = false;
 
@@ -73,6 +74,41 @@ type ApiErrorPayload = {
   details?: unknown;
 };
 
+function resolveApiKey(options: HiveClientOptions): string {
+  const explicitApiKey = options.apiKey;
+  if (typeof explicitApiKey === "string" && explicitApiKey.trim().length > 0) {
+    return explicitApiKey.trim();
+  }
+
+  const apiKeyEnvVarName =
+    options.apiKeyEnvVarName ?? DEFAULT_API_KEY_ENV_VAR_NAME;
+
+  if (
+    typeof apiKeyEnvVarName !== "string" ||
+    apiKeyEnvVarName.trim().length === 0
+  ) {
+    throw new HiveApiError(
+      "apiKeyEnvVarName must be a non-empty string",
+      400,
+      "INVALID_SDK_CONFIG",
+    );
+  }
+
+  const runtimeEnv =
+    typeof process !== "undefined" && process?.env ? process.env : undefined;
+  const envApiKey = runtimeEnv?.[apiKeyEnvVarName];
+
+  if (typeof envApiKey === "string" && envApiKey.trim().length > 0) {
+    return envApiKey.trim();
+  }
+
+  throw new HiveApiError(
+    `apiKey is required. Pass { apiKey } or set ${apiKeyEnvVarName} in your server environment.`,
+    400,
+    "INVALID_SDK_CONFIG",
+  );
+}
+
 export class Hive {
   public static readonly BASE_URLS = [...HIVE_BASE_URLS] as const;
   public static readonly VERSIONS = [...HIVE_API_VERSIONS] as const;
@@ -103,14 +139,10 @@ export class Hive {
     get: () => Promise<PublicStats>;
   };
 
-  constructor(options: HiveClientOptions) {
+  constructor(options: HiveClientOptions = {}) {
     warnIfBrowserRuntime();
 
-    if (!options.apiKey || options.apiKey.trim().length === 0) {
-      throw new HiveApiError("apiKey is required", 400, "INVALID_SDK_CONFIG");
-    }
-
-    this.apiKey = options.apiKey;
+    this.apiKey = resolveApiKey(options);
     this.baseUrl = trimTrailingSlash(options.baseUrl ?? DEFAULT_BASE_URL);
     this.version = options.version ?? DEFAULT_VERSION;
     this.fetchImpl = options.fetch ?? fetch;
@@ -193,10 +225,14 @@ export class Hive {
 
     this.stats = {
       get: async () => {
-        return this.executeWithGuard("/stats", "Failed to fetch stats.", async () => {
-          const payload = await this.request("/stats");
-          return parseStatsResponse(payload);
-        });
+        return this.executeWithGuard(
+          "/stats",
+          "Failed to fetch stats.",
+          async () => {
+            const payload = await this.request("/stats");
+            return parseStatsResponse(payload);
+          },
+        );
       },
     };
   }

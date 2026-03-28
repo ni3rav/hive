@@ -7,7 +7,8 @@ export const HIVE_API_VERSIONS = ["v1"] as const;
 export type HiveApiVersion = (typeof HIVE_API_VERSIONS)[number];
 
 export type HiveClientOptions = {
-  apiKey: string;
+  apiKey?: string;
+  apiKeyEnvVarName?: string;
   baseUrl?: HiveBaseUrl | string;
   version?: HiveApiVersion | string;
   fetch?: typeof fetch;
