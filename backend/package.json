@@ -24,7 +24,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "drizzle-orm": "^0.44.3",
+    "drizzle-orm": "^0.45.2",
     "envalid": "^8.1.0",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
