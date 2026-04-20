@@ -71,11 +71,11 @@ export function VerifyPage() {
 
   if (!isVerificationMode) {
     return (
-      <div className='w-full min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-4'>
+      <div className='w-full min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4'>
         <div className='w-full max-w-md'>
           <div className='flex items-center justify-center mb-8'>
             <img src='/hive.png' alt='Hive Logo' className='h-10 w-10' />
-            <span className='text-2xl font-bold text-white ml-2'>Hive</span>
+            <span className='text-2xl font-bold text-foreground ml-2'>Hive</span>
           </div>
 
           <Card>
@@ -125,11 +125,11 @@ export function VerifyPage() {
   }
 
   return (
-    <div className='w-full min-h-screen bg-neutral-900 flex flex-col items-center justify-center p-4'>
+    <div className='w-full min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4'>
       <div className='w-full max-w-md'>
         <div className='flex items-center justify-center mb-8'>
           <img src='/hive.png' alt='Hive Logo' className='h-10 w-10' />
-          <span className='text-2xl font-bold text-white ml-2'>Hive</span>
+          <span className='text-2xl font-bold text-foreground ml-2'>Hive</span>
         </div>
 
         <Card>

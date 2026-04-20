@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { NavMenu } from "@/components/nav-menu";
 import { NavigationSheet } from "@/components/navigation-sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AppLinkWithTheme } from "@/components/app-link-with-theme";
 import Image from "next/image";
-import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -26,7 +26,9 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <Button asChild>
-            <Link href="https://app.hivecms.online">Get Started</Link>
+            <AppLinkWithTheme href="https://app.hivecms.online">
+              Get Started
+            </AppLinkWithTheme>
           </Button>
           <ThemeToggle />
 

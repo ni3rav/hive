@@ -39,8 +39,10 @@ import type {
   CreateWorkspaceApiKeyResponse,
 } from '@/types/api-key';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { useTheme } from '@/contexts/theme-context';
 
 export default function ApiKeysManager() {
+  const { theme, resolvedTheme } = useTheme();
   const workspaceSlug = useWorkspaceSlug();
   const { data: workspace } = useWorkspaceVerification(workspaceSlug);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -132,6 +134,8 @@ export default function ApiKeysManager() {
   };
 
   const hasReachedLimit = apiKeys.length >= 3;
+  const docsTheme = theme === 'system' ? resolvedTheme : theme;
+  const docsUrl = `https://hivecms.online/docs?theme=${docsTheme}`;
 
   const handleCreateButtonPress = () => {
     if (!canManageApiKeys) {
@@ -200,7 +204,7 @@ export default function ApiKeysManager() {
                     at any time. Only workspace owners and admins can create or
                     delete keys; members can view existing keys.{' '}
                     <a
-                      href='https://hivecms.online/docs'
+                      href={docsUrl}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='text-primary underline hover:text-primary/80 transition-colors'

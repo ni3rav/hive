@@ -1,13 +1,10 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
 import "./global.css";
 import { Geist } from "next/font/google";
 import type { Metadata } from "next";
-import {
-  generateOrganizationData,
-  generateWebSiteData,
-} from "@/lib/structured-data";
+import { ThemeQuerySync } from "@/components/theme-query-sync";
+import { DocsThemeProvider } from "@/contexts/theme-context";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -108,8 +105,6 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const organizationData = generateOrganizationData();
-  const websiteData = generateWebSiteData();
   const searchLinks: [string, string][] = [
     ["Getting Started", "/docs/getting-started"],
     ["Posts", "/docs/posts"],
@@ -121,21 +116,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <html lang="en" className={geist.className} suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteData) }}
-        />
-      </head>
+    <html lang="en" className={`${geist.className} dark`} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <DocsThemeProvider>
+          <ThemeQuerySync />
           <RootProvider search={{ links: searchLinks }}>{children}</RootProvider>
-        </ThemeProvider>
+        </DocsThemeProvider>
         <Analytics />
       </body>
     </html>

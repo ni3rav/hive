@@ -30,6 +30,15 @@ function getStoredTheme(): Theme {
   return 'system';
 }
 
+function getThemeFromQueryParam(): Theme | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const value = new URLSearchParams(window.location.search).get('theme');
+  if (value === 'light' || value === 'dark' || value === 'system') {
+    return value;
+  }
+  return undefined;
+}
+
 function applyTheme(theme: 'light' | 'dark') {
   const root = document.documentElement;
   if (theme === 'dark') {
@@ -51,6 +60,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const currentTheme = theme === 'system' ? getSystemTheme() : theme;
     applyTheme(currentTheme);
     setResolvedTheme(currentTheme);
+  }, [theme]);
+
+  // Sync incoming query param to local theme state
+  useEffect(() => {
+    const queryTheme = getThemeFromQueryParam();
+    if (!queryTheme || queryTheme === theme) return;
+
+    setThemeState(queryTheme);
+    setCookie(THEME_COOKIE, queryTheme, {
+      maxAgeSeconds: THEME_COOKIE_MAX_AGE,
+    });
   }, [theme]);
 
   // Listen for system theme changes

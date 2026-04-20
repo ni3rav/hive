@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AppLinkWithTheme } from "@/components/app-link-with-theme";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,9 +24,9 @@ export default function Hero({ badgeText }: { badgeText: string }) {
         </p>
         <div className="mt-10 flex items-center justify-center gap-4">
           <Button size="lg" className="rounded-full text-base" asChild>
-            <Link href="https://app.hivecms.online">
+            <AppLinkWithTheme href="https://app.hivecms.online">
               Get Started <ArrowUpRight className="h-5! w-5!" />
-            </Link>
+            </AppLinkWithTheme>
           </Button>
           <Button
             variant="outline"
@@ -44,6 +45,8 @@ export default function Hero({ badgeText }: { badgeText: string }) {
           src="/hive-dashboard.png"
           alt="Hive Dashboard Dark"
           className="hidden dark:block object-cover"
+          loading="eager"
+          priority
           fill
         />
         <Image

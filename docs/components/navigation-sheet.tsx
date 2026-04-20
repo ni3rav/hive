@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -8,8 +10,23 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Menu } from "lucide-react";
 import { NavMenu } from "@/components/nav-menu";
+import { useEffect, useState } from "react";
 
 export const NavigationSheet = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="icon" aria-label="Open navigation menu">
+        <Menu />
+      </Button>
+    );
+  }
+
   return (
     <Sheet>
       <VisuallyHidden>
