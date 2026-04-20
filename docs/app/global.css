@@ -211,3 +211,11 @@ body::-webkit-scrollbar-thumb {
     scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
   }
 }
+
+/* Keep sidebar search row from being forced into a vertical stack. */
+#nd-sidebar > div:has(> div.bg-fd-secondary\/50),
+#nd-sidebar div.flex.flex-col.p-4.pt-2:has(> div.bg-fd-secondary\/50),
+#nd-sidebar > div.flex.flex-col.p-4.pt-2,
+#nd-sidebar div.flex.flex-col.p-4.pt-2 {
+  flex-direction: row !important;
+}
