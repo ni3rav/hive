@@ -15,6 +15,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -36,16 +37,16 @@ jobs:
           # IMPORTANT: relative to appSourcePath — so just "Dockerfile"
           dockerfilePath: Dockerfile
 
-          registryUrl: hiveacr3.azurecr.io
-          registryUsername: ${{ secrets.HIVEBACKEND_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.HIVEBACKEND_REGISTRY_PASSWORD }}
+          registryUrl: ghcr.io
+          registryUsername: ${{ github.actor }}
+          registryPassword: ${{ secrets.GITHUB_TOKEN }}
 
           containerAppName: hive-backend
           resourceGroup: hive-rg
 
           # Build & deploy the same tag
-          imageToBuild: hiveacr3.azurecr.io/hive-backend:${{ github.sha }}
-          imageToDeploy: hiveacr3.azurecr.io/hive-backend:${{ github.sha }}
+          imageToBuild: ghcr.io/ni3rav/hive-backend:${{ github.sha }}
+          imageToDeploy: ghcr.io/ni3rav/hive-backend:${{ github.sha }}
 
           # Optional
           buildArguments: |
