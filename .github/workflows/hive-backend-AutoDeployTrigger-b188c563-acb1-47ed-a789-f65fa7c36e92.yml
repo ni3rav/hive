@@ -12,6 +12,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
       id-token: write
       contents: read
@@ -31,25 +32,14 @@ jobs:
       - name: Build & Deploy Container App
         uses: azure/container-apps-deploy-action@v2
         with:
-          # Your backend folder in the repo
           appSourcePath: backend
-
-          # IMPORTANT: relative to appSourcePath — so just "Dockerfile"
           dockerfilePath: Dockerfile
-
-          registryUrl: ghcr.io
-          registryUsername: ${{ github.actor }}
-          registryPassword: ${{ secrets.GITHUB_TOKEN }}
 
           containerAppName: hive-backend
           resourceGroup: hive-rg
 
-          # Build & deploy the same tag
           imageToBuild: ghcr.io/ni3rav/hive-backend:${{ github.sha }}
           imageToDeploy: ghcr.io/ni3rav/hive-backend:${{ github.sha }}
 
-          # Optional
           buildArguments: |
             NODE_ENV=production
-
-
