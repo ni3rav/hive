@@ -43,6 +43,7 @@
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.5",
+    "@types/express-serve-static-core": "^5.0.0",
     "@types/helmet": "^0.0.48",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.1.0",
@@ -58,6 +59,7 @@
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1"
   },
   "overrides": {

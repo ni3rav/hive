@@ -22,7 +22,7 @@ export async function verifyPublicApiKey(
   next: NextFunction,
 ) {
   try {
-    const apiKey = req.params.apiKey;
+    const apiKey = req.params.apiKey as string;
 
     if (!apiKey) {
       return unauthorized(res, 'API key required');

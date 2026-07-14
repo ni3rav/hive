@@ -25,7 +25,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
           </CardHeader>
           <CardContent>
             <pre className='whitespace-pre-wrap text-destructive bg-destructive/10 rounded p-3 mb-4 text-sm'>
-              {error?.message}
+              {(error as Error)?.message}
             </pre>
             <Button
               onClick={resetErrorBoundary}

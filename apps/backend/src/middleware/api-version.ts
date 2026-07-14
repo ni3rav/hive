@@ -19,7 +19,7 @@ export function apiVersionMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const version = req.params.apiVersion;
+  const version = req.params.apiVersion as string;
 
   if (!isSupportedVersion(version)) {
     return notFound(res, `API version ${version} not found`);

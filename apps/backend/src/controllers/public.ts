@@ -87,7 +87,7 @@ export async function listPublicPostsController(req: Request, res: Response) {
 
 export async function getPublicPostController(req: Request, res: Response) {
   const workspaceId = req.publicWorkspaceId;
-  const postSlug = req.params.postSlug;
+  const postSlug = req.params.postSlug as string;
 
   if (!workspaceId) {
     return res.status(500).json({ message: 'Workspace context missing' });

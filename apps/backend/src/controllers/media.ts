@@ -350,7 +350,7 @@ export async function updateMediaThumbhashController(
     return forbidden(res, 'invalid azure function secret');
   }
 
-  const mediaId = req.params.mediaId;
+  const mediaId = req.params.mediaId as string;
 
   if (!UUID_REGEX.test(mediaId)) {
     return validationError(res, 'invalid media id', [

@@ -312,7 +312,7 @@ export async function createWorkspaceApiKeyController(
   res: Response,
 ) {
   const workspaceId = req.workspaceId;
-  const workspaceSlug = req.workspaceSlug || req.params.workspaceSlug;
+  const workspaceSlug = (req.workspaceSlug || req.params.workspaceSlug) as string;
   const userId = req.userId;
 
   const validated = createWorkspaceApiKeySchema.safeParse({

@@ -20,7 +20,7 @@ export async function verifyWorkspaceMembership(
   next: NextFunction,
 ) {
   try {
-    const workspaceSlug = req.params.workspaceSlug;
+    const workspaceSlug = req.params.workspaceSlug as string;
     const userId = req.userId;
 
     if (!workspaceSlug) {
