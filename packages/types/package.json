@@ -22,13 +22,16 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "zod": "^4.0.14"
   },
   "devDependencies": {
     "tsdown": "^0.21.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.7"
   }
 }
