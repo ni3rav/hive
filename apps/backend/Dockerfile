@@ -10,7 +10,7 @@ COPY apps/backend/package.json ./apps/backend/package.json
 COPY packages/types/package.json ./packages/types/package.json
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --shamefully-hoist
 
 # Stage 2: Build
 FROM node:22-alpine AS builder
