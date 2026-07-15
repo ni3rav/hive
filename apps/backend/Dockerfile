@@ -18,6 +18,8 @@ COPY packages/types ./packages/types
 
 # Prune the backend application
 RUN pnpm turbo prune backend --docker
+# drizzle/ is not included in turbo prune output, copy it manually
+RUN mkdir -p /app/out/apps/backend/drizzle && cp -r /app/apps/backend/drizzle/* /app/out/apps/backend/drizzle/
 
 # Stage 2: Dependencies
 FROM node:22-alpine AS dependencies
