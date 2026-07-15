@@ -1,0 +1,10 @@
+{
+  "name": "@hive/tsconfig",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Shared TypeScript configurations for Hive monorepo",
+  "files": [
+    "*.json"
+  ]
+}
