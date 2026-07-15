@@ -1,24 +1,7 @@
-export interface Workspace {
-  id: string;
-  name: string;
-  slug: string;
-  createdAt: string;
-}
-
-export interface UserWorkspace extends Workspace {
-  role: string;
-  joinedAt: string;
-}
-
-export interface CreateWorkspaceData {
-  workspaceName: string;
-  workspaceSlug: string;
-}
-
-export interface UpdateWorkspaceData {
-  name: string;
-}
-
-export interface VerifiedWorkspace extends Workspace {
-  role?: string;
-}
+export type {
+  Workspace,
+  UserWorkspace,
+  CreateWorkspaceData,
+  UpdateWorkspaceData,
+  VerifiedWorkspace,
+} from '@hive/types';

@@ -14,6 +14,9 @@
   "dependencies": {
     "@ariakit/react": "^0.4.19",
     "@faker-js/faker": "^10.0.0",
+    "@hive/query-params": "workspace:*",
+    "@hive/theme": "workspace:*",
+    "@hive/types": "workspace:*",
     "@floating-ui/dom": "^1.7.4",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
