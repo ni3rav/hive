@@ -1,0 +1,34 @@
+{
+  "name": "@hive/types",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Shared TypeScript types and Zod schemas for Hive monorepo",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "tsdown": "^0.21.3",
+    "typescript": "^5.9.2"
+  }
+}
