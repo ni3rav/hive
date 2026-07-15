@@ -1,15 +1,13 @@
 import { z } from 'zod';
+import {
+  memberRoleEnum,
+  inviteMemberSchema,
+  updateMemberRoleSchema,
+} from '@hive/types';
 
-export const memberRoleEnum = z.enum(['owner', 'admin', 'member']);
+export { memberRoleEnum, inviteMemberSchema, updateMemberRoleSchema };
 
-export const inviteMemberSchema = z.object({
-  email: z.email(),
-  role: memberRoleEnum,
-});
-
-export const updateMemberRoleSchema = z.object({
-  role: memberRoleEnum,
-});
+export type { MemberRole, InviteMemberData, UpdateMemberRoleData } from '@hive/types';
 
 export const revokeInvitationSchema = z.object({
   invitationId: z.uuid(),

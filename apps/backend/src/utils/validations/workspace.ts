@@ -34,3 +34,5 @@ export const deleteWorkspaceSchema = z.object({
 export const checkSlugAvailabilitySchema = z.object({
   slug: z.string().trim().min(1, 'Slug is required'),
 });
+
+export type { Workspace, UserWorkspace, VerifiedWorkspace } from '@hive/types';

@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { sessionIdSchema } from './common';
+import {
+  createAuthorSchema as baseCreateAuthorSchema,
+  updateAuthorSchema as baseUpdateAuthorSchema,
+} from '@hive/types';
 
 export const getAuthorByIdSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
@@ -7,14 +11,7 @@ export const getAuthorByIdSchema = z.object({
 
 export { sessionIdSchema };
 
-export const createAuthorSchema = z.object({
-  name: z.string().trim().min(1, 'name is required'),
-  email: z.email('invalid email'),
-  about: z.string().trim().optional(),
-  socialLinks: z
-    .record(z.string(), z.url('Invalid URL for social link'))
-    .optional(),
-});
+export const createAuthorSchema = baseCreateAuthorSchema;
 
 export const deleteAuthorSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
@@ -22,17 +19,7 @@ export const deleteAuthorSchema = z.object({
 
 export const updateAuthorSchema = z.object({
   authorId: z.uuid('Invalid authorId'),
-  data: z
-    .object({
-      name: z.string().trim().min(1, 'Name is required').optional(),
-      email: z.email('Invalid email').optional(),
-      about: z.string().trim().optional(),
-      socialLinks: z
-        .record(z.string(), z.url('Invalid URL for social link'))
-        .optional(),
-    })
-    .refine(
-      (data) => Object.values(data).some((value) => value !== undefined),
-      { message: 'please provide at least one field to update' },
-    ),
+  data: baseUpdateAuthorSchema,
 });
+
+export type { CreateAuthorInput, UpdateAuthorInput } from '@hive/types';
