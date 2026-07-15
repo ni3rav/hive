@@ -6,6 +6,15 @@
   "description": "Type-safe Node.js SDK for Hive CMS public API.",
   "homepage": "https://hivecms.online/docs",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ni3rav/hive.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "engines": {
     "node": ">=20"
   },
