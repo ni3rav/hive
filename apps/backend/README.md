@@ -8,31 +8,30 @@ workspace invites) via Resend.
 ## Requirements
 
 - Node.js 20+
-- npm 10+
+- pnpm 11+
 - PostgreSQL 15+ (local install or Docker)
 - Resend API key for email delivery
 
 ## Getting Started
 
 ```bash
-cd backend
-npm install
-# optional helper for Postgres
+cd apps/backend
+# (Optional) Spin up a Postgres helper container
 docker run --name hive-postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:16
 ```
 
-Create a `.env` file in `backend/`:
+Create a `.env` file in `apps/backend/`:
 
 | Variable         | Required | Description                                                        |
 | ---------------- | -------- | ------------------------------------------------------------------ |
-| `DATABASE_URL`   | ✅       | `postgres://user:pass@host:5432/dbname`                            |
-| `PORT`           | ✅       | Port for Express (defaults to 3000)                                |
-| `NODE_ENV`       | ✅       | `development` / `production`                                       |
-| `FRONTEND_URL`   | ✅       | SPA origin for CORS + auth links                                   |
-| `RESEND_API_KEY` | ✅       | Resend API key for email templates                                 |
-| `DMA`            | optional | Enables DMA defensive checks (`false` by default)                  |
-| `DEV_USER_ID`    | optional | Seed user ID for local debugging                                   |
-| `EMAIL_DOMAIN`   | optional | Domain used for transactional senders (`emails.ni3rav.me` default) |
+| `DATABASE_URL`   | yes      | `postgres://user:pass@host:5432/dbname`                            |
+| `PORT`           | yes      | Port for Express (defaults to 3000)                                |
+| `NODE_ENV`       | yes      | `development` / `production`                                       |
+| `FRONTEND_URL`   | yes      | SPA origin for CORS + auth links                                   |
+| `RESEND_API_KEY` | yes      | Resend API key for email templates                                 |
+| `DMA`            | no       | Enables DMA defensive checks (`false` by default)                  |
+| `DEV_USER_ID`    | no       | Seed user ID for local debugging                                   |
+| `EMAIL_DOMAIN`   | no       | Domain used for transactional senders (`emails.ni3rav.me` default) |
 
 Example:
 
@@ -49,23 +48,26 @@ EMAIL_DOMAIN=emails.ni3rav.me
 
 ## Database Management
 
-- **Push latest schema:** `npm run drizzle-push`
-- **Generate migration from schema changes:** `npm run generate`
-- **Apply pending migrations:** `npm run migrate`
-- **Inspect data:** `npm run drizzle-studio`
+- **Push latest schema:** `pnpm drizzle-push`
+- **Generate migration from schema changes:** `pnpm generate`
+- **Apply pending migrations:** `pnpm migrate`
+- **Inspect data:** `pnpm drizzle-studio`
 
 The full SQL history lives under `drizzle/`. Every change should come with a new
 migration file so environments remain reproducible.
 
 ## Running the API
 
+You can run these scripts directly from this directory, or from the monorepo
+root using `--filter backend`.
+
 ```bash
 # Development (ts-node + nodemon)
-npm run dev
+pnpm dev
 
 # Production build
-npm run build
-npm run start
+pnpm build
+pnpm start
 ```
 
 By default the dev server listens on `http://localhost:3000`. Update
@@ -73,31 +75,31 @@ By default the dev server listens on `http://localhost:3000`. Update
 
 ## Useful Scripts
 
-| Script             | Purpose                   |
-| ------------------ | ------------------------- |
-| `npm run lint`     | ESLint over `src/**/*.ts` |
-| `npm run prettier` | Format source files       |
-| `npm run dev`      | Watch mode server         |
-| `npm run build`    | Emit `dist/`              |
-| `npm run start`    | Run compiled server       |
+| Script          | Purpose                   |
+| --------------- | ------------------------- |
+| `pnpm lint`     | ESLint over `src/**/*.ts` |
+| `pnpm prettier` | Format source files       |
+| `pnpm dev`      | Watch mode server         |
+| `pnpm build`    | Emit `dist/`              |
+| `pnpm start`    | Run compiled server       |
 
 ## Testing the API
 
-- **REST tooling**: use Thunder Client, Postman, or curl. Each module exposes
+- **REST tooling**: Use Thunder Client, Postman, or curl. Each module exposes
   routes under `/api/<module>`. See `src/routes/*` for exact paths.
-- **Auth flows**: verify register/login/password-reset + email verification.
+- **Auth flows**: Verify register/login/password-reset + email verification.
   Transactional emails leverage Resend; when `RESEND_API_KEY` is not set,
   handlers will throw early—mock responses if needed.
-- **Workspace actions**: exercise workspace creation, member invites, and role
+- **Workspace actions**: Exercise workspace creation, member invites, and role
   checks in `middleware/workspace-role.ts`.
 
 ## Troubleshooting
 
-- **Migrations fail**: confirm the database container is running and accessible
-  via `psql`. Re-run `npm run drizzle-push`.
-- **CORS blocked**: ensure `FRONTEND_URL` matches the actual origin (including
+- **Migrations fail**: Confirm the database container is running and accessible
+  via `psql`. Re-run `pnpm drizzle-push`.
+- **CORS blocked**: Ensure `FRONTEND_URL` matches the actual origin (including
   protocol and port).
-- **Email delivery**: verify the Resend domain is verified; in local dev you can
+- **Email delivery**: Verify the Resend domain is verified; in local dev you can
   temporarily stub `send*Email` helpers under `src/utils/email.ts`.
 
 ## License

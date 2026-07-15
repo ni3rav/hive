@@ -1,21 +1,20 @@
 # Hive Frontend
 
-Vite + React 19 single-page app that provides the Hive workspace dashboard, editors, and member management UI. It relies on Radix UI primitives, Tailwind, TipTap, and TanStack Query for a responsive authoring experience.
+Vite + React 19 single-page app that provides the Hive workspace dashboard, editors, and member management UI. It relies on Radix UI primitives, Tailwind CSS, TipTap, and TanStack Query for a responsive authoring experience.
 
 ## Requirements
 
 - Node.js 20+
-- npm 10+
+- pnpm 11+
 - Backend API running locally (default `http://localhost:3000`)
 
 ## Getting Started
 
 ```bash
-cd frontend
-npm install
+cd apps/frontend
 ```
 
-Create `.env` in `frontend/`:
+Create `.env` in `apps/frontend/`:
 
 ```
 VITE_HIVE_API_BASE_URL=http://localhost:3000
@@ -26,15 +25,17 @@ VITE_APP_URL=http://localhost:5173
 
 ## Development Workflow
 
+You can run these scripts directly from this directory, or from the monorepo root using `--filter frontend`.
+
 ```bash
 # Start Vite dev server on http://localhost:5173
-npm run dev
+pnpm dev
 
 # Type-check + production build
-npm run build
+pnpm build
 
 # Preview the optimized build
-npm run preview
+pnpm preview
 ```
 
 ## Project Structure
@@ -47,9 +48,9 @@ npm run preview
 
 ## Quality Tooling
 
-- `npm run lint`: ESLint 9 with React + TanStack Query plugins
-- `npm run prettier`: Repository-wide formatting
-- `npm run test`: _(not yet implemented)_ — rely on manual verification for now
+- `pnpm lint`: ESLint 9 with React + TanStack Query plugins
+- `pnpm prettier`: Repository-wide formatting
+- `pnpm test`: _(not yet implemented)_ — rely on manual verification for now
 
 ## Connecting to the Backend
 
@@ -60,7 +61,7 @@ npm run preview
 ## Deployment Notes
 
 - Build artifacts land in `dist/`. Deploy to Vercel/Netlify or serve via any static host + reverse-proxy for the API.
-- Update `VITE_HIVE_API_BASE_URL` and `VITE_APP_URL` with production URLs before running `npm run build`.
+- Update `VITE_HIVE_API_BASE_URL` and `VITE_APP_URL` with production URLs before running `pnpm build`.
 - A sample `vercel.json` is included for edge-friendly defaults.
 
 ## License
