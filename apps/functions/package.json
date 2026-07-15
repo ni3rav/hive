@@ -11,14 +11,14 @@
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0",
+    "@azure/functions": "^4.16.2",
     "sharp": "^0.34.5",
     "thumbhash": "^0.1.1"
   },
   "devDependencies": {
-    "@types/node": "^20.x",
-    "rimraf": "^5.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.19.43",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.9.3"
   },
   "main": "dist/src/{index.js,functions/*.js}"
 }
