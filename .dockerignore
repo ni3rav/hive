@@ -1,0 +1,57 @@
+# Root-level .dockerignore — build context is the repo root
+# Exclude heavy directories that don't belong in the image
+
+# Local node_modules (Docker installs its own inside the image)
+node_modules/
+**/node_modules/
+
+# Build outputs (Docker builds these internally)
+dist/
+**/dist/
+.next/
+out/
+build/
+
+# Turborepo cache
+.turbo/
+**/.turbo/
+
+# Git history
+.git/
+.gitignore
+
+# Environment files — never bake secrets into the image
+.env
+.env.*
+!.env.example
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.sw?
+
+# CI/CD — not needed at runtime
+.github/
+
+# Docs app — unrelated to backend
+apps/docs/
+apps/frontend/
+apps/functions/
+
+# Packages unrelated to backend
+packages/sdk/
+packages/theme/
+packages/query-params/
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+tests/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
