@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useDocsTheme } from "@/contexts/theme-context";
+import { getUrlQueryParam } from "@hive/query-params/vanilla";
 
 type QueryTheme = "light" | "dark";
 
@@ -14,9 +15,7 @@ export function ThemeQuerySync() {
 
   useEffect(() => {
     const syncThemeFromUrl = () => {
-      const incomingTheme = new URLSearchParams(window.location.search).get(
-        "theme",
-      );
+      const incomingTheme = getUrlQueryParam("theme");
 
       if (!isQueryTheme(incomingTheme)) {
         return;

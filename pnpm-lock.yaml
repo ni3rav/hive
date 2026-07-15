@@ -20,6 +20,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.958.0
         version: 3.1085.0
+      '@hive/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -141,6 +144,12 @@ importers:
 
   apps/docs:
     dependencies:
+      '@hive/query-params':
+        specifier: workspace:*
+        version: link:../../packages/query-params
+      '@hive/theme':
+        specifier: workspace:*
+        version: link:../../packages/theme
       '@radix-ui/react-accordion':
         specifier: ^1.2.16
         version: 1.2.16(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -247,6 +256,15 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.4
         version: 1.8.0
+      '@hive/query-params':
+        specifier: workspace:*
+        version: link:../../packages/query-params
+      '@hive/theme':
+        specifier: workspace:*
+        version: link:../../packages/theme
+      '@hive/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.4.0(react-hook-form@7.81.0(react@19.2.7))
@@ -569,7 +587,7 @@ importers:
         version: 19.2.17
       jsdom:
         specifier: ^26.1.0
-        version: 26.1.0
+        version: 26.1.0(supports-color@5.5.0)
       react:
         specifier: ^19.1.2
         version: 19.2.7
@@ -584,7 +602,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.7
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.23.1)
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0(supports-color@5.5.0))(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1)
 
   packages/sdk:
     devDependencies:
@@ -611,7 +629,7 @@ importers:
         version: 19.2.3(@types/react@19.2.17)
       jsdom:
         specifier: ^26.1.0
-        version: 26.1.0
+        version: 26.1.0(supports-color@5.5.0)
       react:
         specifier: ^19.1.2
         version: 19.2.7
@@ -626,7 +644,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.7
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.23.1)
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0(supports-color@5.5.0))(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1)
 
   packages/tsconfig: {}
 
@@ -644,7 +662,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.7
-        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.23.1)
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0(supports-color@5.5.0))(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1)
 
 packages:
 
@@ -12082,7 +12100,7 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
-  http-proxy-agent@7.0.2:
+  http-proxy-agent@7.0.2(supports-color@5.5.0):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@5.5.0)
@@ -12096,7 +12114,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  https-proxy-agent@7.0.6:
+  https-proxy-agent@7.0.6(supports-color@5.5.0):
     dependencies:
       agent-base: 7.1.4
       debug: 4.4.3(supports-color@5.5.0)
@@ -12337,14 +12355,14 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdom@26.1.0:
+  jsdom@26.1.0(supports-color@5.5.0):
     dependencies:
       cssstyle: 4.6.0
       data-urls: 5.0.0
       decimal.js: 10.6.0
       html-encoding-sniffer: 4.0.0
-      http-proxy-agent: 7.0.2
-      https-proxy-agent: 7.0.6
+      http-proxy-agent: 7.0.2(supports-color@5.5.0)
+      https-proxy-agent: 7.0.6(supports-color@5.5.0)
       is-potential-custom-element-name: 1.0.1
       nwsapi: 2.2.24
       parse5: 7.3.0
@@ -14782,7 +14800,7 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  vite-node@3.2.4(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.1):
+  vite-node@3.2.4(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1):
     dependencies:
       cac: 6.7.14
       debug: 4.4.3(supports-color@5.5.0)
@@ -14833,7 +14851,7 @@ snapshots:
       lightningcss: 1.32.0
       tsx: 4.23.1
 
-  vitest@3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(tsx@4.23.1):
+  vitest@3.2.7(@types/debug@4.1.13)(@types/node@26.1.1)(happy-dom@20.10.6)(jiti@2.7.0)(jsdom@26.1.0(supports-color@5.5.0))(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.7
@@ -14856,13 +14874,13 @@ snapshots:
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
       vite: 7.3.6(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.1)
-      vite-node: 3.2.4(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.1)
+      vite-node: 3.2.4(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@5.5.0)(tsx@4.23.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/debug': 4.1.13
       '@types/node': 26.1.1
       happy-dom: 20.10.6
-      jsdom: 26.1.0
+      jsdom: 26.1.0(supports-color@5.5.0)
     transitivePeerDependencies:
       - jiti
       - less

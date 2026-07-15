@@ -24,7 +24,7 @@ function withThemeQuery(href: string, theme: "light" | "dark") {
 }
 
 export function AppLinkWithTheme({ href, ...props }: LinkProps) {
-  const { theme } = useDocsTheme();
+  const { resolvedTheme } = useDocsTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -39,8 +39,8 @@ export function AppLinkWithTheme({ href, ...props }: LinkProps) {
     if (!mounted) {
       return href;
     }
-    return withThemeQuery(href, theme);
-  }, [href, mounted, theme]);
+    return withThemeQuery(href, resolvedTheme);
+  }, [href, mounted, resolvedTheme]);
 
   return <Link href={themedHref} {...props} />;
 }

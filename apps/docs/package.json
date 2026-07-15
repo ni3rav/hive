@@ -11,6 +11,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hive/query-params": "workspace:*",
+    "@hive/theme": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.16",
     "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-navigation-menu": "^1.2.18",
