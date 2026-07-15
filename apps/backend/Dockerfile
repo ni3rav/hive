@@ -1,45 +1,59 @@
 # Production-grade Multi-stage Dockerfile for Express TypeScript Backend
+# Uses turbo prune to extract only the necessary files from the monorepo
 
-# Stage 1: Dependencies
-# Use Alpine for smaller image size
-FROM node:22-alpine AS dependencies
+# Stage 1: Prune
+FROM node:22-alpine AS pruner
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Install pnpm and turbo
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy root package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+
+# Copy the entire monorepo structure needed for pruning
+COPY apps/backend ./apps/backend
+COPY packages/types ./packages/types
+
+# Prune the backend application
+RUN pnpm turbo prune backend --docker
+
+# Stage 2: Dependencies
+FROM node:22-alpine AS dependencies
+
+WORKDIR /app
+
+# Copy pruned package files
+COPY --from=pruner /app/out/pnpm-lock.yaml ./
+COPY --from=pruner /app/out/pnpm-workspace.yaml ./
+COPY --from=pruner /app/out/package.json ./
+COPY --from=pruner /app/out/apps/backend/package.json ./apps/backend/package.json
+COPY --from=pruner /app/out/packages/types/package.json ./packages/types/package.json
 
 # Install dependencies
-# --omit=dev skips devDependencies for production build
-RUN npm ci --only=production && \
-    # Cache production dependencies
-    cp -R node_modules /tmp/prod_node_modules && \
-    # Install all dependencies (including dev) for build
-    npm ci
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN pnpm install --frozen-lockfile
 
-# Stage 2: Build
+# Stage 3: Builder
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* tsconfig.json ./
-
-# Copy node_modules from dependencies stage
+# Copy dependencies from dependencies stage
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/apps/backend/node_modules ./apps/backend/node_modules
+COPY --from=dependencies /app/packages/types/node_modules ./packages/types/node_modules
 
-# Copy source code
-COPY src ./src
+# Copy pruned source code
+COPY --from=pruner /app/out ./
 
-# Build TypeScript to JavaScript
-RUN npm run build
+# Build the types package first, then the backend
+RUN cd packages/types && pnpm build
+RUN cd apps/backend && pnpm build
 
-# Stage 3: Production
+# Stage 4: Production
 FROM node:22-alpine AS production
-
-# Install dumb-init to handle PID 1 and signal forwarding
-# RUN apk add --no-cache dumb-init
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -51,33 +65,32 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY --from=pruner /app/out/apps/backend/package.json ./
+COPY --from=pruner /app/out/packages/types/package.json ./packages/types/package.json
 
-# Copy production dependencies from dependencies stage
-COPY --from=dependencies /tmp/prod_node_modules ./node_modules
+# Copy production dependencies
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/apps/backend/node_modules ./apps/backend/node_modules
+COPY --from=dependencies /app/packages/types/node_modules ./packages/types/node_modules
 
-# Copy built application from builder stage
-COPY --from=builder /app/dist ./dist
+# Copy built application
+COPY --from=builder /app/apps/backend/dist ./dist
 
-# Copy drizzle migrations if needed
-COPY drizzle ./drizzle
+# Copy drizzle migrations
+COPY --from=pruner /app/out/apps/backend/drizzle ./drizzle
 
 # Change ownership to non-root user
-# RUN chown -R nodejs:nodejs /app
+RUN chown -R nodejs:nodejs /app
 
 # Switch to non-root user
-# USER nodejs
+USER nodejs
 
-# Expose port (adjust if your app uses a different port)
+# Expose port
 EXPOSE 3000
 
 # Health check
-# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-#     CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
-
-# Use dumb-init to run the application
-# This ensures proper signal handling and zombie process reaping
-# ENTRYPOINT ["dumb-init", "--"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
 
 # Start the application
 CMD ["node", "dist/index.js"]
