@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, MoreVertical, UserX } from 'lucide-react';
+import { format } from 'date-fns';
+import { Search, Plus, MoreVertical, UserX, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -66,27 +67,35 @@ function RoleBadge({ role }: { role: MemberRole }) {
 
 export default function MemberList({
   members,
-  //
+  invitations,
   currentUserRole,
   currentUserId,
   workspaceSlug,
   onEdit,
   onRemove,
-  //onRevokeInvitation,
+  onRevokeInvitation,
   onLeave,
 }: Props) {
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
 
+  const query = search.trim().toLowerCase();
+
   const filteredMembers = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return members;
+    if (!query) return members;
     return members.filter(
       (m) =>
-        m.name?.toLowerCase().includes(q) ||
-        m.email?.toLowerCase().includes(q),
+        m.name?.toLowerCase().includes(query) ||
+        m.email?.toLowerCase().includes(query),
     );
-  }, [members, search]);
+  }, [members, query]);
+
+  const filteredInvitations = useMemo(() => {
+    if (!query) return invitations;
+    return invitations.filter((invitation) =>
+      invitation.email.toLowerCase().includes(query),
+    );
+  }, [invitations, query]);
 
   const canInvite = currentUserRole === 'owner' || currentUserRole === 'admin';
 
@@ -95,7 +104,9 @@ export default function MemberList({
       <CardHeader>
         <div>
           <CardTitle>Members</CardTitle>
-          <CardDescription>Manage workspace members</CardDescription>
+          <CardDescription>
+            Manage workspace members and invitations
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent className='space-y-6'>
@@ -105,7 +116,7 @@ export default function MemberList({
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder='Search team members...'
+              placeholder='Search members and invites...'
               className='pl-9 sm:w-64'
             />
           </div>
@@ -209,11 +220,25 @@ export default function MemberList({
           )}
         </div>
 
-        {/* {invitations.length > 0 && (
-          <div>
-            <div className='mb-3 text-sm font-medium'>Pending Invitations</div>
+        <div>
+          <div className='mb-3 text-sm font-medium'>Pending Invitations</div>
+          {filteredInvitations.length === 0 ? (
+            <Empty className='border-dashed'>
+              <EmptyHeader>
+                <EmptyMedia variant='icon'>
+                  <Mail />
+                </EmptyMedia>
+                <EmptyTitle>No Pending Invitations</EmptyTitle>
+                <EmptyDescription>
+                  {query
+                    ? `No invitations found matching "${search.trim()}"`
+                    : 'No pending invitations at this time'}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
             <div className='divide-y'>
-              {invitations.map((invitation, idx) => {
+              {filteredInvitations.map((invitation, idx) => {
                 const canRevoke = canManageMember(
                   currentUserRole,
                   invitation.role,
@@ -235,10 +260,13 @@ export default function MemberList({
                         <div className='truncate font-medium'>
                           {invitation.email}
                         </div>
+                        <div className='truncate text-sm text-muted-foreground'>
+                          Invited{' '}
+                          {format(new Date(invitation.invitedAt), 'MMM d, yyyy')}
+                        </div>
                       </div>
                     </div>
                     <div className='flex items-center gap-3'>
-                      <RoleBadge role={invitation.role} />
                       {canRevoke && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -260,30 +288,14 @@ export default function MemberList({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
+                      <RoleBadge role={invitation.role} />
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
-        )}
-
-        {invitations.length === 0 && (
-          <div>
-            <div className='mb-3 text-sm font-medium'>Pending Invitations</div>
-            <Empty className='border-dashed'>
-              <EmptyHeader>
-                <EmptyMedia variant='icon'>
-                  <UserX />
-                </EmptyMedia>
-                <EmptyTitle>No Pending Invitations</EmptyTitle>
-                <EmptyDescription>
-                  No pending invitations at this time
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </div>
-        )} */}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

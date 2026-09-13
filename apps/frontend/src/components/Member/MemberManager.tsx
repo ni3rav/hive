@@ -46,7 +46,10 @@ export default function MemberManager() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [selectedInvitation, setSelectedInvitation] =
+    useState<PendingInvitation | null>(null);
 
   const { data, isLoading, isError } = useMembers(workspaceSlug);
   const updateMemberRoleMutation = useUpdateMemberRole(workspaceSlug);
@@ -131,7 +134,16 @@ export default function MemberManager() {
   };
 
   const handleRevokeInvitation = (invitation: PendingInvitation) => {
-    revokeInvitationMutation.mutate(invitation.id);
+    setSelectedInvitation(invitation);
+    setRevokeDialogOpen(true);
+  };
+
+  const confirmRevoke = () => {
+    if (selectedInvitation) {
+      revokeInvitationMutation.mutate(selectedInvitation.id);
+      setSelectedInvitation(null);
+      setRevokeDialogOpen(false);
+    }
   };
 
   const handleLeave = () => {
@@ -200,6 +212,38 @@ export default function MemberManager() {
               disabled={removeMemberMutation.isPending}
             >
               {removeMemberMutation.isPending ? 'Removing...' : 'Remove'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke Invitation</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to revoke the invitation to{' '}
+              {selectedInvitation?.email}? They will no longer be able to join
+              with this invite link.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setRevokeDialogOpen(false);
+                setSelectedInvitation(null);
+              }}
+              disabled={revokeInvitationMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={confirmRevoke}
+              disabled={revokeInvitationMutation.isPending}
+            >
+              {revokeInvitationMutation.isPending ? 'Revoking...' : 'Revoke'}
             </Button>
           </DialogFooter>
         </DialogContent>
