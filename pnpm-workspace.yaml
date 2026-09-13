@@ -13,8 +13,34 @@ minimumReleaseAgeExclude:
   - postcss@8.5.10
   - sharp@0.35.0
   - next@16.2.11
+  - brace-expansion@1.1.17
+  - brace-expansion@2.1.3
+  - brace-expansion@5.0.8
+  - postcss@8.5.23
+  - brace-expansion@5.0.9
+  - brace-expansion@2.1.4
+  - brace-expansion@1.1.18
+  - js-yaml@4.3.1
+  - react-router@7.18.2
+  - nanoid@3.3.18
+  - js-yaml@5.2.2
+  - browserslist@4.28.7
+  - sanitize-html@2.17.7
+  - qs@6.15.4
+  - qs@6.16.0
+  - '@tiptap/core@3.30.4'
+  - next@16.3.3
+  - vitest@4.1.11
+  - '@vitest/mocker@4.1.11'
+  - sharp@0.35.4
+  - js-yaml@4.3.2
+  - '@tiptap/core@3.30.5'
+  - morgan@1.12.0
 
 overrides:
   esbuild@<=0.24.2: ^0.28.1
-  postcss@<8.5.10: ^8.5.10
-  sharp@<0.35.0: ^0.35.0
+  postcss@<8.5.10: ^8.5.23
+  sharp@<0.35.4: ^0.35.4
+  react-router@<7.18.2: ^7.18.2
+  vitest@<4.1.11: ^4.1.11
+  "@vitest/mocker@<4.1.11": ^4.1.11

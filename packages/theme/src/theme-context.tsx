@@ -12,7 +12,6 @@ import type {
   ResolvedTheme,
   ThemeProviderConfig,
   ThemeContextValue,
-  StorageAdapter,
 } from './types';
 import {
   resolveTheme,

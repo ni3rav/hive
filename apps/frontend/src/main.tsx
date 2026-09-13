@@ -14,7 +14,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { lazyPage, lazyImport } from '@/components/editor/lazy';
 import { Suspense, useEffect } from 'react';
 import { Spinner } from './components/ui/spinner';
-import { ThemeProvider } from '@/contexts/theme-context';
+import { ThemeProvider } from '@hive/theme';
 import { UnheadProvider } from '@unhead/react/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';

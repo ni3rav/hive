@@ -39,7 +39,7 @@ import type {
   CreateWorkspaceApiKeyResponse,
 } from '@/types/api-key';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { useTheme } from '@/contexts/theme-context';
+import { useTheme } from '@hive/theme';
 
 export default function ApiKeysManager() {
   const { theme, resolvedTheme } = useTheme();

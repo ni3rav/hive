@@ -1,6 +1,5 @@
 import type { Theme, ResolvedTheme, StorageAdapter } from './types';
 
-const DEFAULT_STORAGE_KEY = 'theme';
 const DEFAULT_ATTRIBUTE = 'data-theme';
 
 export function getSystemTheme(): ResolvedTheme {
