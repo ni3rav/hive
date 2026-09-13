@@ -26,6 +26,10 @@ async function generateThumbhash(
     const originalMetadata = await sharp(imageBuffer).metadata();
     const originalWidth = originalMetadata.width || 0;
     const originalHeight = originalMetadata.height || 0;
+    if (!originalWidth || !originalHeight) {
+      context.log("Invalid image dimensions");
+      return null;
+    }
     const aspectRatio = originalWidth / originalHeight;
 
     const { data, info } = await sharp(imageBuffer)
@@ -63,53 +67,72 @@ async function fetchImage(
   url: string,
   context: InvocationContext
 ): Promise<Buffer | null> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+  const maxAttempts = 3;
 
-    const response = await fetch(url, {
-      signal: controller.signal,
-    });
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    clearTimeout(timeoutId);
+      const response = await fetch(url, {
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      context.log(
-        `Image fetch failed: ${response.status} ${response.statusText}`
-      );
-      return null;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        context.log(
+          `Image fetch failed (attempt ${attempt}/${maxAttempts}): ${response.status} ${response.statusText}`
+        );
+      } else {
+        const contentType = (response.headers.get("content-type") || "")
+          .split(";")[0]
+          .trim()
+          .toLowerCase();
+        if (
+          contentType &&
+          !contentType.startsWith("image/") &&
+          contentType !== "application/octet-stream"
+        ) {
+          context.log(`Invalid content type: ${contentType}`);
+          return null;
+        }
+
+        const contentLength = response.headers.get("content-length");
+        if (contentLength) {
+          const sizeMB = parseInt(contentLength, 10) / (1024 * 1024);
+          context.log(`Downloading image: ${sizeMB.toFixed(2)} MB`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        context.log(
+          `Image downloaded: ${(arrayBuffer.byteLength / (1024 * 1024)).toFixed(
+            2
+          )} MB`
+        );
+        return Buffer.from(arrayBuffer);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        context.log(
+          `Image fetch timeout after 30 seconds (attempt ${attempt}/${maxAttempts})`
+        );
+      } else {
+        context.log(
+          `Image fetch error (attempt ${attempt}/${maxAttempts}):`,
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     }
 
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.startsWith("image/")) {
-      context.log(`Invalid content type: ${contentType}`);
-      return null;
+    if (attempt < maxAttempts) {
+      const delayMs = attempt * 1000;
+      context.log(`Retrying image fetch in ${delayMs}ms`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
-
-    const contentLength = response.headers.get("content-length");
-    if (contentLength) {
-      const sizeMB = parseInt(contentLength, 10) / (1024 * 1024);
-      context.log(`Downloading image: ${sizeMB.toFixed(2)} MB`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    context.log(
-      `Image downloaded: ${(arrayBuffer.byteLength / (1024 * 1024)).toFixed(
-        2
-      )} MB`
-    );
-    return Buffer.from(arrayBuffer);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      context.log("Image fetch timeout after 30 seconds");
-    } else {
-      context.log(
-        "Image fetch error:",
-        error instanceof Error ? error.message : String(error)
-      );
-    }
-    return null;
   }
+
+  return null;
 }
 
 async function callbackBackend(

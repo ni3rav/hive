@@ -30,9 +30,6 @@ import {
 import { UUID_REGEX } from '../utils/validations/common';
 import { env } from '../env';
 import logger from '../logger';
-import https from 'https';
-import http from 'http';
-import { URL } from 'url';
 
 export async function generatePresignedUrlController(
   req: Request,
@@ -187,75 +184,51 @@ function triggerThumbhashGeneration(payload: {
   publicUrl: string;
   size: number;
 }) {
-  try {
-    logger.info(
-      {
-        url: env.AZURE_THUMBHASH_FUNCTION_URL,
-        mediaId: payload.mediaId,
-      },
-      'Preparing Azure Function request',
-    );
+  const url = env.AZURE_THUMBHASH_FUNCTION_URL;
 
-    const url = new URL(env.AZURE_THUMBHASH_FUNCTION_URL);
-    const data = JSON.stringify(payload);
-    const isHttps = url.protocol === 'https:';
+  logger.info(
+    {
+      url,
+      mediaId: payload.mediaId,
+    },
+    'Sending request to Azure Function',
+  );
 
-    const options: https.RequestOptions | http.RequestOptions = {
-      method: 'POST',
-      hostname: url.hostname,
-      port: url.port || (isHttps ? 443 : 80),
-      path: `${url.pathname}${url.search}`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data),
-        'x-azure-function-secret': env.AZURE_FUNCTION_SECRET,
-      },
-    };
+  void fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-azure-function-secret': env.AZURE_FUNCTION_SECRET,
+    },
+    body: JSON.stringify(payload),
+  })
+    .then(async (res) => {
+      const body = await res.text();
+      if (!res.ok) {
+        logger.error(
+          {
+            statusCode: res.status,
+            statusText: res.statusText,
+            body,
+            mediaId: payload.mediaId,
+          },
+          'Azure thumbhash function returned an error',
+        );
+        return;
+      }
 
-    const headers = options.headers as
-      | Record<string, string | string[] | undefined>
-      | undefined;
-    const secretHeader = headers?.['x-azure-function-secret'];
-    logger.info(
-      {
-        hostname: options.hostname,
-        port: options.port,
-        path: options.path,
-        protocol: url.protocol,
-        hasSecretHeader: !!secretHeader,
-        secretLength: secretHeader ? String(secretHeader).length : 0,
-      },
-      'Sending request to Azure Function',
-    );
-
-    const requestModule = isHttps ? https : http;
-    const req = requestModule.request(options, (res) => {
       logger.info(
         {
-          statusCode: res.statusCode,
-          statusMessage: res.statusMessage,
+          statusCode: res.status,
+          body,
+          mediaId: payload.mediaId,
         },
-        'Azure Function response received',
+        'Azure thumbhash function accepted request',
       );
-      res.on('data', () => {});
-      res.on('end', () => {
-        logger.info('Azure Function request completed');
-      });
-    });
-
-    req.on('error', (err) => {
+    })
+    .catch((err) => {
       logger.error(err, 'Failed to trigger Azure thumbhash function');
     });
-
-    req.write(data);
-    req.end();
-    logger.info('Azure Function request sent');
-  } catch (error) {
-    logger.error(
-      error,
-      'Failed to prepare request to Azure thumbhash function',
-    );
-  }
 }
 
 export async function listMediaController(req: Request, res: Response) {

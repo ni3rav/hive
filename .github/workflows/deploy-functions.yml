@@ -35,9 +35,18 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm --filter functions build
 
+      # Flex Consumption installs Linux native deps (sharp) during remote-build.
+      # Do not ship pnpm's workspace node_modules — they do not load on Azure.
       - name: Zip artifact for deployment
         working-directory: apps/functions
-        run: zip -r ${{ github.workspace }}/release.zip .
+        run: |
+          zip -r ${{ github.workspace }}/release.zip . \
+            -x "node_modules/*" \
+            -x "node_modules/**/*" \
+            -x ".turbo/*" \
+            -x ".turbo/**/*" \
+            -x "*.js.map" \
+            -x "test-thumbhash.js"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -75,5 +84,6 @@ jobs:
         id: fa
         with:
           app-name: 'hive-thumbhash'
-          slot-name: 'Production'
           package: '.'
+          remote-build: true
+          respect-funcignore: true
