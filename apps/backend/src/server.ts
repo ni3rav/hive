@@ -22,7 +22,19 @@ import { sql } from 'drizzle-orm';
 import logger from './logger';
 import pinoHTTP from 'pino-http';
 
+const LEGACY_API_HOST = 'api.hivecms.online';
+const CANONICAL_API_ORIGIN = 'https://api.hive.niravv.me';
+
 export const app = express();
+
+app.use((req, res, next) => {
+  if (req.hostname !== LEGACY_API_HOST) {
+    next();
+    return;
+  }
+
+  res.redirect(308, `${CANONICAL_API_ORIGIN}${req.originalUrl}`);
+});
 
 app.use(
   helmet({

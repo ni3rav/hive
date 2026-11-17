@@ -1,5 +1,5 @@
 export function generateStructuredData() {
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
 
   return {
     "@context": "https://schema.org",
@@ -35,7 +35,7 @@ export function generateStructuredData() {
 }
 
 export function generateOrganizationData() {
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
 
   return {
     "@context": "https://schema.org",
@@ -53,7 +53,7 @@ export function generateOrganizationData() {
 }
 
 export function generateWebSiteData() {
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
 
   return {
     "@context": "https://schema.org",
@@ -114,10 +114,10 @@ export function generateArticleData(params: {
     publisher: {
       "@type": "Organization",
       name: "Hive",
-      url: "https://hivecms.online",
+      url: "https://hive.niravv.me",
       logo: {
         "@type": "ImageObject",
-        url: "https://hivecms.online/og.png",
+        url: "https://hive.niravv.me/og.png",
       },
     },
     inLanguage: "en-US",

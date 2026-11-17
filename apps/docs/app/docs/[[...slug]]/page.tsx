@@ -20,7 +20,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   if (!page) notFound();
 
   const MDX = page.data.body;
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
   const ogImage = "/og.png";
   const url = `${baseUrl}/docs/${params.slug?.join("/") || ""}`;
 
@@ -83,7 +83,7 @@ export async function generateMetadata(
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
   const ogImage = "/og.png";
   const url = `${baseUrl}/docs/${params.slug?.join("/") || ""}`;
 

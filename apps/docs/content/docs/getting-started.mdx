@@ -52,6 +52,8 @@ The SDK is server-first. If loaded in a browser runtime, it logs a warning.
 
 By default, the SDK reads `HIVE_API_KEY` automatically from your server environment.
 
+`new Hive()` calls `https://api.hive.niravv.me/api/public`. That default changed when Hive moved to `hive.niravv.me`. See [Migration](/docs/migration) if you pinned the old host or depend on a `hive-cms` release older than 1.3.0.
+
 ## 3. Create a client
 
 ```ts
@@ -173,7 +175,7 @@ try {
 
 ## Technical notes
 
-- Default base URL: `https://api.hivecms.online/api/public`
+- Default base URL: `https://api.hive.niravv.me/api/public`
 - Default version: `v1`
 - You can override with custom strings:
 
@@ -203,8 +205,8 @@ SDK should remain your primary integration path.
 The Hive Public Content API is versioned. `v1` is the current stable version. The version should be included in the URL path immediately after `/api/public`.
 
 **Supported URL formats:**
-- **Recommended**: `https://api.hivecms.online/api/public/v1/{API_KEY}/posts`
-- **Legacy (auto-routes to v1)**: `https://api.hivecms.online/api/public/{API_KEY}/posts`
+- **Recommended**: `https://api.hive.niravv.me/api/public/v1/{API_KEY}/posts`
+- **Legacy (auto-routes to v1)**: `https://api.hive.niravv.me/api/public/{API_KEY}/posts`
 
 We recommend using the explicit `/v1/` format for clarity, as future API versions will be maintained separately.
 
@@ -222,10 +224,10 @@ Replace `{API_KEY}` in each endpoint URL with your actual API key. For example:
 
 ```bash
 # Before
-https://api.hivecms.online/api/public/v1/{API_KEY}/posts
+https://api.hive.niravv.me/api/public/v1/{API_KEY}/posts
 
 # After (with your actual key)
-https://api.hivecms.online/api/public/v1/your-actual-key-here/posts
+https://api.hive.niravv.me/api/public/v1/your-actual-key-here/posts
 ```
 
 ## Making Requests
@@ -241,14 +243,14 @@ The public API is configured for simple GET requests. No special headers are req
 Here's a simple example using cURL:
 
 ```bash
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5"
+curl "https://api.hive.niravv.me/api/public/{API_KEY}/posts?limit=5"
 ```
 
 Or using JavaScript in the browser:
 
 ```js
 const response = await fetch(
-  'https://api.hivecms.online/api/public/{API_KEY}/posts?limit=5'
+  'https://api.hive.niravv.me/api/public/{API_KEY}/posts?limit=5'
 );
 const data = await response.json();
 console.log(data);

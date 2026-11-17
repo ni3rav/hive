@@ -7,7 +7,7 @@ Prefer SDK defaults unless you are integrating against a custom host/version.
 
 ## Defaults
 
-- Base URL defaults to `https://api.hivecms.online/api/public`
+- Base URL defaults to `https://api.hive.niravv.me/api/public`
 - Version defaults to `v1`
 
 ```ts
@@ -44,17 +44,17 @@ See [API Reference: Versioning](/docs/api-reference/versioning).
 
 
 ```
-https://api.hivecms.online/api/public/{VERSION}/{API_KEY}/{ENDPOINT}
+https://api.hive.niravv.me/api/public/{VERSION}/{API_KEY}/{ENDPOINT}
 ```
 
 ### Example
 
 ```bash
 # Versioned URL (recommended)
-curl "https://api.hivecms.online/api/public/v1/{API_KEY}/posts"
+curl "https://api.hive.niravv.me/api/public/v1/{API_KEY}/posts"
 
 # Legacy URL (also works, auto-routes to v1)
-curl "https://api.hivecms.online/api/public/{API_KEY}/posts"
+curl "https://api.hive.niravv.me/api/public/{API_KEY}/posts"
 ```
 
 ## Backward Compatibility

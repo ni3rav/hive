@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { source } from "@/lib/source";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://hivecms.online";
+  const baseUrl = "https://hive.niravv.me";
 
   // Get all doc pages
   const docPages = source.getPages().map((page) => ({

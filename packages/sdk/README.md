@@ -4,7 +4,19 @@ Type-safe SDK for consuming Hive CMS public API endpoints from Node.js runtimes.
 
 ## Documentation
 
-- https://hivecms.online/docs
+- https://hive.niravv.me/docs
+
+## Host
+
+`new Hive()` calls `https://api.hive.niravv.me/api/public`.
+
+Hive moved off `hivecms.online`. This default changed in 1.3.0. On older releases, set it yourself:
+
+```ts
+const hive = new Hive({
+  baseUrl: "https://api.hive.niravv.me/api/public",
+});
+```
 
 ## Status
 

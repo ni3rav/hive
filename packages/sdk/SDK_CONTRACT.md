@@ -8,7 +8,7 @@ new Hive({ apiKey?, apiKeyEnvVarName?, baseUrl?, version?, fetch? })
 
 - `apiKey`: optional (if omitted, reads from `HIVE_API_KEY`)
 - `apiKeyEnvVarName`: optional custom env var name for API key lookup
-- `baseUrl`: optional, defaults to `https://hivecms.online/api/public`
+- `baseUrl`: optional, defaults to `https://api.hive.niravv.me/api/public`
 - `version`: optional, defaults to `v1`
 - `fetch`: optional custom fetch implementation
 

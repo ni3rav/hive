@@ -1,5 +1,5 @@
 export const HIVE_BASE_URLS = [
-  "https://api.hivecms.online/api/public",
+  "https://api.hive.niravv.me/api/public",
 ] as const;
 export type HiveBaseUrl = (typeof HIVE_BASE_URLS)[number];
 

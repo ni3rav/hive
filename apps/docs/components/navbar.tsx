@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-50 h-16 bg-background/80 backdrop-blur-md border-b">
+    <nav className="h-16 bg-background/80 backdrop-blur-md border-b">
       <div className="h-full flex items-center justify-between max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-12">
           <div className="flex items-center justify-center p-2">
@@ -26,7 +26,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <Button asChild>
-            <AppLinkWithTheme href="https://app.hivecms.online">
+            <AppLinkWithTheme href="https://app.hive.niravv.me">
               Get Started
             </AppLinkWithTheme>
           </Button>

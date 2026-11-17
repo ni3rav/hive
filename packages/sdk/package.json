@@ -1,10 +1,10 @@
 {
   "name": "hive-cms",
   "type": "module",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "private": false,
   "description": "Type-safe Node.js SDK for Hive CMS public API.",
-  "homepage": "https://hivecms.online/docs",
+  "homepage": "https://hive.niravv.me/docs",
   "license": "MIT",
   "repository": {
     "type": "git",

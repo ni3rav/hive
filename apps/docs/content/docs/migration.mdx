@@ -1,0 +1,33 @@
+---
+title: Migration
+description: Hive now lives on hive.niravv.me
+---
+
+Hive has moved from `hivecms.online` to `hive.niravv.me`.
+
+## Hosts
+
+| Service | Host |
+| --- | --- |
+| Docs | `https://hive.niravv.me` |
+| App | `https://app.hive.niravv.me` |
+| API | `https://api.hive.niravv.me` |
+| Media | `https://media.hive.niravv.me` |
+
+The docs, app, API, and media hosts on `hivecms.online` redirect to the hosts above while that domain is still registered.
+
+## SDK
+
+`new Hive()` uses `https://api.hive.niravv.me/api/public` in `hive-cms` 1.3.0 and later. Earlier releases still call `https://api.hivecms.online/api/public`, so set the host yourself until you upgrade:
+
+```ts
+import { Hive } from 'hive-cms';
+
+const hive = new Hive({
+  baseUrl: 'https://api.hive.niravv.me/api/public',
+});
+```
+
+## Media
+
+Uploaded files are served from `https://media.hive.niravv.me`. Content saved before the move uses that host as well. Links that still point at `media.hivecms.online` redirect to the same path.

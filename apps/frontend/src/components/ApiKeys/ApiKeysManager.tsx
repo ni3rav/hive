@@ -135,7 +135,7 @@ export default function ApiKeysManager() {
 
   const hasReachedLimit = apiKeys.length >= 3;
   const docsTheme = theme === 'system' ? resolvedTheme : theme;
-  const docsUrl = `https://hivecms.online/docs?theme=${docsTheme}`;
+  const docsUrl = `https://hive.niravv.me/docs?theme=${docsTheme}`;
 
   const handleCreateButtonPress = () => {
     if (!canManageApiKeys) {

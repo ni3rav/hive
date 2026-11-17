@@ -10,7 +10,7 @@ const geist = Geist({
   subsets: ["latin"],
 });
 
-const baseUrl = "https://hivecms.online";
+const baseUrl = "https://hive.niravv.me";
 
 const siteConfig = {
   name: "Hive",

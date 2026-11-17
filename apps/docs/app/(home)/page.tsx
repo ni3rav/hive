@@ -3,11 +3,12 @@ import FAQ from "@/components/faq";
 import Features from "@/components/features";
 import Footer from "@/components/footer";
 import Hero from "@/components/hero";
+import { MigrationBanner } from "@/components/migration-banner";
 import Navbar from "@/components/navbar";
 import type { Metadata } from "next";
 import { generateStructuredData } from "@/lib/structured-data";
 
-const baseUrl = "https://hivecms.online";
+const baseUrl = "https://hive.niravv.me";
 
 export const metadata: Metadata = {
   title: "Hive | A simple CMS for your next project",
@@ -54,7 +55,10 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <Navbar />
+      <header className="sticky top-0 z-50">
+        <MigrationBanner />
+        <Navbar />
+      </header>
       <Hero badgeText="AI powered text editing and analysis now available🤖" />
       <Features />
       <FAQ />
@@ -64,7 +68,7 @@ export default function HomePage() {
         buttons={{
           primary: {
             text: "Get Started",
-            url: "https://app.hivecms.online/login",
+            url: "https://app.hive.niravv.me/login",
           },
         }}
       />

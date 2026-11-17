@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/_next/", "/.*"],
       },
     ],
-    sitemap: "https://hivecms.online/sitemap.xml",
-    host: "https://hivecms.online",
+    sitemap: "https://hive.niravv.me/sitemap.xml",
+    host: "https://hive.niravv.me",
   };
 }

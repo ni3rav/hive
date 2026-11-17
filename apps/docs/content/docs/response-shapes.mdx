@@ -62,19 +62,19 @@ See [API Reference: Response Shapes](/docs/api-reference/response-shapes).
 ```ts
 // Fetch posts
 const response = await fetch(
-  'https://api.hivecms.online/api/public/{API_KEY}/posts'
+  'https://api.hive.niravv.me/api/public/{API_KEY}/posts'
 );
 const data: PostListResponse = await response.json();
 
 // Fetch a single post
 const postResponse = await fetch(
-  'https://api.hivecms.online/api/public/{API_KEY}/posts/my-post-slug'
+  'https://api.hive.niravv.me/api/public/{API_KEY}/posts/my-post-slug'
 );
 const post: PostDetail = await postResponse.json();
 
 // Fetch tags
 const tagsResponse = await fetch(
-  'https://api.hivecms.online/api/public/{API_KEY}/tags'
+  'https://api.hive.niravv.me/api/public/{API_KEY}/tags'
 );
 const tags: TagCategoryResponse = await tagsResponse.json();
 ```

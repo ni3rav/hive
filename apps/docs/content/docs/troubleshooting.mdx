@@ -52,7 +52,17 @@ try {
 }
 ```
 
-## 5. Next.js and Express best practice
+## 5. Requests still use hivecms.online
+
+Cause: the installed `hive-cms` release is older than 1.3.0, or `baseUrl` is pinned to `https://api.hivecms.online/api/public`.
+
+Fix:
+
+- pass `baseUrl: 'https://api.hive.niravv.me/api/public'`
+- upgrade to `hive-cms` 1.3.0 or later once that release is published
+- see [Migration](/docs/migration)
+
+## 6. Next.js and Express best practice
 
 - call SDK in server runtime only (route handlers/controllers)
 - avoid client-bundling API keys

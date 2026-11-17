@@ -3,6 +3,7 @@
   "title": "Hive Documentation",
   "pages": [
     "index",
+    "migration",
     "getting-started",
     "posts",
     "tags",

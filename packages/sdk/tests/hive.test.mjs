@@ -137,9 +137,8 @@ test("logs browser warning once when window is present", () => {
 });
 
 test("exposes selectable base URLs and versions on Hive", () => {
-  assert.ok(Array.isArray(Hive.BASE_URLS));
+  assert.deepEqual(Hive.BASE_URLS, ["https://api.hive.niravv.me/api/public"]);
   assert.ok(Array.isArray(Hive.VERSIONS));
-  assert.ok(Hive.BASE_URLS.length > 0);
   assert.ok(Hive.VERSIONS.includes("v1"));
 });
 
